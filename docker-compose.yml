@@ -1,0 +1,13 @@
+services:
+  frontend:
+    build: .
+    container_name: orcafast-frontend
+    ports:
+      - "3000:5173"  # Frontend acessível em localhost:3000
+    volumes:
+      - ./src:/app/src
+      - ./public:/app/public
+      - ./vite.config.js:/app/vite.config.js
+    environment:
+      VITE_API_URL: http://localhost:8080
+    command: npm run dev -- --host 0.0.0.0
