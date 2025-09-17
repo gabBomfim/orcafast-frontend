@@ -98,7 +98,7 @@ const HomePage = () => {
             <HStack spacing={4}>
               <Button
                 as={Link}
-                to="/dashboard"
+                to="/login"
                 variant="ghost"
                 color="gray.600"
                 _hover={{ color: 'gray.900' }}
@@ -108,7 +108,7 @@ const HomePage = () => {
               </Button>
               <Button
                 as={Link}
-                to="/dashboard"
+                to="/register"
                 bg="linear-gradient(135deg, #10b981 0%, #34d399 100%)"
                 _hover={{ bg: 'linear-gradient(135deg, #059669 0%, #10b981 100%)' }}
                 color="white"
@@ -177,7 +177,7 @@ const HomePage = () => {
               <HStack spacing={6} flexWrap="wrap" justify="center">
                 <Button
                   as={Link}
-                  to="/dashboard"
+                  to="/register"
                   size="lg"
                   bg="linear-gradient(135deg, #10b981 0%, #34d399 100%)"
                   _hover={{ bg: 'linear-gradient(135deg, #059669 0%, #10b981 100%)' }}
@@ -433,7 +433,7 @@ const HomePage = () => {
 
                     <Button
                       as={Link}
-                      to="/dashboard"
+                      to="/register"
                       variant="outline"
                       w="full"
                       mt={10}
@@ -514,7 +514,7 @@ const HomePage = () => {
 
                       <Button
                         as={Link}
-                        to="/dashboard"
+                        to="/register"
                         w="full"
                         mt={10}
                         bg="white"
@@ -604,7 +604,7 @@ const HomePage = () => {
             </Text>
             <Button
               as={Link}
-              to="/dashboard"
+              to="/register"
               size="lg"
               bg="linear-gradient(135deg, #10b981 0%, #34d399 100%)"
               _hover={{ bg: 'linear-gradient(135deg, #059669 0%, #10b981 100%)' }}
