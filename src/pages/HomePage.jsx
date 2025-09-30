@@ -108,7 +108,7 @@ const HomePage = () => {
               </Button>
               <Button
                 as={Link}
-                to="/register"
+                to="/onboarding/create-client"
                 bg="linear-gradient(135deg, #10b981 0%, #34d399 100%)"
                 _hover={{ bg: 'linear-gradient(135deg, #059669 0%, #10b981 100%)' }}
                 color="white"
@@ -177,7 +177,7 @@ const HomePage = () => {
               <HStack spacing={6} flexWrap="wrap" justify="center">
                 <Button
                   as={Link}
-                  to="/register"
+                  to="/onboarding/create-client"
                   size="lg"
                   bg="linear-gradient(135deg, #10b981 0%, #34d399 100%)"
                   _hover={{ bg: 'linear-gradient(135deg, #059669 0%, #10b981 100%)' }}
@@ -190,10 +190,6 @@ const HomePage = () => {
                   boxShadow="lg"
                   transition="all 0.2s"
                   rightIcon={<Icon as={FiArrowRight} boxSize={6} />}
-                  _hover={{ 
-                    bg: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
-                    boxShadow: 'xl' 
-                  }}
                 >
                   Começar grátis
                 </Button>
@@ -433,7 +429,7 @@ const HomePage = () => {
 
                     <Button
                       as={Link}
-                      to="/register"
+                      to="/onboarding/create-client"
                       variant="outline"
                       w="full"
                       mt={10}
@@ -514,7 +510,7 @@ const HomePage = () => {
 
                       <Button
                         as={Link}
-                        to="/register"
+                        to="/onboarding/create-client"
                         w="full"
                         mt={10}
                         bg="white"
@@ -604,7 +600,7 @@ const HomePage = () => {
             </Text>
             <Button
               as={Link}
-              to="/register"
+              to="/onboarding/create-client"
               size="lg"
               bg="linear-gradient(135deg, #10b981 0%, #34d399 100%)"
               _hover={{ bg: 'linear-gradient(135deg, #059669 0%, #10b981 100%)' }}
@@ -617,10 +613,6 @@ const HomePage = () => {
               boxShadow="2xl"
               transition="all 0.2s"
               rightIcon={<Icon as={FiArrowRight} boxSize={8} />}
-              _hover={{ 
-                bg: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
-                boxShadow: '3xl' 
-              }}
             >
               Começar grátis agora
             </Button>

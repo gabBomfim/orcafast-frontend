@@ -8,6 +8,11 @@ services:
       - ./src:/app/src
       - ./public:/app/public
       - ./vite.config.js:/app/vite.config.js
+      - ./rootReducer.js:/app/rootReducer.js
+      - node_modules:/app/node_modules
     environment:
       VITE_API_URL: http://localhost:8080
     command: npm run dev -- --host 0.0.0.0
+
+volumes:
+  node_modules:

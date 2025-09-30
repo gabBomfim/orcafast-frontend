@@ -1,0 +1,22 @@
+---
+description: "How to interact with the API using the createResourceApi utility."
+globs: "src/store/api/**/*.js"
+---
+# API Layer
+
+API interactions are standardized using a resource-centric approach. The `[createResourceApi](mdc:src/store/utils/createResourceApi.js)` utility is a factory function that generates a set of common API methods for a given resource endpoint.
+
+## Usage
+
+To create an API module for a new resource (e.g., 'products'), you would do the following:
+
+1.  Create a new file, for example, `[src/store/api/Products.js](mdc:src/store/api/Products.js)`.
+2.  Use `createResourceApi` to generate the API methods:
+
+    ```javascript
+    import createResourceApi from '../utils/createResourceApi';
+
+    export const Products = createResourceApi('products');
+    ```
+
+This provides a consistent API for interacting with resources across the application, including methods for `fetch`, `details`, `create`, `update`, and `remove`.
