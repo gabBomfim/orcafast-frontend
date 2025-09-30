@@ -8,61 +8,83 @@ import {
   Button,
   VStack,
   Text,
-  HStack,
-  Input,
-  InputGroup,
-  InputLeftElement,
-  Icon,
-  FormControl,
-  FormLabel,
-  Box,
   useToast,
-  Spinner,
 } from '@chakra-ui/react'
-import { FiUser, FiMail, FiLock, FiArrowRight, FiMessageSquare } from 'react-icons/fi'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import LoginForm from '../auth/LoginForm'
+import RegisterForm from '../auth/RegisterForm'
+import { authService } from '../../services'
+import { useOnboarding } from '../../contexts/OnboardingContext'
+import { storage } from '../../utils/storage'
 
 const LoginModal = ({ isOpen, onClose, onSuccess }) => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-  })
   const [isLoading, setIsLoading] = useState(false)
   const [isLoginMode, setIsLoginMode] = useState(false)
   const toast = useToast()
   const navigate = useNavigate()
-
-  const handleInputChange = (field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }))
-  }
+  const { guestData, clearGuestData } = useOnboarding()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsLoading(true)
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500))
+    const formData = new FormData(e.target)
+    const data = {
+      name: formData.get('name'),
+      email: formData.get('email'),
+      password: formData.get('password'),
+    }
 
-    // For demo purposes, just show success
-    toast({
-      title: isLoginMode ? 'Login realizado!' : 'Conta criada com sucesso!',
-      description: 'Redirecionando para o dashboard...',
-      status: 'success',
-      duration: 3000,
-      isClosable: true,
-    })
+    try {
+      if (isLoginMode) {
+        const response = await authService.login({
+          email: data.email,
+          password: data.password,
+        })
+        
+        storage.setToken(response.data.token)
+        storage.setUser(response.data.user)
+      } else {
+        const registerData = {
+          ...data,
+          guest_data: {
+            client: guestData.client,
+            proposal: guestData.proposal,
+          }
+        }
 
-    setIsLoading(false)
+        const response = await authService.register(registerData)
+        
+        storage.setToken(response.data.token)
+        storage.setUser(response.data.user)
+        
+        clearGuestData()
+      }
 
-    // Close modal and redirect to initial dashboard
-    onClose()
-    if (onSuccess) onSuccess()
-    navigate('/initial-dashboard')
+      toast({
+        title: isLoginMode ? 'Login realizado!' : 'Conta criada com sucesso!',
+        description: 'Redirecionando para o dashboard...',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      })
+
+      onClose()
+      if (onSuccess) onSuccess()
+      navigate('/initial-dashboard')
+    } catch (error) {
+      const message = error.response?.data?.message || 'Erro ao processar requisição'
+      toast({
+        title: 'Erro',
+        description: message,
+        status: 'error',
+        duration: 4000,
+        isClosable: true,
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleGoogleLogin = () => {
@@ -75,9 +97,9 @@ const LoginModal = ({ isOpen, onClose, onSuccess }) => {
     })
   }
 
-  const handleWhatsAppLogin = () => {
+  const handleFacebookLogin = () => {
     toast({
-      title: 'Login com WhatsApp',
+      title: 'Login com Facebook',
       description: 'Funcionalidade será implementada em breve',
       status: 'info',
       duration: 3000,
@@ -106,151 +128,40 @@ const LoginModal = ({ isOpen, onClose, onSuccess }) => {
         <ModalCloseButton />
 
         <ModalBody pb={8}>
-          <VStack as="form" spacing={6} onSubmit={handleSubmit}>
-            {!isLoginMode && (
-              <FormControl isRequired>
-                <FormLabel color="gray.700" fontSize="sm" fontWeight="medium">
-                  Nome completo
-                </FormLabel>
-                <InputGroup size="lg">
-                  <InputLeftElement pointerEvents="none">
-                    <Icon as={FiUser} color="gray.400" />
-                  </InputLeftElement>
-                  <Input
-                    placeholder="Seu nome completo"
-                    value={formData.name}
-                    onChange={(e) => handleInputChange('name', e.target.value)}
-                    borderRadius="xl"
-                    bg="gray.50"
-                    border="1px"
-                    borderColor="gray.200"
-                    _hover={{ borderColor: 'gray.300' }}
-                    _focus={{ borderColor: 'emerald.400', bg: 'white' }}
-                  />
-                </InputGroup>
-              </FormControl>
+          <VStack spacing={6}>
+            {isLoginMode ? (
+              <LoginForm
+                onSubmit={handleSubmit}
+                onGoogleLogin={handleGoogleLogin}
+                onFacebookLogin={handleFacebookLogin}
+                isLoading={isLoading}
+              />
+            ) : (
+              <RegisterForm
+                onSubmit={handleSubmit}
+                onGoogleLogin={handleGoogleLogin}
+                onFacebookLogin={handleFacebookLogin}
+                isLoading={isLoading}
+              />
             )}
 
-            <FormControl isRequired>
-              <FormLabel color="gray.700" fontSize="sm" fontWeight="medium">
-                E-mail
-              </FormLabel>
-              <InputGroup size="lg">
-                <InputLeftElement pointerEvents="none">
-                  <Icon as={FiMail} color="gray.400" />
-                </InputLeftElement>
-                <Input
-                  type="email"
-                  placeholder="seu@email.com"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  borderRadius="xl"
-                  bg="gray.50"
-                  border="1px"
-                  borderColor="gray.200"
-                  _hover={{ borderColor: 'gray.300' }}
-                  _focus={{ borderColor: 'emerald.400', bg: 'white' }}
-                />
-              </InputGroup>
-            </FormControl>
-
-            <FormControl isRequired>
-              <FormLabel color="gray.700" fontSize="sm" fontWeight="medium">
-                Senha
-              </FormLabel>
-              <InputGroup size="lg">
-                <InputLeftElement pointerEvents="none">
-                  <Icon as={FiLock} color="gray.400" />
-                </InputLeftElement>
-                <Input
-                  type="password"
-                  placeholder="Sua senha"
-                  value={formData.password}
-                  onChange={(e) => handleInputChange('password', e.target.value)}
-                  borderRadius="xl"
-                  bg="gray.50"
-                  border="1px"
-                  borderColor="gray.200"
-                  _hover={{ borderColor: 'gray.300' }}
-                  _focus={{ borderColor: 'emerald.400', bg: 'white' }}
-                />
-              </InputGroup>
-            </FormControl>
-
-            <VStack spacing={4} w="full">
+            <Text fontSize="sm" color="gray.500" textAlign="center">
+              {isLoginMode ? 'Não tem conta?' : 'Já tem conta?'}{' '}
               <Button
-                type="submit"
-                w="full"
-                size="lg"
+                variant="link"
                 colorScheme="emerald"
-                borderRadius="xl"
-                py={6}
-                fontSize="lg"
-                fontWeight="semibold"
-                rightIcon={!isLoading ? <Icon as={FiArrowRight} /> : undefined}
-                isLoading={isLoading}
-                loadingText="Processando..."
+                fontSize="sm"
+                onClick={() => setIsLoginMode(!isLoginMode)}
               >
-                {isLoading
-                  ? 'Processando...'
-                  : isLoginMode
-                    ? 'Entrar'
-                    : 'Criar conta grátis'
-                }
+                {isLoginMode ? 'Criar conta' : 'Fazer login'}
               </Button>
+            </Text>
 
-              <Text fontSize="sm" color="gray.500" textAlign="center">
-                {isLoginMode ? 'Não tem conta?' : 'Já tem conta?'}{' '}
-                <Button
-                  variant="link"
-                  colorScheme="emerald"
-                  fontSize="sm"
-                  onClick={() => setIsLoginMode(!isLoginMode)}
-                >
-                  {isLoginMode ? 'Criar conta' : 'Fazer login'}
-                </Button>
-              </Text>
-            </VStack>
-
-            <VStack spacing={3} w="full">
-              <HStack w="full" align="center">
-                <Box h="1px" bg="gray.200" flex="1" />
-                <Text fontSize="xs" color="gray.500" px={3}>ou</Text>
-                <Box h="1px" bg="gray.200" flex="1" />
-              </HStack>
-
-              <Button
-                w="full"
-                size="lg"
-                variant="outline"
-                borderRadius="xl"
-                py={6}
-                fontSize="md"
-                leftIcon={<Icon as={FiMail} />}
-                onClick={handleGoogleLogin}
-              >
-                Continuar com Google
-              </Button>
-
-              <Button
-                w="full"
-                size="lg"
-                variant="outline"
-                borderRadius="xl"
-                py={6}
-                fontSize="md"
-                leftIcon={<Icon as={FiMessageSquare} />}
-                onClick={handleWhatsAppLogin}
-              >
-                Continuar com WhatsApp
-              </Button>
-            </VStack>
-
-            <Box textAlign="center" pt={4}>
-              <Text fontSize="xs" color="gray.500">
+            {!isLoginMode && (
+              <Text fontSize="xs" color="gray.500" textAlign="center">
                 Sem cartão de crédito • Você está a 1 clique de enviar sua proposta 🚀
               </Text>
-            </Box>
+            )}
           </VStack>
         </ModalBody>
       </ModalContent>

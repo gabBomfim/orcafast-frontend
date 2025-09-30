@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { API_CONFIG } from './config/api'
+import { storage } from './utils/storage'
 
 const api = axios.create({
   baseURL: API_CONFIG.BASE_URL,
@@ -10,27 +11,22 @@ const api = axios.create({
   },
 })
 
-// Request interceptor para adicionar token de autenticação
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('auth_token')
+    const token = storage.getToken()
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
     return config
   },
-  (error) => {
-    return Promise.reject(error)
-  }
+  (error) => Promise.reject(error)
 )
 
-// Response interceptor para tratar erros de autenticação
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('auth_token')
-      localStorage.removeItem('profile')
+      storage.clear()
       window.location.href = '/login'
     }
     return Promise.reject(error)
