@@ -5,15 +5,14 @@ import {
   HStack,
   Text,
   Icon,
-  Grid,
   Card,
   CardBody,
   Heading,
   Button,
   Badge,
-  Flex,
-  useToast,
   SimpleGrid,
+  Spinner,
+  Center,
 } from '@chakra-ui/react'
 import {
   FiAward,
@@ -23,227 +22,169 @@ import {
   FiPlus,
   FiUsers,
   FiFileText,
-  FiMessageSquare,
   FiArrowRight,
   FiZap,
-  FiTrendingUp,
 } from 'react-icons/fi'
 import { Link } from 'react-router-dom'
-import Layout from '../components/layout/Layout'
-import StatsCard from '../components/ui/StatsCard'
+import { useState, useEffect } from 'react'
 import ActionCard from '../components/ui/ActionCard'
+import StatusBadge from '../components/ui/StatusBadge'
+import { storage } from '../utils/storage'
 
 const InitialDashboardPage = () => {
-  const toast = useToast()
+  const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(true)
 
-  const handleNotificationSimulation = () => {
-    toast({
-      title: 'Cliente abriu sua proposta! 👁️',
-      description: 'Você será notificado quando houver novidades.',
-      status: 'info',
-      duration: 4000,
-      isClosable: true,
-      position: 'top-right',
-    })
+  useEffect(() => {
+    const userData = storage.getUser()
+    setUser(userData)
+    setLoading(false)
+  }, [])
+
+  if (loading || !user) {
+    return (
+      <Center h="100vh">
+        <Spinner size="xl" />
+      </Center>
+    )
+  }
+
+  const firstClient = user.clients?.[0]
+  const firstProposal = firstClient?.proposals?.[0]
+
+  const stats = {
+    sent: firstProposal ? 1 : 0,
+    viewed: 0,
+    approved: 0,
+    totalValue: firstProposal ? parseFloat(firstProposal.total_value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'R$ 0,00',
+  }
+
+  const proposalStatus = (status) => {
+    switch (status) {
+      case 1: return 'sent'
+      case 2: return 'viewed'
+      case 3: return 'approved'
+      case 4: return 'rejected'
+      default: return 'pending'
+    }
   }
 
   return (
-    <Layout>
-      <Container maxW="container.xl">
-        <VStack align="stretch" spacing={8}>
-          {/* Header Gamificado */}
-          <Box textAlign="center" py={8}>
-            <VStack spacing={4}>
-              <HStack spacing={2} justify="center">
-                <Icon as={FiAward} color="emerald.500" boxSize={8} />
-                <Text fontSize="3xl" fontWeight="bold" color="gray.900">
-                  Parabéns, você enviou sua 1ª proposta
-                </Text>
-                <Icon as={FiAward} color="emerald.500" boxSize={8} />
+    <Container maxW="container.xl" py={10}>
+      <VStack align="stretch" spacing={8}>
+        {/* Header Gamificado */}
+        <Box textAlign="center">
+          <VStack spacing={4}>
+            <HStack spacing={2} justify="center">
+              <Icon as={FiAward} color="emerald.500" boxSize={8} />
+              <Text fontSize={{ base: '2xl', md: '3xl' }} fontWeight="bold" color="gray.900">
+                Parabéns, você enviou sua 1ª proposta!
+              </Text>
+              <Icon as={FiAward} color="emerald.500" boxSize={8} />
+            </HStack>
+            <Text fontSize="lg" color="gray.600" maxW="2xl">
+              Agora é só acompanhar o progresso. Você será notificado sobre cada etapa.
+            </Text>
+            <Badge
+              colorScheme="emerald"
+              fontSize="sm"
+              px={4}
+              py={2}
+              borderRadius="full"
+            >
+              🚀 Primeiro passo concluído!
+            </Badge>
+          </VStack>
+        </Box>
+
+        {/* KPI Cards */}
+        <SimpleGrid columns={{ base: 2, md: 4 }} spacing={6}>
+          <Card bg="gray.50" border="1px" borderColor="gray.200">
+            <CardBody textAlign="center">
+              <VStack spacing={2}>
+                <Icon as={FiFileText} color="emerald.500" boxSize={6} />
+                <Text fontSize="2xl" fontWeight="bold" color="gray.900">{stats.sent}</Text>
+                <Text fontSize="sm" color="gray.600">Propostas Enviadas</Text>
+              </VStack>
+            </CardBody>
+          </Card>
+          <Card bg="gray.50" border="1px" borderColor="gray.200">
+            <CardBody textAlign="center">
+              <VStack spacing={2}>
+                <Icon as={FiEye} color="blue.500" boxSize={6} />
+                <Text fontSize="2xl" fontWeight="bold" color="gray.900">{stats.viewed}</Text>
+                <Text fontSize="sm" color="gray.600">Visualizadas</Text>
+              </VStack>
+            </CardBody>
+          </Card>
+          <Card bg="gray.50" border="1px" borderColor="gray.200">
+            <CardBody textAlign="center">
+              <VStack spacing={2}>
+                <Icon as={FiCheckCircle} color="green.500" boxSize={6} />
+                <Text fontSize="2xl" fontWeight="bold" color="gray.900">{stats.approved}</Text>
+                <Text fontSize="sm" color="gray.600">Aprovadas</Text>
+              </VStack>
+            </CardBody>
+          </Card>
+          <Card bg="gray.50" border="1px" borderColor="gray.200">
+            <CardBody textAlign="center">
+              <VStack spacing={2}>
+                <Icon as={FiDollarSign} color="purple.500" boxSize={6} />
+                <Text fontSize="2xl" fontWeight="bold" color="gray.900">{stats.totalValue}</Text>
+                <Text fontSize="sm" color="gray.600">Valor Total</Text>
+              </VStack>
+            </CardBody>
+          </Card>
+        </SimpleGrid>
+
+        {/* Recent Proposals Table */}
+        <Card>
+          <CardBody>
+            <VStack align="stretch" spacing={6}>
+              <HStack justify="space-between" align="center">
+                <Heading size="md" color="gray.900">Sua Primeira Proposta</Heading>
+                <Button as={Link} to="/dashboard" variant="outline" size="sm" rightIcon={<Icon as={FiArrowRight} />}>
+                  Ver Todas
+                </Button>
               </HStack>
 
-              <Text fontSize="lg" color="gray.600" maxW="2xl">
-                Agora é só acompanhar o progresso. Você será notificado quando seu cliente visualizar e aprovar.
-              </Text>
-
-              <Badge
-                colorScheme="emerald"
-                fontSize="sm"
-                px={4}
-                py={2}
-                borderRadius="full"
-                mt={2}
-              >
-                🚀 Primeiro passo concluído!
-              </Badge>
-            </VStack>
-          </Box>
-
-          {/* KPI Cards */}
-          <SimpleGrid columns={{ base: 2, md: 4 }} spacing={6}>
-            <Card bg="gray.50" border="1px" borderColor="gray.200">
-              <CardBody textAlign="center">
-                <VStack spacing={2}>
-                  <Icon as={FiFileText} color="emerald.500" boxSize={6} />
-                  <Text fontSize="2xl" fontWeight="bold" color="gray.900">
-                    1
-                  </Text>
-                  <Text fontSize="sm" color="gray.600">
-                    Propostas Enviadas
-                  </Text>
-                </VStack>
-              </CardBody>
-            </Card>
-
-            <Card bg="gray.50" border="1px" borderColor="gray.200">
-              <CardBody textAlign="center">
-                <VStack spacing={2}>
-                  <Icon as={FiEye} color="blue.500" boxSize={6} />
-                  <Text fontSize="2xl" fontWeight="bold" color="gray.900">
-                    0
-                  </Text>
-                  <Text fontSize="sm" color="gray.600">
-                    Visualizadas
-                  </Text>
-                </VStack>
-              </CardBody>
-            </Card>
-
-            <Card bg="gray.50" border="1px" borderColor="gray.200">
-              <CardBody textAlign="center">
-                <VStack spacing={2}>
-                  <Icon as={FiCheckCircle} color="green.500" boxSize={6} />
-                  <Text fontSize="2xl" fontWeight="bold" color="gray.900">
-                    0
-                  </Text>
-                  <Text fontSize="sm" color="gray.600">
-                    Aprovadas
-                  </Text>
-                </VStack>
-              </CardBody>
-            </Card>
-
-            <Card bg="gray.50" border="1px" borderColor="gray.200">
-              <CardBody textAlign="center">
-                <VStack spacing={2}>
-                  <Icon as={FiDollarSign} color="purple.500" boxSize={6} />
-                  <Text fontSize="2xl" fontWeight="bold" color="gray.900">
-                    R$ 0,00
-                  </Text>
-                  <Text fontSize="sm" color="gray.600">
-                    Valor Total
-                  </Text>
-                </VStack>
-              </CardBody>
-            </Card>
-          </SimpleGrid>
-
-          {/* Recent Proposals Table */}
-          <Card>
-            <CardBody>
-              <VStack align="stretch" spacing={6}>
-                <HStack justify="space-between" align="center">
-                  <Heading size="md" color="gray.900">
-                    Suas Propostas Recentes
-                  </Heading>
-                  <Button
-                    as={Link}
-                    to="/dashboard"
-                    variant="outline"
-                    size="sm"
-                    rightIcon={<Icon as={FiArrowRight} />}
-                  >
-                    Ver Todas
-                  </Button>
-                </HStack>
-
-                <Box
-                  p={6}
-                  border="2px"
-                  borderColor="gray.200"
-                  borderRadius="lg"
-                  borderStyle="dashed"
-                  textAlign="center"
-                >
-                  <VStack spacing={4}>
-                    <Icon as={FiFileText} color="gray.400" boxSize={8} />
-                    <Text color="gray.600" fontSize="lg">
-                      Sua proposta aparecerá aqui assim que for enviada
-                    </Text>
-                    <Text color="gray.500" fontSize="sm">
-                      Você será notificado quando seu cliente visualizar esta proposta 👁️
-                    </Text>
-
-                    <Button
-                      colorScheme="emerald"
-                      size="sm"
-                      onClick={handleNotificationSimulation}
-                      leftIcon={<Icon as={FiMessageSquare} />}
-                    >
-                      Simular notificação
-                    </Button>
-                  </VStack>
+              {firstProposal ? (
+                <Box p={4} border="1px" borderColor="gray.200" borderRadius="lg">
+                  <HStack justify="space-between" align="center">
+                    <Box>
+                      <Text fontWeight="bold">{firstProposal.title}</Text>
+                      <Text fontSize="sm" color="gray.600">Para: {firstClient.name}</Text>
+                    </Box>
+                    <HStack>
+                      <Text fontWeight="semibold" color="emerald.600">
+                        {parseFloat(firstProposal.total_value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                      </Text>
+                      <StatusBadge status={proposalStatus(firstProposal.status)} />
+                    </HStack>
+                  </HStack>
                 </Box>
-              </VStack>
-            </CardBody>
-          </Card>
+              ) : (
+                <Text color="gray.500">Nenhuma proposta encontrada.</Text>
+              )}
+            </VStack>
+          </CardBody>
+        </Card>
 
-          {/* Quick Actions */}
-          <Card>
-            <CardBody>
-              <VStack align="stretch" spacing={6}>
-                <Heading size="md" color="gray.900">
-                  Próximos Passos
-                </Heading>
-
-                <Grid templateColumns={{ base: '1fr', md: 'repeat(3, 1fr)' }} gap={6}>
-                  <ActionCard
-                    icon={FiPlus}
-                    title="Nova Proposta"
-                    subtitle="Enviar outra proposta"
-                    to="/onboarding/create-client"
-                    variant="solid"
-                    colorScheme="emerald"
-                  />
-
-                  <ActionCard
-                    icon={FiUsers}
-                    title="Clientes"
-                    subtitle="Gerenciar seus clientes"
-                    to="/dashboard/clientes"
-                  />
-
-                  <ActionCard
-                    icon={FiZap}
-                    title="Plano Pro"
-                    subtitle="Desbloquear recursos avançados"
-                    to="/register"
-                    variant="outline"
-                    colorScheme="purple"
-                  />
-                </Grid>
-              </VStack>
-            </CardBody>
-          </Card>
-
-          {/* Progress Encouragement */}
-          <Card bg="emerald.50" border="1px" borderColor="emerald.200">
-            <CardBody textAlign="center">
-              <VStack spacing={4}>
-                <Icon as={FiTrendingUp} color="emerald.500" boxSize={8} />
-                <Heading size="md" color="gray.900">
-                  Você está no caminho certo!
-                </Heading>
-                <Text color="gray.700">
-                  Continue enviando propostas e acompanhe seu crescimento.
-                  Em breve você verá seus primeiros resultados aqui! 🎯
-                </Text>
-              </VStack>
-            </CardBody>
-          </Card>
-        </VStack>
-      </Container>
-    </Layout>
+        {/* Quick Actions */}
+        <Card>
+          <CardBody>
+            <VStack align="stretch" spacing={6}>
+              <Heading size="md" color="gray.900">Próximos Passos</Heading>
+              <SimpleGrid columns={{ base: 1, md: 3 }} gap={6}>
+                <ActionCard icon={FiPlus} title="Nova Proposta" subtitle="Criar outra proposta" to="/onboarding/create-client" variant="solid" colorScheme="emerald" />
+                <ActionCard icon={FiUsers} title="Clientes" subtitle="Gerenciar seus contatos" to="/dashboard/clientes" />
+                <ActionCard icon={FiZap} title="Plano Pro" subtitle="Desbloquear recursos" to="/planos" variant="outline" colorScheme="purple" />
+              </SimpleGrid>
+            </VStack>
+          </CardBody>
+        </Card>
+      </VStack>
+    </Container>
   )
 }
 

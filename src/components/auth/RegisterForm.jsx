@@ -27,6 +27,7 @@ import { useState } from 'react'
 
 const RegisterForm = ({ onSubmit, onGoogleLogin, onFacebookLogin, isLoading }) => {
   const [showPassword, setShowPassword] = useState(false)
+  const [showPasswordConfirmation, setShowPasswordConfirmation] = useState(false)
 
   return (
     <VStack spacing={6}>
@@ -53,11 +54,11 @@ const RegisterForm = ({ onSubmit, onGoogleLogin, onFacebookLogin, isLoading }) =
               placeholder="Seu nome completo"
               size="lg"
               borderRadius="xl"
-              bg="gray.50"
+              bg="white"
               border="1px"
-              borderColor="gray.200"
-              _hover={{ borderColor: 'gray.300' }}
-              _focus={{ borderColor: 'emerald.400', bg: 'white' }}
+              borderColor="gray.300"
+              _hover={{ borderColor: 'gray.400' }}
+              _focus={{ borderColor: 'emerald.500', boxShadow: '0 0 0 1px var(--chakra-colors-emerald-500)' }}
             />
           </InputGroup>
         </FormControl>
@@ -83,11 +84,11 @@ const RegisterForm = ({ onSubmit, onGoogleLogin, onFacebookLogin, isLoading }) =
               placeholder="seu@email.com"
               size="lg"
               borderRadius="xl"
-              bg="gray.50"
+              bg="white"
               border="1px"
-              borderColor="gray.200"
-              _hover={{ borderColor: 'gray.300' }}
-              _focus={{ borderColor: 'emerald.400', bg: 'white' }}
+              borderColor="gray.300"
+              _hover={{ borderColor: 'gray.400' }}
+              _focus={{ borderColor: 'emerald.500', boxShadow: '0 0 0 1px var(--chakra-colors-emerald-500)' }}
             />
           </InputGroup>
         </FormControl>
@@ -110,14 +111,14 @@ const RegisterForm = ({ onSubmit, onGoogleLogin, onFacebookLogin, isLoading }) =
               name="password"
               type={showPassword ? 'text' : 'password'}
               required
-              placeholder="Mínimo 6 caracteres"
-              minLength={6}
+              placeholder="Mínimo 8 caracteres"
+              minLength={8}
               borderRadius="xl"
-              bg="gray.50"
+              bg="white"
               border="1px"
-              borderColor="gray.200"
-              _hover={{ borderColor: 'gray.300' }}
-              _focus={{ borderColor: 'emerald.400', bg: 'white' }}
+              borderColor="gray.300"
+              _hover={{ borderColor: 'gray.400' }}
+              _focus={{ borderColor: 'emerald.500', boxShadow: '0 0 0 1px var(--chakra-colors-emerald-500)' }}
             />
             <InputRightElement>
               <Button
@@ -127,6 +128,48 @@ const RegisterForm = ({ onSubmit, onGoogleLogin, onFacebookLogin, isLoading }) =
               >
                 <Icon
                   as={showPassword ? FiEyeOff : FiEye}
+                  color="gray.500"
+                />
+              </Button>
+            </InputRightElement>
+          </InputGroup>
+        </FormControl>
+
+        <FormControl>
+          <FormLabel
+            htmlFor="password_confirmation"
+            fontSize="sm"
+            fontWeight="medium"
+            color="gray.700"
+          >
+            Confirmar senha
+          </FormLabel>
+          <InputGroup size="lg">
+            <InputLeftElement pointerEvents="none">
+              <Icon as={FiLock} color="gray.400" />
+            </InputLeftElement>
+            <Input
+              id="password_confirmation"
+              name="password_confirmation"
+              type={showPasswordConfirmation ? 'text' : 'password'}
+              required
+              placeholder="Digite a senha novamente"
+              minLength={8}
+              borderRadius="xl"
+              bg="white"
+              border="1px"
+              borderColor="gray.300"
+              _hover={{ borderColor: 'gray.400' }}
+              _focus={{ borderColor: 'emerald.500', boxShadow: '0 0 0 1px var(--chakra-colors-emerald-500)' }}
+            />
+            <InputRightElement>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowPasswordConfirmation(!showPasswordConfirmation)}
+              >
+                <Icon
+                  as={showPasswordConfirmation ? FiEyeOff : FiEye}
                   color="gray.500"
                 />
               </Button>

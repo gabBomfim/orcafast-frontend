@@ -51,11 +51,11 @@ const LoginForm = ({ onSubmit, onGoogleLogin, onFacebookLogin, isLoading }) => {
               placeholder="Digite seu e-mail"
               size="lg"
               borderRadius="xl"
-              bg="gray.50"
+              bg="white"
               border="1px"
-              borderColor="gray.200"
-              _hover={{ borderColor: 'gray.300' }}
-              _focus={{ borderColor: 'emerald.400', bg: 'white' }}
+              borderColor="gray.300"
+              _hover={{ borderColor: 'gray.400' }}
+              _focus={{ borderColor: 'emerald.500', boxShadow: '0 0 0 1px var(--chakra-colors-emerald-500)' }}
             />
           </InputGroup>
         </FormControl>
@@ -80,11 +80,11 @@ const LoginForm = ({ onSubmit, onGoogleLogin, onFacebookLogin, isLoading }) => {
               required
               placeholder="Digite sua senha"
               borderRadius="xl"
-              bg="gray.50"
+              bg="white"
               border="1px"
-              borderColor="gray.200"
-              _hover={{ borderColor: 'gray.300' }}
-              _focus={{ borderColor: 'emerald.400', bg: 'white' }}
+              borderColor="gray.300"
+              _hover={{ borderColor: 'gray.400' }}
+              _focus={{ borderColor: 'emerald.500', boxShadow: '0 0 0 1px var(--chakra-colors-emerald-500)' }}
             />
             <InputRightElement>
               <Button

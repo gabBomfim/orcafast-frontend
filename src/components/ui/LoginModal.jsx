@@ -34,6 +34,7 @@ const LoginModal = ({ isOpen, onClose, onSuccess }) => {
       name: formData.get('name'),
       email: formData.get('email'),
       password: formData.get('password'),
+      password_confirmation: formData.get('password_confirmation'),
     }
 
     try {
@@ -43,7 +44,7 @@ const LoginModal = ({ isOpen, onClose, onSuccess }) => {
           password: data.password,
         })
         
-        storage.setToken(response.data.token)
+        storage.setToken(response.data.access_token)
         storage.setUser(response.data.user)
       } else {
         const registerData = {
@@ -56,7 +57,7 @@ const LoginModal = ({ isOpen, onClose, onSuccess }) => {
 
         const response = await authService.register(registerData)
         
-        storage.setToken(response.data.token)
+        storage.setToken(response.data.access_token)
         storage.setUser(response.data.user)
         
         clearGuestData()
