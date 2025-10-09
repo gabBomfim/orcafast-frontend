@@ -20,6 +20,7 @@ import {
   Flex,
   Checkbox,
   SimpleGrid,
+  useToast,
 } from '@chakra-ui/react'
 import {
   FiZap,
@@ -30,15 +31,68 @@ import {
 } from 'react-icons/fi'
 import { FaFacebook } from 'react-icons/fa'
 import { FcGoogle } from 'react-icons/fc'
-import { Link as RouterLink } from 'react-router-dom'
+import { Link as RouterLink, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
+import { authService } from '../services'
+import { storage } from '../utils/storage'
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const toast = useToast()
+  const navigate = useNavigate()
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setIsLoading(true)
+
+    const formData = new FormData(e.target)
+    const credentials = {
+      email: formData.get('email'),
+      password: formData.get('password'),
+    }
+
+    try {
+      const response = await authService.login(credentials)
+      
+      storage.setToken(response.data.access_token)
+      storage.setUser(response.data.user)
+
+      toast({
+        title: 'Login realizado!',
+        description: 'Redirecionando para o dashboard...',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      })
+
+      navigate('/dashboard')
+    } catch (error) {
+      const message = error.response?.data?.message || 'Erro ao fazer login'
+      toast({
+        title: 'Erro',
+        description: message,
+        status: 'error',
+        duration: 4000,
+        isClosable: true,
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleSocialLogin = (provider) => {
+    toast({
+      title: `Login com ${provider}`,
+      description: 'Funcionalidade será implementada em breve',
+      status: 'info',
+      duration: 3000,
+      isClosable: true,
+    })
+  }
 
   return (
     <SimpleGrid columns={{ base: 1, lg: 2 }} minH="100vh">
-      {/* Left side - Branding */}
       <Flex
         display={{ base: 'none', lg: 'flex' }}
         bg="gray.900"
@@ -79,7 +133,6 @@ const LoginPage = () => {
         </VStack>
       </Flex>
 
-      {/* Right side - Login Form */}
       <Flex
         align="center"
         justify="center"
@@ -88,7 +141,6 @@ const LoginPage = () => {
         direction="column"
         justify={{ base: 'start', lg: 'center' }}
       >
-        {/* Mobile Header */}
         <HStack
           display={{ base: 'flex', lg: 'none' }}
           spacing={3}
@@ -120,7 +172,7 @@ const LoginPage = () => {
 
           <CardBody>
             <VStack spacing={6}>
-              <VStack as="form" spacing={6} w="full">
+              <VStack as="form" onSubmit={handleSubmit} spacing={6} w="full">
                 <FormControl>
                   <FormLabel
                     htmlFor="email"
@@ -142,7 +194,10 @@ const LoginPage = () => {
                       placeholder="Digite seu e-mail"
                       size="lg"
                       borderRadius="md"
+                      bg="white"
                       borderColor="gray.300"
+                      _hover={{ borderColor: 'gray.400' }}
+                      _focus={{ borderColor: 'emerald.500', boxShadow: '0 0 0 1px var(--chakra-colors-emerald-500)' }}
                     />
                   </InputGroup>
                 </FormControl>
@@ -167,7 +222,10 @@ const LoginPage = () => {
                       required
                       placeholder="Digite sua senha"
                       borderRadius="md"
+                      bg="white"
                       borderColor="gray.300"
+                      _hover={{ borderColor: 'gray.400' }}
+                      _focus={{ borderColor: 'emerald.500', boxShadow: '0 0 0 1px var(--chakra-colors-emerald-500)' }}
                     />
                     <InputRightElement>
                       <Button
@@ -211,12 +269,13 @@ const LoginPage = () => {
                     bg: 'emerald.600',
                   }}
                   borderRadius="md"
+                  isLoading={isLoading}
+                  loadingText="Entrando..."
                 >
                   Entrar
                 </Button>
               </VStack>
 
-              {/* Divider */}
               <HStack w="full">
                 <Divider />
                 <Text
@@ -230,7 +289,6 @@ const LoginPage = () => {
                 <Divider />
               </HStack>
 
-              {/* Social Logins */}
               <VStack spacing={3} w="full">
                 <Button
                   w="full"
@@ -241,6 +299,7 @@ const LoginPage = () => {
                   fontWeight="semibold"
                   leftIcon={<Icon as={FcGoogle} boxSize={5} />}
                   borderColor="gray.300"
+                  onClick={() => handleSocialLogin('Google')}
                 >
                   Continuar com Google
                 </Button>
@@ -252,6 +311,7 @@ const LoginPage = () => {
                   fontSize="md"
                   fontWeight="semibold"
                   leftIcon={<Icon as={FaFacebook} boxSize={5} />}
+                  onClick={() => handleSocialLogin('Facebook')}
                 >
                   Continuar com Facebook
                 </Button>

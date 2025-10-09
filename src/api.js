@@ -26,10 +26,13 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const isAuthRoute = error.config?.url?.includes('login') || error.config?.url?.includes('register')
+    
+    if (error.response?.status === 401 && !isAuthRoute) {
       storage.clear()
       window.location.href = '/login'
     }
+    
     return Promise.reject(error)
   }
 )

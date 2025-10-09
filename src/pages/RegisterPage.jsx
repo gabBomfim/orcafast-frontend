@@ -20,6 +20,7 @@ import {
   Badge,
   Flex,
   SimpleGrid,
+  useToast,
 } from '@chakra-ui/react'
 import {
   FiZap,
@@ -33,15 +34,71 @@ import {
 } from 'react-icons/fi'
 import { FaFacebook } from 'react-icons/fa'
 import { FcGoogle } from 'react-icons/fc'
-import { Link as RouterLink } from 'react-router-dom'
+import { Link as RouterLink, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
+import { authService } from '../services'
+import { storage } from '../utils/storage'
 
 const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false)
+  const [showPasswordConfirmation, setShowPasswordConfirmation] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const toast = useToast()
+  const navigate = useNavigate()
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setIsLoading(true)
+
+    const formData = new FormData(e.target)
+    const data = {
+      name: formData.get('name'),
+      email: formData.get('email'),
+      password: formData.get('password'),
+      password_confirmation: formData.get('password_confirmation'),
+    }
+
+    try {
+      const response = await authService.register(data)
+      
+      storage.setToken(response.data.access_token)
+      storage.setUser(response.data.user)
+
+      toast({
+        title: 'Conta criada com sucesso!',
+        description: 'Redirecionando para o dashboard...',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      })
+
+      navigate('/dashboard')
+    } catch (error) {
+      const message = error.response?.data?.message || 'Erro ao criar conta'
+      toast({
+        title: 'Erro',
+        description: message,
+        status: 'error',
+        duration: 4000,
+        isClosable: true,
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleSocialLogin = (provider) => {
+    toast({
+      title: `Login com ${provider}`,
+      description: 'Funcionalidade será implementada em breve',
+      status: 'info',
+      duration: 3000,
+      isClosable: true,
+    })
+  }
 
   return (
     <SimpleGrid columns={{ base: 1, lg: 2 }} minH="100vh">
-      {/* Left side - Branding */}
       <Flex
         display={{ base: 'none', lg: 'flex' }}
         bg="gray.900"
@@ -82,7 +139,6 @@ const RegisterPage = () => {
         </VStack>
       </Flex>
 
-      {/* Right side - Register Form */}
       <Flex
         align="center"
         justify="center"
@@ -91,7 +147,6 @@ const RegisterPage = () => {
         direction="column"
         justify={{ base: 'start', lg: 'center' }}
       >
-        {/* Mobile Header */}
         <HStack
           display={{ base: 'flex', lg: 'none' }}
           spacing={3}
@@ -125,8 +180,7 @@ const RegisterPage = () => {
 
           <CardBody>
             <VStack spacing={6}>
-              {/* Form */}
-              <VStack as="form" spacing={5} w="full">
+              <VStack as="form" onSubmit={handleSubmit} spacing={5} w="full">
                 <FormControl>
                   <FormLabel
                     htmlFor="name"
@@ -148,7 +202,10 @@ const RegisterPage = () => {
                       placeholder="Seu nome completo"
                       size="lg"
                       borderRadius="md"
+                      bg="white"
                       borderColor="gray.300"
+                      _hover={{ borderColor: 'gray.400' }}
+                      _focus={{ borderColor: 'emerald.500', boxShadow: '0 0 0 1px var(--chakra-colors-emerald-500)' }}
                     />
                   </InputGroup>
                 </FormControl>
@@ -174,7 +231,10 @@ const RegisterPage = () => {
                       placeholder="seu@email.com"
                       size="lg"
                       borderRadius="md"
+                      bg="white"
                       borderColor="gray.300"
+                      _hover={{ borderColor: 'gray.400' }}
+                      _focus={{ borderColor: 'emerald.500', boxShadow: '0 0 0 1px var(--chakra-colors-emerald-500)' }}
                     />
                   </InputGroup>
                 </FormControl>
@@ -197,10 +257,13 @@ const RegisterPage = () => {
                       name="password"
                       type={showPassword ? 'text' : 'password'}
                       required
-                      placeholder="Mínimo 6 caracteres"
-                      minLength={6}
+                      placeholder="Mínimo 8 caracteres"
+                      minLength={8}
                       borderRadius="md"
+                      bg="white"
                       borderColor="gray.300"
+                      _hover={{ borderColor: 'gray.400' }}
+                      _focus={{ borderColor: 'emerald.500', boxShadow: '0 0 0 1px var(--chakra-colors-emerald-500)' }}
                     />
                     <InputRightElement>
                       <Button
@@ -209,6 +272,46 @@ const RegisterPage = () => {
                       >
                         <Icon
                           as={showPassword ? FiEyeOff : FiEye}
+                          color="gray.500"
+                        />
+                      </Button>
+                    </InputRightElement>
+                  </InputGroup>
+                </FormControl>
+
+                <FormControl>
+                  <FormLabel
+                    htmlFor="password_confirmation"
+                    fontSize="sm"
+                    fontWeight="medium"
+                    color="gray.700"
+                  >
+                    Confirmar senha
+                  </FormLabel>
+                  <InputGroup size="lg">
+                    <InputLeftElement pointerEvents="none">
+                      <Icon as={FiLock} color="gray.400" />
+                    </InputLeftElement>
+                    <Input
+                      id="password_confirmation"
+                      name="password_confirmation"
+                      type={showPasswordConfirmation ? 'text' : 'password'}
+                      required
+                      placeholder="Digite a senha novamente"
+                      minLength={8}
+                      borderRadius="md"
+                      bg="white"
+                      borderColor="gray.300"
+                      _hover={{ borderColor: 'gray.400' }}
+                      _focus={{ borderColor: 'emerald.500', boxShadow: '0 0 0 1px var(--chakra-colors-emerald-500)' }}
+                    />
+                    <InputRightElement>
+                      <Button
+                        variant="ghost"
+                        onClick={() => setShowPasswordConfirmation(!showPasswordConfirmation)}
+                      >
+                        <Icon
+                          as={showPasswordConfirmation ? FiEyeOff : FiEye}
                           color="gray.500"
                         />
                       </Button>
@@ -230,12 +333,13 @@ const RegisterPage = () => {
                   }}
                   borderRadius="md"
                   rightIcon={<Icon as={FiArrowRight} />}
+                  isLoading={isLoading}
+                  loadingText="Criando conta..."
                 >
                   Criar conta grátis
                 </Button>
               </VStack>
 
-              {/* Divider */}
               <HStack w="full">
                 <Divider />
                 <Text
@@ -249,7 +353,6 @@ const RegisterPage = () => {
                 <Divider />
               </HStack>
 
-              {/* Social Logins */}
               <VStack spacing={3} w="full">
                 <Button
                   w="full"
@@ -260,6 +363,7 @@ const RegisterPage = () => {
                   fontWeight="semibold"
                   leftIcon={<Icon as={FcGoogle} boxSize={5} />}
                   borderColor="gray.300"
+                  onClick={() => handleSocialLogin('Google')}
                 >
                   Continuar com Google
                 </Button>
@@ -271,6 +375,7 @@ const RegisterPage = () => {
                   fontSize="md"
                   fontWeight="semibold"
                   leftIcon={<Icon as={FaFacebook} boxSize={5} />}
+                  onClick={() => handleSocialLogin('Facebook')}
                 >
                   Continuar com Facebook
                 </Button>
