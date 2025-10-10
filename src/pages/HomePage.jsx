@@ -1,682 +1,432 @@
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
-  Box,
-  Container,
-  VStack,
-  HStack,
-  Text,
-  Button,
-  Icon,
-  Badge,
-  Grid,
-  Flex,
-  Card,
-  CardBody,
-  Heading,
-} from '@chakra-ui/react'
-import { Link } from 'react-router-dom'
-import {
-  FiZap,
-  FiCheckCircle,
   FiArrowRight,
   FiUsers,
   FiSend,
   FiEye,
   FiDollarSign,
   FiBarChart,
-  FiTarget,
+  FiSettings,
   FiShield,
-  FiTrendingUp,
+  FiCheck,
+  FiMenu,
+  FiX,
+  FiZap,
   FiClock,
-} from 'react-icons/fi'
+  FiTrendingUp,
+  FiStar
+} from 'react-icons/fi';
+import '../styles/landing.css';
+
+// Componentes auxiliares
+const Card = ({ children, className = '' }) => (
+  <div className={className}>{children}</div>
+);
+
+const CardContent = ({ children, className = '' }) => (
+  <div className={className}>{children}</div>
+);
+
+const Badge = ({ children, className = '' }) => (
+  <div className={className}>{children}</div>
+);
 
 const HomePage = () => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
-    <Box minH="100vh">
-      {/* Header */}
-      <Box
-        as="header"
-        borderBottom="1px"
-        borderColor="gray.200"
-        position="sticky"
-        top="0"
-        zIndex="50"
-        backdropFilter="blur(8px)"
-        bg="rgba(255, 255, 255, 0.95)"
-      >
-        <Container maxW="container.xl" py={4}>
-          <Flex justify="space-between" align="center">
-            <HStack spacing={3}>
-              <Box
-                w={8}
-                h={8}
-                bg="linear-gradient(135deg, #10b981 0%, #34d399 100%)"
-                borderRadius="lg"
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-              >
-                <Icon as={FiZap} color="white" boxSize={5} />
-              </Box>
-              <Text fontSize="2xl" fontWeight="bold" color="gray.900">
-                OrçaFast
-              </Text>
-            </HStack>
+    <div className="landing-page">
+      {/* Navigation */}
+      <nav className="nav-container">
+        <div className="nav-content">
+          <div className="nav-logo">
+            <div className="logo-icon">
+              <FiTrendingUp className="logo-arrow" />
+            </div>
+            <span className="logo-text">OrçaFast</span>
+          </div>
+          
+          {/* Desktop Menu */}
+          <div className="nav-menu">
+            <a href="#features" className="nav-link">Recursos</a>
+            <a href="#how-it-works" className="nav-link">Como funciona</a>
+            <a href="#pricing" className="nav-link">Preços</a>
+          </div>
 
-            <HStack spacing={8} display={{ base: 'none', md: 'flex' }}>
-              <Text
-                as="a"
-                href="#como-funciona"
-                color="gray.600"
-                _hover={{ color: 'gray.900' }}
-                fontWeight="medium"
-                cursor="pointer"
-              >
-                Como funciona
-              </Text>
-              <Text
-                as="a"
-                href="#precos"
-                color="gray.600"
-                _hover={{ color: 'gray.900' }}
-                fontWeight="medium"
-                cursor="pointer"
-              >
-                Preços
-              </Text>
-              <Text
-                as="a"
-                href="#contato"
-                color="gray.600"
-                _hover={{ color: 'gray.900' }}
-                fontWeight="medium"
-                cursor="pointer"
-              >
-                Contato
-              </Text>
-            </HStack>
+          <div className="nav-actions">
+            <Link to="/login" className="nav-btn-secondary" style={{ textDecoration: 'none', padding: '0.5rem 1rem', borderRadius: '0.5rem', display: 'inline-block' }}>
+              Entrar
+            </Link>
+            <Link to="/onboarding/create-client" className="nav-btn-primary" style={{ textDecoration: 'none', padding: '0.5rem 1.5rem', borderRadius: '0.5rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+              Começar grátis
+              <FiArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+          </div>
 
-            <HStack spacing={4}>
-              <Button
-                as={Link}
-                to="/login"
-                variant="ghost"
-                color="gray.600"
-                _hover={{ color: 'gray.900' }}
-                fontWeight="medium"
-              >
-                Entrar
-              </Button>
-              <Button
-                as={Link}
+          {/* Mobile Menu Button */}
+          <button 
+            className="mobile-menu-btn"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
+          </button>
+        </div>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="mobile-menu">
+            <a href="#features" className="mobile-link">Recursos</a>
+            <a href="#how-it-works" className="mobile-link">Como funciona</a>
+            <a href="#pricing" className="mobile-link">Preços</a>
+            <Link 
                 to="/onboarding/create-client"
-                bg="linear-gradient(135deg, #10b981 0%, #34d399 100%)"
-                _hover={{ bg: 'linear-gradient(135deg, #059669 0%, #10b981 100%)' }}
-                color="white"
-                fontWeight="semibold"
-                px={6}
-                borderRadius="lg"
-                boxShadow="sm"
+              className="nav-btn-primary"
+              style={{ textDecoration: 'none', padding: '0.75rem 1.5rem', borderRadius: '0.5rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '100%', marginTop: '1rem' }}
               >
                 Começar grátis
-              </Button>
-            </HStack>
-          </Flex>
-        </Container>
-      </Box>
+            </Link>
+          </div>
+        )}
+      </nav>
 
       {/* Hero Section */}
-      <Box py={32} px={6} bg="white">
-        <Container maxW="container.xl" textAlign="center">
-          <Badge
-            mb={8}
-            bg="emerald.50"
-            color="emerald.700"
-            borderColor="emerald.200"
-            fontWeight="medium"
-            px={6}
-            py={3}
-            fontSize="base"
-            borderRadius="full"
-            border="1px"
-          >
-            ✨ Mais de 1.000 propostas enviadas este mês
+      <section className="hero-section">
+        <div className="hero-content">
+          <Badge className="hero-badge">
+            <FiStar className="mr-1 h-3 w-3" />
+            MAIS DE 1.000 PROPOSTAS ENVIADAS ESTE MÊS
           </Badge>
 
-          <VStack spacing={10}>
-            <Box>
-              <Text
-                fontSize={{ base: '4xl', md: '6xl', lg: '7xl' }}
-                fontWeight="bold"
-                lineHeight="tight"
-                color="gray.900"
-              >
+          <h1 className="hero-title">
                 Orça rápido,
-                <br />
-                <Text
-                  as="span"
-                  bgGradient="linear(to-r, emerald.600, emerald.500)"
-                  bgClip="text"
-                >
-                  fecha fácil
-                </Text>
-              </Text>
-            </Box>
+            <span className="hero-title-accent"> fecha fácil</span>
+          </h1>
+          
+          <p className="hero-subtitle">
+            A plataforma mais simples para criar, enviar e acompanhar propostas profissionais. 
+            Sem enrolação, sem complexidade.
+          </p>
 
-            <Text
-              fontSize={{ base: 'xl', md: '2xl', lg: '3xl' }}
-              color="gray.600"
-              maxW="4xl"
-              lineHeight="relaxed"
-              fontWeight="light"
-            >
-              A plataforma mais simples para criar, enviar e acompanhar propostas
-              profissionais. Sem enrolação, sem complexidade.
-            </Text>
-
-            <VStack spacing={6}>
-              <HStack spacing={6} flexWrap="wrap" justify="center">
-                <Button
-                  as={Link}
+          <div className="hero-cta">
+            <Link 
                   to="/onboarding/create-client"
-                  size="lg"
-                  bg="linear-gradient(135deg, #10b981 0%, #34d399 100%)"
-                  _hover={{ bg: 'linear-gradient(135deg, #059669 0%, #10b981 100%)' }}
-                  color="white"
-                  fontSize="xl"
-                  px={16}
-                  py={6}
-                  fontWeight="semibold"
-                  borderRadius="2xl"
-                  boxShadow="lg"
-                  transition="all 0.2s"
-                  rightIcon={<Icon as={FiArrowRight} boxSize={6} />}
+              className="cta-primary"
+              style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
                 >
                   Começar grátis
-                </Button>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  color="gray.700"
-                  borderColor="gray.300"
-                  _hover={{ borderColor: 'gray.400', bg: 'gray.50' }}
-                  fontSize="xl"
-                  px={16}
-                  py={6}
-                  fontWeight="semibold"
-                  borderRadius="2xl"
-                  borderWidth="2px"
-                >
+              <FiArrowRight className="ml-2 h-5 w-5" />
+            </Link>
+            <button className="cta-secondary" style={{ cursor: 'pointer' }}>
                   Ver demonstração
-                </Button>
-              </HStack>
+            </button>
+          </div>
 
-              <HStack
-                spacing={12}
-                fontSize="lg"
-                color="gray.600"
-                flexWrap="wrap"
-                justify="center"
-              >
-                <HStack>
-                  <Icon as={FiCheckCircle} color="emerald.600" boxSize={6} />
-                  <Text>Grátis para sempre</Text>
-                </HStack>
-                <HStack>
-                  <Icon as={FiCheckCircle} color="emerald.600" boxSize={6} />
-                  <Text>Sem cartão de crédito</Text>
-                </HStack>
-                <HStack>
-                  <Icon as={FiCheckCircle} color="emerald.600" boxSize={6} />
-                  <Text>Pronto em 2 minutos</Text>
-                </HStack>
-              </HStack>
-            </VStack>
-          </VStack>
-        </Container>
-      </Box>
+          <div className="hero-trust">
+            <div className="trust-item">
+              <FiCheck className="trust-icon" />
+              <span>Grátis para sempre</span>
+            </div>
+            <div className="trust-item">
+              <FiCheck className="trust-icon" />
+              <span>Sem cartão de crédito</span>
+            </div>
+            <div className="trust-item">
+              <FiCheck className="trust-icon" />
+              <span>Pronto em 2 minutos</span>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Stats Section */}
-      <Box py={24} bg="gray.900">
-        <Container maxW="container.xl">
-          <Grid templateColumns={{ base: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }} gap={16} textAlign="center">
-            <VStack spacing={4}>
-              <Text fontSize="5xl" fontWeight="bold" color="white">
-                3 cliques
-              </Text>
-              <Text color="gray.300" fontSize="lg">
-                Para enviar proposta
-              </Text>
-            </VStack>
-            <VStack spacing={4}>
-              <Text fontSize="5xl" fontWeight="bold" color="white">
-                2 min
-              </Text>
-              <Text color="gray.300" fontSize="lg">
-                Tempo médio de setup
-              </Text>
-            </VStack>
-            <VStack spacing={4}>
-              <Text fontSize="5xl" fontWeight="bold" color="white">
-                85%
-              </Text>
-              <Text color="gray.300" fontSize="lg">
-                Taxa de aprovação
-              </Text>
-            </VStack>
-            <VStack spacing={4}>
-              <Text fontSize="5xl" fontWeight="bold" color="emerald.400">
-                R$ 29
-              </Text>
-              <Text color="gray.300" fontSize="lg">
-                Plano Pro por mês
-              </Text>
-            </VStack>
-          </Grid>
-        </Container>
-      </Box>
+      <section className="stats-section">
+        <div className="stats-container">
+          <Card className="stat-card">
+            <CardContent className="stat-content">
+              <FiZap className="stat-icon" />
+              <div className="stat-text">
+                <div className="stat-number">3 cliques</div>
+                <div className="stat-label">Para criar proposta</div>
+              </div>
+            </CardContent>
+          </Card>
 
-      {/* How it Works */}
-      <Box id="como-funciona" py={32} px={6} bg="gray.50">
-        <Container maxW="container.xl">
-          <VStack spacing={24}>
-            <Box textAlign="center">
-              <Text fontSize={{ base: '4xl', md: '5xl', lg: '6xl' }} fontWeight="bold" mb={8} color="gray.900">
-                Como funciona
-              </Text>
-              <Text fontSize="2xl" color="gray.600" maxW="3xl">
-                Processo simples em 4 etapas para fechar mais negócios
-              </Text>
-            </Box>
+          <Card className="stat-card">
+            <CardContent className="stat-content">
+              <FiClock className="stat-icon" />
+              <div className="stat-text">
+                <div className="stat-number">2 min</div>
+                <div className="stat-label">Tempo médio de envio</div>
+              </div>
+            </CardContent>
+          </Card>
 
-            <Grid templateColumns={{ base: '1fr', md: 'repeat(4, 1fr)' }} gap={12}>
-              {[
-                { icon: FiUsers, step: 1, title: 'Criar', desc: 'Cadastre clientes e crie propostas profissionais em minutos' },
-                { icon: FiSend, step: 2, title: 'Enviar', desc: 'Compartilhe por WhatsApp, email ou link direto' },
-                { icon: FiEye, step: 3, title: 'Acompanhar', desc: 'Veja quando foi visualizada e receba notificações' },
-                { icon: FiDollarSign, step: 4, title: 'Ser pago', desc: 'Cliente aprova e você recebe o pagamento' },
-              ].map((item) => (
-                <VStack key={item.step} textAlign="center" spacing={6}>
-                  <Box
-                    w={20}
-                    h={20}
-                    bg="emerald.100"
-                    borderRadius="2xl"
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                  >
-                    <Icon as={item.icon} color="emerald.600" boxSize={10} />
-                  </Box>
-                  <Box
-                    w={12}
-                    h={12}
-                    bg="emerald.600"
-                    color="white"
-                    borderRadius="full"
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                    fontSize="lg"
-                    fontWeight="bold"
-                  >
-                    {item.step}
-                  </Box>
-                  <Text fontSize="2xl" fontWeight="semibold" color="gray.900">
-                    {item.title}
-                  </Text>
-                  <Text color="gray.600" lineHeight="relaxed" fontSize="lg">
-                    {item.desc}
-                  </Text>
-                </VStack>
-              ))}
-            </Grid>
-          </VStack>
-        </Container>
-      </Box>
+          <Card className="stat-card">
+            <CardContent className="stat-content">
+              <FiTrendingUp className="stat-icon" />
+              <div className="stat-text">
+                <div className="stat-number">85%</div>
+                <div className="stat-label">Taxa de aprovação</div>
+              </div>
+            </CardContent>
+          </Card>
 
-      {/* Dashboard Features */}
-      <Box py={32} px={6} bg="gray.900">
-        <Container maxW="container.xl">
-          <VStack spacing={20}>
-            <Box textAlign="center">
-              <Text fontSize={{ base: '4xl', md: '5xl', lg: '6xl' }} fontWeight="bold" mb={8} color="white">
-                Dashboard que funciona
-              </Text>
-              <Text fontSize="2xl" color="gray.300" maxW="3xl">
-                Acompanhe suas métricas e tome decisões baseadas em dados reais
-              </Text>
-            </Box>
+          <Card className="stat-card">
+            <CardContent className="stat-content">
+              <FiDollarSign className="stat-icon" />
+              <div className="stat-text">
+                <div className="stat-number">R$ 29</div>
+                <div className="stat-label">Plano mais popular</div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
 
-            <Grid templateColumns={{ base: '1fr', md: 'repeat(3, 1fr)' }} gap={8}>
-              {[
-                { icon: FiBarChart, title: 'Métricas em tempo real', desc: 'Visualize aprovações, valores e performance das suas propostas' },
-                { icon: FiTarget, title: 'Controle total', desc: 'Gerencie clientes, propostas e pagamentos em um só lugar' },
-                { icon: FiShield, title: 'Dados seguros', desc: 'Suas informações protegidas com criptografia de ponta' },
-              ].map((item, index) => (
-                <Card key={index} bg="gray.800" borderColor="gray.700" p={8}>
-                  <CardBody textAlign="center" p={0}>
-                    <Box
-                      w={16}
-                      h={16}
-                      bg="rgba(16, 185, 129, 0.2)"
-                      borderRadius="2xl"
-                      display="flex"
-                      alignItems="center"
-                      justifyContent="center"
-                      mx="auto"
-                      mb={6}
-                    >
-                      <Icon as={item.icon} color="emerald.400" boxSize={8} />
-                    </Box>
-                    <Heading size="lg" color="white" mb={4}>
-                      {item.title}
-                    </Heading>
-                    <Text color="gray.300" fontSize="lg" lineHeight="relaxed">
-                      {item.desc}
-                    </Text>
-                  </CardBody>
+      {/* How It Works Section */}
+      <section id="how-it-works" className="how-section">
+        <div className="section-header">
+          <h2 className="section-title">Como funciona</h2>
+          <p className="section-subtitle">Processo simples em 4 etapas para fechar mais negócios</p>
+        </div>
+
+        <div className="steps-container">
+          <Card className="step-card">
+            <CardContent className="step-content">
+              <div className="step-icon-wrapper">
+                <FiUsers className="step-icon" />
+              </div>
+              <div className="step-number">01</div>
+              <h3 className="step-title">Criar</h3>
+              <p className="step-description">
+                Monte sua proposta em minutos com templates prontos e personalizáveis
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="step-card">
+            <CardContent className="step-content">
+              <div className="step-icon-wrapper">
+                <FiSend className="step-icon" />
+              </div>
+              <div className="step-number">02</div>
+              <h3 className="step-title">Enviar</h3>
+              <p className="step-description">
+                Compartilhe por email, WhatsApp ou link em um único clique
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="step-card">
+            <CardContent className="step-content">
+              <div className="step-icon-wrapper">
+                <FiEye className="step-icon" />
+              </div>
+              <div className="step-number">03</div>
+              <h3 className="step-title">Acompanhar</h3>
+              <p className="step-description">
+                Saiba em tempo real quando sua proposta foi visualizada
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="step-card">
+            <CardContent className="step-content">
+              <div className="step-icon-wrapper">
+                <FiDollarSign className="step-icon" />
+              </div>
+              <div className="step-number">04</div>
+              <h3 className="step-title">Ser pago</h3>
+              <p className="step-description">
+                Receba aprovações mais rápido e feche mais negócios
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section id="features" className="features-section">
+        <div className="section-header">
+          <h2 className="section-title">Dashboard que funciona</h2>
+          <p className="section-subtitle">Acompanhe suas métricas e tome decisões baseadas em dados reais</p>
+        </div>
+
+        <div className="features-container">
+          <Card className="feature-card">
+            <CardContent className="feature-content">
+              <div className="feature-icon-wrapper">
+                <FiBarChart className="feature-icon" />
+              </div>
+              <h3 className="feature-title">Métricas em tempo real</h3>
+              <p className="feature-description">
+                Acompanhe taxa de abertura, tempo de visualização e status de cada proposta
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="feature-card">
+            <CardContent className="feature-content">
+              <div className="feature-icon-wrapper">
+                <FiSettings className="feature-icon" />
+              </div>
+              <h3 className="feature-title">Controle total</h3>
+              <p className="feature-description">
+                Gerencie todas as suas propostas em um único lugar, de forma simples e organizada
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="feature-card">
+            <CardContent className="feature-content">
+              <div className="feature-icon-wrapper">
+                <FiShield className="feature-icon" />
+              </div>
+              <h3 className="feature-title">Dados seguros</h3>
+              <p className="feature-description">
+                Seus dados e de seus clientes protegidos com criptografia de ponta a ponta
+              </p>
+            </CardContent>
                 </Card>
-              ))}
-            </Grid>
-          </VStack>
-        </Container>
-      </Box>
+        </div>
+      </section>
 
       {/* Pricing Section */}
-      <Box id="precos" py={32} px={6} bg="gray.900">
-        <Container maxW="container.xl">
-          <VStack spacing={24}>
-            <Box textAlign="center">
-              <Text fontSize={{ base: '4xl', md: '5xl', lg: '6xl' }} fontWeight="bold" mb={8} color="white">
-                Preços simples e transparentes
-              </Text>
-              <Text fontSize="2xl" color="gray.300">
-                Comece grátis e evolua conforme seu negócio cresce
-              </Text>
-            </Box>
+      <section id="pricing" className="pricing-section">
+        <div className="section-header">
+          <h2 className="section-title">Preços simples e transparentes</h2>
+          <p className="section-subtitle">Comece grátis e evolua conforme seu negócio cresce</p>
+        </div>
 
-            <Grid templateColumns={{ base: '1fr', md: 'repeat(3, 1fr)' }} gap={8}>
-              {/* Plano Gratuito */}
-              <Card bg="gray.800" borderColor="gray.700" _hover={{ borderColor: 'gray.600' }} transition="all 0.2s" boxShadow="xl">
-                <CardBody textAlign="center" p={8}>
-                  <VStack spacing={6}>
-                    <Box>
-                      <Heading size="lg" color="white" fontWeight="semibold" mb={6}>
-                        Gratuito
-                      </Heading>
-                      <Text fontSize="6xl" fontWeight="bold" color="white">
-                        R$ 0
-                      </Text>
-                      <Text color="gray.300" fontSize="lg" mt={4}>
-                        Para começar
-                      </Text>
-                    </Box>
-
-                    <VStack spacing={6} align="stretch">
-                      <HStack>
-                        <Icon as={FiCheckCircle} color="emerald.400" boxSize={6} flexShrink={0} />
-                        <Text color="gray.200" fontSize="lg">Até 5 propostas/mês</Text>
-                      </HStack>
-                      <HStack>
-                        <Icon as={FiCheckCircle} color="emerald.400" boxSize={6} flexShrink={0} />
-                        <Text color="gray.200" fontSize="lg">Templates básicos</Text>
-                      </HStack>
-                      <HStack>
-                        <Icon as={FiCheckCircle} color="emerald.400" boxSize={6} flexShrink={0} />
-                        <Text color="gray.200" fontSize="lg">Suporte por email</Text>
-                      </HStack>
-                    </VStack>
-
-                    <Button
-                      as={Link}
+        <div className="pricing-container">
+          <Card className="pricing-card">
+            <CardContent className="pricing-content">
+              <h3 className="pricing-plan">Gratuito</h3>
+              <div className="pricing-price">
+                <span className="price-currency">R$</span>
+                <span className="price-amount">0</span>
+                <span className="price-period">/mês</span>
+              </div>
+              <p className="pricing-description">Perfeito para começar</p>
+              <ul className="pricing-features">
+                <li><FiCheck className="feature-check" /> Até 5 propostas/mês</li>
+                <li><FiCheck className="feature-check" /> Templates básicos</li>
+                <li><FiCheck className="feature-check" /> Rastreamento simples</li>
+                <li><FiCheck className="feature-check" /> Suporte por email</li>
+              </ul>
+              <Link 
                       to="/onboarding/create-client"
-                      variant="outline"
-                      w="full"
-                      mt={10}
-                      borderColor="gray.600"
-                      _hover={{ borderColor: 'gray.500' }}
-                      bg="transparent"
-                      color="white"
-                      py={4}
-                      fontSize="lg"
-                      fontWeight="semibold"
-                      borderRadius="xl"
+                className="pricing-btn"
+                style={{ textDecoration: 'none', display: 'inline-block', textAlign: 'center', border: '1px solid rgba(255, 255, 255, 0.2)', borderRadius: '0.5rem' }}
                     >
                       Começar grátis
-                    </Button>
-                  </VStack>
-                </CardBody>
+              </Link>
+            </CardContent>
               </Card>
 
-              {/* Plano Pro - Mais Popular */}
-              <Box position="relative">
-                <Box
-                  position="absolute"
-                  top="-6"
-                  left="50%"
-                  transform="translateX(-50%)"
-                  zIndex="10"
-                >
-                  <Badge
-                    bg="white"
-                    color="emerald.700"
-                    px={6}
-                    py={3}
-                    fontSize="base"
-                    fontWeight="bold"
-                    borderRadius="full"
-                  >
-                    Mais popular
-                  </Badge>
-                </Box>
-                <Card
-                                  bg="linear-gradient(135deg, #10b981 0%, #34d399 100%)"
-                  borderColor="emerald.500"
-                  boxShadow="2xl"
-                  transform="scale(1.05)"
-                >
-                  <CardBody textAlign="center" p={8}>
-                    <VStack spacing={6}>
-                      <Box>
-                        <Heading size="lg" color="white" fontWeight="semibold" mb={6}>
-                          Pro
-                        </Heading>
-                        <Text fontSize="6xl" fontWeight="bold" color="white">
-                          R$ 29
-                        </Text>
-                        <Text color="emerald.100" fontSize="lg" mt={4}>
-                          Por mês
-                        </Text>
-                      </Box>
-
-                      <VStack spacing={6} align="stretch">
-                        <HStack>
-                          <Icon as={FiCheckCircle} color="white" boxSize={6} flexShrink={0} />
-                          <Text color="white" fontSize="lg">Propostas ilimitadas</Text>
-                        </HStack>
-                        <HStack>
-                          <Icon as={FiCheckCircle} color="white" boxSize={6} flexShrink={0} />
-                          <Text color="white" fontSize="lg">Sem marca OrçaFast</Text>
-                        </HStack>
-                        <HStack>
-                          <Icon as={FiCheckCircle} color="white" boxSize={6} flexShrink={0} />
-                          <Text color="white" fontSize="lg">Dashboard completo</Text>
-                        </HStack>
-                        <HStack>
-                          <Icon as={FiCheckCircle} color="white" boxSize={6} flexShrink={0} />
-                          <Text color="white" fontSize="lg">Suporte prioritário</Text>
-                        </HStack>
-                      </VStack>
-
-                      <Button
-                        as={Link}
+          <Card className="pricing-card pricing-card-popular">
+            <Badge className="popular-badge">MAIS POPULAR</Badge>
+            <CardContent className="pricing-content">
+              <h3 className="pricing-plan">Pro</h3>
+              <div className="pricing-price">
+                <span className="price-currency">R$</span>
+                <span className="price-amount">29</span>
+                <span className="price-period">/mês</span>
+              </div>
+              <p className="pricing-description">Para profissionais</p>
+              <ul className="pricing-features">
+                <li><FiCheck className="feature-check" /> Propostas ilimitadas</li>
+                <li><FiCheck className="feature-check" /> Todos os templates</li>
+                <li><FiCheck className="feature-check" /> Analytics avançado</li>
+                <li><FiCheck className="feature-check" /> Marca personalizada</li>
+                <li><FiCheck className="feature-check" /> Suporte prioritário</li>
+              </ul>
+              <Link 
                         to="/onboarding/create-client"
-                        w="full"
-                        mt={10}
-                        bg="white"
-                        _hover={{ bg: 'gray.100' }}
-                        color="emerald.700"
-                        py={4}
-                        fontSize="lg"
-                        fontWeight="bold"
-                        boxShadow="lg"
-                        borderRadius="xl"
+                className="pricing-btn-primary"
+                style={{ textDecoration: 'none', display: 'inline-block', textAlign: 'center' }}
                       >
                         Começar teste grátis
-                      </Button>
-                    </VStack>
-                  </CardBody>
+              </Link>
+            </CardContent>
                 </Card>
-              </Box>
 
-              {/* Plano Business */}
-              <Card bg="gray.800" borderColor="gray.700" _hover={{ borderColor: 'gray.600' }} transition="all 0.2s" boxShadow="xl">
-                <CardBody textAlign="center" p={8}>
-                  <VStack spacing={6}>
-                    <Box>
-                      <Heading size="lg" color="white" fontWeight="semibold" mb={6}>
-                        Business
-                      </Heading>
-                      <Text fontSize="6xl" fontWeight="bold" color="white">
-                        R$ 59
-                      </Text>
-                      <Text color="gray.300" fontSize="lg" mt={4}>
-                        Para equipes
-                      </Text>
-                    </Box>
-
-                    <VStack spacing={6} align="stretch">
-                      <HStack>
-                        <Icon as={FiCheckCircle} color="emerald.400" boxSize={6} flexShrink={0} />
-                        <Text color="gray.200" fontSize="lg">Tudo do Pro</Text>
-                      </HStack>
-                      <HStack>
-                        <Icon as={FiCheckCircle} color="emerald.400" boxSize={6} flexShrink={0} />
-                        <Text color="gray.200" fontSize="lg">Até 5 usuários</Text>
-                      </HStack>
-                      <HStack>
-                        <Icon as={FiCheckCircle} color="emerald.400" boxSize={6} flexShrink={0} />
-                        <Text color="gray.200" fontSize="lg">Templates customizados</Text>
-                      </HStack>
-                      <HStack>
-                        <Icon as={FiCheckCircle} color="emerald.400" boxSize={6} flexShrink={0} />
-                        <Text color="gray.200" fontSize="lg">API integração</Text>
-                      </HStack>
-                    </VStack>
-
-                    <Button
-                      variant="outline"
-                      w="full"
-                      mt={10}
-                      borderColor="gray.600"
-                      _hover={{ borderColor: 'gray.500' }}
-                      bg="transparent"
-                      color="white"
-                      py={4}
-                      fontSize="lg"
-                      fontWeight="semibold"
-                      borderRadius="xl"
-                    >
+          <Card className="pricing-card">
+            <CardContent className="pricing-content">
+              <h3 className="pricing-plan">Business</h3>
+              <div className="pricing-price">
+                <span className="price-currency">R$</span>
+                <span className="price-amount">79</span>
+                <span className="price-period">/mês</span>
+              </div>
+              <p className="pricing-description">Para equipes</p>
+              <ul className="pricing-features">
+                <li><FiCheck className="feature-check" /> Tudo do Pro</li>
+                <li><FiCheck className="feature-check" /> Usuários ilimitados</li>
+                <li><FiCheck className="feature-check" /> API de integração</li>
+                <li><FiCheck className="feature-check" /> Gerenciamento de equipe</li>
+                <li><FiCheck className="feature-check" /> Suporte 24/7</li>
+              </ul>
+              <button className="pricing-btn" style={{ border: '1px solid rgba(255, 255, 255, 0.2)', borderRadius: '0.5rem', cursor: 'pointer' }}>
                       Falar com vendas
-                    </Button>
-                  </VStack>
-                </CardBody>
+              </button>
+            </CardContent>
               </Card>
-            </Grid>
-          </VStack>
-        </Container>
-      </Box>
+        </div>
+      </section>
 
       {/* CTA Section */}
-      <Box py={32} px={6} bg="gray.900">
-        <Container maxW="container.lg" textAlign="center">
-          <VStack spacing={16}>
-            <Text fontSize={{ base: '4xl', md: '5xl', lg: '6xl' }} fontWeight="bold" color="white">
-              Pronto para aumentar suas aprovações?
-            </Text>
-            <Text fontSize="2xl" color="gray.300" maxW="3xl">
-              Junte-se a mais de 1.000 profissionais que já usam o OrçaFast para
-              fechar mais negócios
-            </Text>
-            <Button
-              as={Link}
+      <section className="cta-section">
+        <div className="cta-container">
+          <h2 className="cta-title">Pronto para aumentar suas aprovações?</h2>
+          <p className="cta-subtitle">
+            Junte-se a mais de 1.000 profissionais que já usam o OrçaFast para fechar mais negócios
+          </p>
+          <Link 
               to="/onboarding/create-client"
-              size="lg"
-              bg="linear-gradient(135deg, #10b981 0%, #34d399 100%)"
-              _hover={{ bg: 'linear-gradient(135deg, #059669 0%, #10b981 100%)' }}
-              color="white"
-              fontSize="2xl"
-              px={20}
-              py={8}
-              fontWeight="bold"
-              borderRadius="2xl"
-              boxShadow="2xl"
-              transition="all 0.2s"
-              rightIcon={<Icon as={FiArrowRight} boxSize={8} />}
+            className="cta-btn-final"
+            style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
             >
               Começar grátis agora
-            </Button>
-            <Text fontSize="lg" color="gray.400">
-              Sem cartão de crédito • Configuração em 2 minutos • Suporte em
-              português
-            </Text>
-          </VStack>
-        </Container>
-      </Box>
+            <FiArrowRight className="ml-2 h-5 w-5" />
+          </Link>
+          <div className="cta-trust">
+            <span>Sem cartão de crédito</span>
+            <span>•</span>
+            <span>Configuração em 2 minutos</span>
+            <span>•</span>
+            <span>Suporte em português</span>
+          </div>
+        </div>
+      </section>
 
       {/* Footer */}
-      <Box borderTop="1px" borderColor="gray.200" bg="gray.50" py={20} px={6}>
-        <Container maxW="container.xl">
-          <Flex
-            direction={{ base: 'column', md: 'row' }}
-            justify="space-between"
-            align="center"
-          >
-            <HStack spacing={3} mb={{ base: 8, md: 0 }}>
-              <Box
-                w={12}
-                h={12}
-                bg="linear-gradient(135deg, #10b981 0%, #34d399 100%)"
-                borderRadius="xl"
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-              >
-                <Icon as={FiZap} color="white" boxSize={7} />
-              </Box>
-              <Text fontSize="3xl" fontWeight="bold" color="gray.900">
-                OrçaFast
-              </Text>
-            </HStack>
+      <footer className="footer">
+        <div className="footer-content">
+          <div className="footer-brand">
+            <div className="footer-logo">
+              <div className="logo-icon">
+                <FiTrendingUp className="logo-arrow" />
+              </div>
+              <span className="logo-text">OrçaFast</span>
+            </div>
+            <p className="footer-tagline">Orçamentos profissionais em minutos</p>
+          </div>
+          
+          <div className="footer-links">
+            <a href="#" className="footer-link">Termos de uso</a>
+            <a href="#" className="footer-link">Privacidade</a>
+            <a href="#" className="footer-link">Suporte</a>
+          </div>
+        </div>
+        
+        <div className="footer-bottom">
+          <p>© 2025 OrçaFast. Todos os direitos reservados.</p>
+        </div>
+      </footer>
+    </div>
+  );
+};
 
-            <HStack spacing={10} fontSize="lg" color="gray.600">
-              <Text as="a" href="#" _hover={{ color: 'gray.900' }} cursor="pointer">
-                Termos de uso
-              </Text>
-              <Text as="a" href="#" _hover={{ color: 'gray.900' }} cursor="pointer">
-                Privacidade
-              </Text>
-              <Text as="a" href="#" _hover={{ color: 'gray.900' }} cursor="pointer">
-                Suporte
-              </Text>
-            </HStack>
-          </Flex>
-
-          <Box
-            borderTop="1px"
-            borderColor="gray.200"
-            mt={16}
-            pt={10}
-            textAlign="center"
-            fontSize="lg"
-            color="gray.500"
-          >
-            © 2024 OrçaFast. Todos os direitos reservados.
-          </Box>
-        </Container>
-      </Box>
-    </Box>
-  )
-}
-
-export default HomePage
+export default HomePage;

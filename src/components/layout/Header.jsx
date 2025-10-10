@@ -10,16 +10,20 @@ import {
   MenuButton,
   MenuList,
   MenuItem,
-  Avatar
+  Avatar,
 } from '@chakra-ui/react'
 import { Link } from 'react-router-dom'
-import { FiZap, FiSettings, FiCrop, FiArrowLeft, FiLogOut, FiUser } from 'react-icons/fi'
+import { FiZap, FiCrop, FiArrowLeft, FiLogOut, FiUser } from 'react-icons/fi'
 import { useAuth } from '../../hooks/useAuth'
+import { useSidebar } from '../../contexts/SidebarContext'
+import Sidebar from './Sidebar'
+import SidebarToggle from './SidebarToggle'
 
 const Header = ({ title, showBackButton = false, rightContent }) => {
   const bgColor = useColorModeValue('white', 'gray.800')
   const borderColor = useColorModeValue('gray.200', 'gray.700')
   const { logout, getCurrentUser } = useAuth()
+  const { isCollapsed } = useSidebar()
 
   const user = getCurrentUser()
 
@@ -29,6 +33,11 @@ const Header = ({ title, showBackButton = false, rightContent }) => {
 
   return (
     <>
+      {/* Desktop Sidebar */}
+      <Box display={{ base: 'none', lg: 'block' }}>
+        <Sidebar />
+      </Box>
+
       <Box
         as="header"
         position="sticky"
@@ -38,11 +47,10 @@ const Header = ({ title, showBackButton = false, rightContent }) => {
         borderBottom="1px"
         borderColor={borderColor}
         backdropFilter="blur(8px)"
-        bg={`${bgColor}F5`}
+        w="100%"
       >
         <Flex
-          maxW="container.xl"
-          mx="auto"
+          w="100%"
           px={4}
           py={4}
           align="center"
@@ -50,6 +58,9 @@ const Header = ({ title, showBackButton = false, rightContent }) => {
         >
           {/* Left side */}
           <HStack spacing={4}>
+            {/* Mobile Menu Toggle */}
+            <SidebarToggle />
+            
             {showBackButton && (
               <Button
                 as={Link}
@@ -63,18 +74,16 @@ const Header = ({ title, showBackButton = false, rightContent }) => {
             )}
             
             <HStack spacing={2}>
-              {!showBackButton && (
-                <Flex
-                  w={8}
-                  h={8}
-                  bg="linear-gradient(135deg, #10b981 0%, #34d399 100%)"
-                  borderRadius="lg"
-                  align="center"
-                  justify="center"
-                >
-                  <Icon as={FiZap} color="white" boxSize={5} />
-                </Flex>
-              )}
+              <Flex
+                w={8}
+                h={8}
+                bg="linear-gradient(135deg, #10b981 0%, #34d399 100%)"
+                borderRadius="lg"
+                align="center"
+                justify="center"
+              >
+                <Icon as={FiZap} color="white" boxSize={5} />
+              </Flex>
               <Text fontSize="xl" fontWeight="bold" color="primary.500">
                 {title || 'OrçaFast'}
               </Text>
@@ -117,9 +126,6 @@ const Header = ({ title, showBackButton = false, rightContent }) => {
                   <MenuList>
                     <MenuItem icon={<Icon as={FiUser} />}>
                       Meu Perfil
-                    </MenuItem>
-                    <MenuItem icon={<Icon as={FiSettings} />}>
-                      Configurações
                     </MenuItem>
                     <MenuItem 
                       icon={<Icon as={FiLogOut} />}
