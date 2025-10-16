@@ -13,6 +13,7 @@ import {
   SimpleGrid,
   Spinner,
   Center,
+  useColorModeValue,
 } from '@chakra-ui/react'
 import {
   FiAward,
@@ -34,6 +35,13 @@ import { storage } from '../utils/storage'
 const InitialDashboardPage = () => {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
+  
+  const headingColor = useColorModeValue('gray.900', 'white')
+  const subTextColor = useColorModeValue('gray.600', 'whiteAlpha.700')
+  const cardBgColor = useColorModeValue('gray.50', 'whiteAlpha.100')
+  const cardBorderColor = useColorModeValue('gray.200', 'whiteAlpha.200')
+  const cardTextColor = useColorModeValue('gray.900', 'white')
+  const cardSubTextColor = useColorModeValue('gray.600', 'whiteAlpha.700')
 
   useEffect(() => {
     const userData = storage.getUser()
@@ -76,17 +84,18 @@ const InitialDashboardPage = () => {
         <Box textAlign="center">
           <VStack spacing={4}>
             <HStack spacing={2} justify="center">
-              <Icon as={FiAward} color="emerald.500" boxSize={8} />
-              <Text fontSize={{ base: '2xl', md: '3xl' }} fontWeight="bold" color="gray.900">
+              <Icon as={FiAward} color="primary.500" boxSize={8} />
+              <Text fontSize={{ base: '2xl', md: '3xl' }} fontWeight="bold" color={headingColor}>
                 Parabéns, você enviou sua 1ª proposta!
               </Text>
-              <Icon as={FiAward} color="emerald.500" boxSize={8} />
+              <Icon as={FiAward} color="primary.500" boxSize={8} />
             </HStack>
-            <Text fontSize="lg" color="gray.600" maxW="2xl">
+            <Text fontSize="lg" color={subTextColor} maxW="2xl">
               Agora é só acompanhar o progresso. Você será notificado sobre cada etapa.
             </Text>
             <Badge
-              colorScheme="emerald"
+              bg="primary.100"
+              color="primary.700"
               fontSize="sm"
               px={4}
               py={2}
@@ -99,39 +108,39 @@ const InitialDashboardPage = () => {
 
         {/* KPI Cards */}
         <SimpleGrid columns={{ base: 2, md: 4 }} spacing={6}>
-          <Card bg="gray.50" border="1px" borderColor="gray.200">
+          <Card bg={cardBgColor} border="1px" borderColor={cardBorderColor}>
             <CardBody textAlign="center">
               <VStack spacing={2}>
-                <Icon as={FiFileText} color="emerald.500" boxSize={6} />
-                <Text fontSize="2xl" fontWeight="bold" color="gray.900">{stats.sent}</Text>
-                <Text fontSize="sm" color="gray.600">Propostas Enviadas</Text>
+                <Icon as={FiFileText} color="primary.500" boxSize={6} />
+                <Text fontSize="2xl" fontWeight="bold" color={cardTextColor}>{stats.sent}</Text>
+                <Text fontSize="sm" color={cardSubTextColor}>Propostas Enviadas</Text>
               </VStack>
             </CardBody>
           </Card>
-          <Card bg="gray.50" border="1px" borderColor="gray.200">
+          <Card bg={cardBgColor} border="1px" borderColor={cardBorderColor}>
             <CardBody textAlign="center">
               <VStack spacing={2}>
                 <Icon as={FiEye} color="blue.500" boxSize={6} />
-                <Text fontSize="2xl" fontWeight="bold" color="gray.900">{stats.viewed}</Text>
-                <Text fontSize="sm" color="gray.600">Visualizadas</Text>
+                <Text fontSize="2xl" fontWeight="bold" color={cardTextColor}>{stats.viewed}</Text>
+                <Text fontSize="sm" color={cardSubTextColor}>Visualizadas</Text>
               </VStack>
             </CardBody>
           </Card>
-          <Card bg="gray.50" border="1px" borderColor="gray.200">
+          <Card bg={cardBgColor} border="1px" borderColor={cardBorderColor}>
             <CardBody textAlign="center">
               <VStack spacing={2}>
                 <Icon as={FiCheckCircle} color="green.500" boxSize={6} />
-                <Text fontSize="2xl" fontWeight="bold" color="gray.900">{stats.approved}</Text>
-                <Text fontSize="sm" color="gray.600">Aprovadas</Text>
+                <Text fontSize="2xl" fontWeight="bold" color={cardTextColor}>{stats.approved}</Text>
+                <Text fontSize="sm" color={cardSubTextColor}>Aprovadas</Text>
               </VStack>
             </CardBody>
           </Card>
-          <Card bg="gray.50" border="1px" borderColor="gray.200">
+          <Card bg={cardBgColor} border="1px" borderColor={cardBorderColor}>
             <CardBody textAlign="center">
               <VStack spacing={2}>
                 <Icon as={FiDollarSign} color="purple.500" boxSize={6} />
-                <Text fontSize="2xl" fontWeight="bold" color="gray.900">{stats.totalValue}</Text>
-                <Text fontSize="sm" color="gray.600">Valor Total</Text>
+                <Text fontSize="2xl" fontWeight="bold" color={cardTextColor}>{stats.totalValue}</Text>
+                <Text fontSize="sm" color={cardSubTextColor}>Valor Total</Text>
               </VStack>
             </CardBody>
           </Card>
@@ -142,21 +151,21 @@ const InitialDashboardPage = () => {
           <CardBody>
             <VStack align="stretch" spacing={6}>
               <HStack justify="space-between" align="center">
-                <Heading size="md" color="gray.900">Sua Primeira Proposta</Heading>
+                <Heading size="md" color={headingColor}>Sua Primeira Proposta</Heading>
                 <Button as={Link} to="/dashboard" variant="outline" size="sm" rightIcon={<Icon as={FiArrowRight} />}>
                   Ver Todas
                 </Button>
               </HStack>
 
               {firstProposal ? (
-                <Box p={4} border="1px" borderColor="gray.200" borderRadius="lg">
+                <Box p={4} border="1px" borderColor={cardBorderColor} borderRadius="lg" bg={cardBgColor}>
                   <HStack justify="space-between" align="center">
                     <Box>
-                      <Text fontWeight="bold">{firstProposal.title}</Text>
-                      <Text fontSize="sm" color="gray.600">Para: {firstClient.name}</Text>
+                      <Text fontWeight="bold" color={cardTextColor}>{firstProposal.title}</Text>
+                      <Text fontSize="sm" color={cardSubTextColor}>Para: {firstClient.name}</Text>
                     </Box>
                     <HStack>
-                      <Text fontWeight="semibold" color="emerald.600">
+                      <Text fontWeight="semibold" color="primary.600">
                         {parseFloat(firstProposal.total_value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                       </Text>
                       <StatusBadge status={proposalStatus(firstProposal.status)} />
@@ -164,7 +173,7 @@ const InitialDashboardPage = () => {
                   </HStack>
                 </Box>
               ) : (
-                <Text color="gray.500">Nenhuma proposta encontrada.</Text>
+                <Text color={subTextColor}>Nenhuma proposta encontrada.</Text>
               )}
             </VStack>
           </CardBody>
@@ -174,11 +183,11 @@ const InitialDashboardPage = () => {
         <Card>
           <CardBody>
             <VStack align="stretch" spacing={6}>
-              <Heading size="md" color="gray.900">Próximos Passos</Heading>
+              <Heading size="md" color={headingColor}>Próximos Passos</Heading>
               <SimpleGrid columns={{ base: 1, md: 3 }} gap={6}>
-                <ActionCard icon={FiPlus} title="Nova Proposta" subtitle="Criar outra proposta" to="/onboarding/create-client" variant="solid" colorScheme="emerald" />
+                <ActionCard icon={FiPlus} title="Nova Proposta" subtitle="Criar outra proposta" to="/onboarding/create-client" variant="dashed" />
                 <ActionCard icon={FiUsers} title="Clientes" subtitle="Gerenciar seus contatos" to="/dashboard/clientes" />
-                <ActionCard icon={FiZap} title="Plano Pro" subtitle="Desbloquear recursos" to="/planos" variant="outline" colorScheme="purple" />
+                <ActionCard icon={FiZap} title="Plano Pro" subtitle="Desbloquear recursos" to="/planos" />
               </SimpleGrid>
             </VStack>
           </CardBody>

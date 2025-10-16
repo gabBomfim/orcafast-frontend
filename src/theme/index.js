@@ -1,18 +1,18 @@
 import { extendTheme } from '@chakra-ui/react'
 
-// Cores baseadas no design do V0
+// Cores alinhadas com a landing page (#00d97e)
 const colors = {
   primary: {
-    50: '#ecfeff',
-    100: '#cffafe',
-    200: '#a5f3fc',
-    300: '#67e8f9',
-    400: '#22d3ee',
-    500: '#164e63', // Cor principal
-    600: '#0891b2',
-    700: '#0e7490',
-    800: '#155e75',
-    900: '#164e63',
+    50: '#e6fff5',
+    100: '#ccffe8',
+    200: '#99ffd1',
+    300: '#66ffba',
+    400: '#33ffa3',
+    500: '#00d97e', // Cor principal da landing
+    600: '#00b368', // Cor dark da landing
+    700: '#009c5a',
+    800: '#00804a',
+    900: '#006639',
   },
   secondary: {
     50: '#fefce8',
@@ -20,35 +20,35 @@ const colors = {
     200: '#fde68a',
     300: '#fcd34d',
     400: '#fbbf24',
-    500: '#f59e0b', // Cor secundária/accent
+    500: '#f59e0b',
     600: '#d97706',
     700: '#b45309',
     800: '#92400e',
     900: '#78350f',
   },
   accent: {
-    50: '#fefce8',
-    100: '#fef3c7',
-    200: '#fde68a',
-    300: '#fcd34d',
-    400: '#fbbf24',
-    500: '#f59e0b', // Mesmo que secondary
-    600: '#d97706',
-    700: '#b45309',
-    800: '#92400e',
-    900: '#78350f',
+    50: '#fff9e6',
+    100: '#fff3cc',
+    200: '#ffe799',
+    300: '#ffdb66',
+    400: '#ffcf33',
+    500: '#ffc107', // Cor do badge da landing
+    600: '#f59e0b',
+    700: '#d97706',
+    800: '#b45309',
+    900: '#92400e',
   },
   emerald: {
-    50: '#ecfdf5',
-    100: '#d1fae5',
-    200: '#a7f3d0',
-    300: '#6ee7b7',
-    400: '#34d399',
-    500: '#10b981',
-    600: '#059669',
-    700: '#047857',
-    800: '#065f46',
-    900: '#064e3b',
+    50: '#e6fff5',
+    100: '#ccffe8',
+    200: '#99ffd1',
+    300: '#66ffba',
+    400: '#33ffa3',
+    500: '#00d97e', // Mesma cor da primary
+    600: '#00b368',
+    700: '#009c5a',
+    800: '#00804a',
+    900: '#006639',
   },
   gray: {
     50: '#f8fafc',
@@ -61,115 +61,176 @@ const colors = {
     700: '#334155',
     800: '#1e293b',
     900: '#0f172a',
+  },
+  // Cores dark da landing para possíveis usos
+  dark: {
+    50: '#1f3a52',
+    100: '#1a3347',
+    200: '#152b3c',
+    300: '#0f1f3a', // Gradiente final da landing
+    400: '#0d1b33',
+    500: '#0a1628', // Gradiente inicial da landing
+    600: '#081220',
+    700: '#060e18',
+    800: '#040a10',
+    900: '#020608',
   }
 }
 
-// Fonts baseadas no V0
+// Fonts alinhadas com a landing page
 const fonts = {
-  heading: '"Work Sans", system-ui, sans-serif',
-  body: '"Open Sans", system-ui, sans-serif',
+  heading: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+  body: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
 }
 
-// Componentes customizados
+// Componentes customizados com a identidade da landing
 const components = {
   Button: {
     baseStyle: {
-      fontWeight: 'semibold',
-      borderRadius: 'lg',
+      fontWeight: '600',
+      borderRadius: '12px',
+      letterSpacing: '-0.2px',
     },
     variants: {
       solid: {
-        bg: 'primary.500',
+        bg: 'linear-gradient(135deg, #00d97e 0%, #00b368 100%)',
         color: 'white',
         _hover: {
-          bg: 'primary.600',
-          transform: 'translateY(-1px)',
-          boxShadow: '0 10px 15px -3px rgba(22, 78, 99, 0.1), 0 4px 6px -2px rgba(22, 78, 99, 0.05)',
+          bg: 'linear-gradient(135deg, #00e689 0%, #00c774 100%)',
+          transform: 'translateY(-2px)',
+          boxShadow: '0 8px 24px rgba(0, 217, 126, 0.3)',
         },
-        transition: 'all 0.2s ease-in-out',
+        _active: {
+          transform: 'translateY(0)',
+        },
+        boxShadow: '0 4px 12px rgba(0, 217, 126, 0.2)',
+        transition: 'all 0.2s ease',
       },
       gradient: {
-        background: 'linear-gradient(135deg, #10b981 0%, #34d399 100%)',
+        background: 'linear-gradient(135deg, #00d97e 0%, #00b368 100%)',
         color: 'white',
         _hover: {
-          background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
-          transform: 'translateY(-1px)',
-          boxShadow: '0 10px 15px -3px rgba(16, 185, 129, 0.1), 0 4px 6px -2px rgba(16, 185, 129, 0.05)',
+          background: 'linear-gradient(135deg, #00e689 0%, #00c774 100%)',
+          transform: 'translateY(-2px)',
+          boxShadow: '0 12px 32px rgba(0, 217, 126, 0.4)',
         },
-        transition: 'all 0.2s ease-in-out',
+        _active: {
+          transform: 'translateY(0)',
+        },
+        boxShadow: '0 8px 24px rgba(0, 217, 126, 0.3)',
+        transition: 'all 0.2s ease',
       },
-      hover: {
+      outline: {
+        borderColor: 'gray.200',
+        color: 'gray.700',
+        borderWidth: '1px',
         _hover: {
+          bg: 'gray.50',
+          borderColor: 'primary.500',
+          color: 'primary.500',
           transform: 'translateY(-1px)',
-          boxShadow: '0 10px 15px -3px rgba(22, 78, 99, 0.1), 0 4px 6px -2px rgba(22, 78, 99, 0.05)',
         },
-        transition: 'all 0.2s ease-in-out',
+        transition: 'all 0.2s ease',
+      },
+      ghost: {
+        color: 'gray.600',
+        _hover: {
+          bg: 'gray.100',
+          color: 'gray.800',
+        },
       }
     },
   },
   Card: {
     baseStyle: {
       container: {
-        borderRadius: 'xl',
-        boxShadow: '0 4px 6px -1px rgba(22, 78, 99, 0.1), 0 2px 4px -1px rgba(22, 78, 99, 0.06)',
+        borderRadius: '16px',
+        bg: 'white',
+        border: '1px solid',
+        borderColor: 'gray.100',
+        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)',
         _hover: {
-          transform: 'translateY(-1px)',
-          boxShadow: '0 10px 15px -3px rgba(22, 78, 99, 0.1), 0 4px 6px -2px rgba(22, 78, 99, 0.05)',
+          transform: 'translateY(-2px)',
+          boxShadow: '0 12px 24px rgba(0, 217, 126, 0.08)',
+          borderColor: 'primary.100',
         },
-        transition: 'all 0.2s ease-in-out',
+        transition: 'all 0.3s ease',
       }
     }
   },
   Badge: {
+    baseStyle: {
+      fontWeight: '600',
+      borderRadius: '6px',
+      px: 2,
+      py: 1,
+      fontSize: 'xs',
+      letterSpacing: '0.3px',
+    },
     variants: {
       approved: {
-        bg: 'green.100',
-        color: 'green.800',
+        bg: 'green.50',
+        color: 'green.700',
         borderColor: 'green.200',
         border: '1px solid',
       },
       viewed: {
-        bg: 'blue.100',
-        color: 'blue.800',
+        bg: 'blue.50',
+        color: 'blue.700',
         borderColor: 'blue.200',
         border: '1px solid',
       },
       sent: {
-        bg: 'yellow.100',
-        color: 'yellow.800',
+        bg: 'yellow.50',
+        color: 'yellow.700',
         borderColor: 'yellow.200',
         border: '1px solid',
       },
       rejected: {
-        bg: 'red.100',
-        color: 'red.800',
+        bg: 'red.50',
+        color: 'red.700',
         borderColor: 'red.200',
         border: '1px solid',
       },
       draft: {
         bg: 'gray.100',
-        color: 'gray.800',
+        color: 'gray.700',
         borderColor: 'gray.200',
         border: '1px solid',
       }
     }
-  }
+  },
+  Input: {
+    variants: {
+      outline: {
+        field: {
+          borderColor: 'gray.200',
+          _hover: {
+            borderColor: 'gray.300',
+          },
+          _focus: {
+            borderColor: 'primary.500',
+            boxShadow: '0 0 0 1px rgba(0, 217, 126, 0.3)',
+          },
+        },
+      },
+    },
+  },
 }
 
 // Configurações globais
 const config = {
-  initialColorMode: 'light',
+  initialColorMode: 'dark',
   useSystemColorMode: false,
 }
 
-// Estilos globais
+// Estilos globais com suporte a dark mode
 const styles = {
-  global: {
-    body: {
-      bg: 'gray.50',
-      color: 'gray.600',
+  global: (props) => ({
+    '*::placeholder': {
+      color: props.colorMode === 'dark' ? 'whiteAlpha.400' : 'gray.400',
     },
-  },
+  }),
 }
 
 // Breakpoints responsivos

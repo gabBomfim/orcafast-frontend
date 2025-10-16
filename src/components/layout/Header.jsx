@@ -6,22 +6,27 @@ import {
   Icon,
   Text,
   useColorModeValue,
+  useColorMode,
+  IconButton,
   Menu,
   MenuButton,
   MenuList,
   MenuItem,
   Avatar,
+  Tooltip,
 } from '@chakra-ui/react'
 import { Link } from 'react-router-dom'
-import { FiZap, FiCrop, FiArrowLeft, FiLogOut, FiUser } from 'react-icons/fi'
+import { FiZap, FiCrop, FiArrowLeft, FiLogOut, FiUser, FiSun, FiMoon } from 'react-icons/fi'
 import { useAuth } from '../../hooks/useAuth'
 import { useSidebar } from '../../contexts/SidebarContext'
 import Sidebar from './Sidebar'
 import SidebarToggle from './SidebarToggle'
 
 const Header = ({ title, showBackButton = false, rightContent }) => {
-  const bgColor = useColorModeValue('white', 'gray.800')
-  const borderColor = useColorModeValue('gray.200', 'gray.700')
+  const { colorMode, toggleColorMode } = useColorMode()
+  const bgColor = useColorModeValue('white', 'dark.500')
+  const borderColor = useColorModeValue('gray.200', 'whiteAlpha.200')
+  const textColor = useColorModeValue('gray.900', 'white')
   const { logout, getCurrentUser } = useAuth()
   const { isCollapsed } = useSidebar()
 
@@ -77,14 +82,15 @@ const Header = ({ title, showBackButton = false, rightContent }) => {
               <Flex
                 w={8}
                 h={8}
-                bg="linear-gradient(135deg, #10b981 0%, #34d399 100%)"
+                bg="linear-gradient(135deg, #00d97e 0%, #00b368 100%)"
                 borderRadius="lg"
                 align="center"
                 justify="center"
+                boxShadow="0 4px 12px rgba(0, 217, 126, 0.3)"
               >
                 <Icon as={FiZap} color="white" boxSize={5} />
               </Flex>
-              <Text fontSize="xl" fontWeight="bold" color="primary.500">
+              <Text fontSize="xl" fontWeight="800" color={textColor} letterSpacing="-0.5px">
                 {title || 'OrçaFast'}
               </Text>
             </HStack>
@@ -94,6 +100,20 @@ const Header = ({ title, showBackButton = false, rightContent }) => {
           <HStack spacing={3}>
             {rightContent || (
               <>
+                {/* Theme Toggle */}
+                <Tooltip label={colorMode === 'dark' ? 'Modo Claro' : 'Modo Escuro'} placement="bottom">
+                  <IconButton
+                    icon={<Icon as={colorMode === 'dark' ? FiSun : FiMoon} />}
+                    onClick={toggleColorMode}
+                    variant="ghost"
+                    size="sm"
+                    aria-label="Toggle theme"
+                    _hover={{
+                      bg: useColorModeValue('gray.100', 'whiteAlpha.200'),
+                    }}
+                  />
+                </Tooltip>
+
                 <Button
                   variant="outline"
                   size="sm"
@@ -115,7 +135,7 @@ const Header = ({ title, showBackButton = false, rightContent }) => {
                       <Avatar
                         size="sm"
                         name={user?.name}
-                        bg="emerald.500"
+                        bg="primary.500"
                         color="white"
                       />
                       <Text fontSize="sm" fontWeight="medium">

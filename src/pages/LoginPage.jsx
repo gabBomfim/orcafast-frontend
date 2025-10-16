@@ -21,6 +21,7 @@ import {
   Checkbox,
   SimpleGrid,
   useToast,
+  useColorModeValue,
 } from '@chakra-ui/react'
 import {
   FiZap,
@@ -95,7 +96,7 @@ const LoginPage = () => {
     <SimpleGrid columns={{ base: 1, lg: 2 }} minH="100vh">
       <Flex
         display={{ base: 'none', lg: 'flex' }}
-        bg="gray.900"
+        bg="dark.500"
         color="white"
         p={12}
         direction="column"

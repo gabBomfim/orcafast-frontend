@@ -8,6 +8,7 @@ import {
   Button,
   Icon,
   Flex,
+  useColorModeValue,
 } from '@chakra-ui/react'
 import { Link } from 'react-router-dom'
 import {
@@ -36,16 +37,22 @@ import { recentProposals } from '../mock/propostas'
 const DashboardPage = () => {
   const [stats] = useState(dashboardStats)
   const [proposals] = useState(recentProposals)
+  
+  const headingColor = useColorModeValue('gray.700', 'white')
+  const subTextColor = useColorModeValue('gray.500', 'whiteAlpha.700')
+  const cardBgColor = useColorModeValue('white', 'whiteAlpha.100')
+  const cardBorderColor = useColorModeValue('gray.200', 'whiteAlpha.200')
+  const cardHoverBg = useColorModeValue('gray.50', 'whiteAlpha.50')
 
   return (
     <Container>
       {/* Welcome Section */}
       <VStack align="stretch" spacing={8}>
         <Box>
-          <Text fontSize="3xl" fontWeight="bold" color="gray.700" mb={2}>
+          <Text fontSize="3xl" fontWeight="bold" color={headingColor} mb={2}>
             {userInfo.greeting}
           </Text>
-          <Text color="gray.500" fontSize="lg">
+          <Text color={subTextColor} fontSize="lg">
             Você já faturou{' '}
             <Text as="span" fontWeight="semibold" color="primary.500">
               R$ {stats.totalRevenue.toLocaleString('pt-BR')}
@@ -146,9 +153,10 @@ const DashboardPage = () => {
                 w="full"
                 p={4}
                 border="1px"
-                borderColor="gray.200"
+                borderColor={cardBorderColor}
                 borderRadius="lg"
-                _hover={{ bg: 'gray.50' }}
+                bg={cardBgColor}
+                _hover={{ bg: cardHoverBg }}
                 transition="background 0.2s"
               >
                 <Flex justify="space-between" align="center">
@@ -156,7 +164,7 @@ const DashboardPage = () => {
                     <HStack spacing={3} mb={1}>
                       <Text fontWeight="medium">{proposal.client}</Text>
                     </HStack>
-                    <Text fontSize="sm" color="gray.500">
+                    <Text fontSize="sm" color={subTextColor}>
                       {proposal.service}
                     </Text>
                   </Box>
@@ -166,7 +174,7 @@ const DashboardPage = () => {
                       <Text fontWeight="semibold" color="primary.500">
                         R$ {proposal.value.toLocaleString('pt-BR')}
                       </Text>
-                      <Text fontSize="xs" color="gray.500">
+                      <Text fontSize="xs" color={subTextColor}>
                         {proposal.createdAt}
                       </Text>
                     </Box>

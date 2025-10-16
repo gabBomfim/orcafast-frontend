@@ -15,20 +15,23 @@ const DataCard = ({
   headerAction,
   ...props 
 }) => {
-  const bgColor = useColorModeValue('white', 'gray.800')
-  const borderColor = useColorModeValue('gray.200', 'gray.700')
+  const bgColor = useColorModeValue('white', 'whiteAlpha.100')
+  const borderColor = useColorModeValue('gray.100', 'whiteAlpha.200')
+  const headingColor = useColorModeValue('gray.900', 'white')
+  const subtitleColor = useColorModeValue('gray.600', 'whiteAlpha.700')
 
   return (
     <Card
       bg={bgColor}
-      borderRadius="xl"
+      borderRadius="16px"
       border="1px"
-      borderColor={borderColor}
-      boxShadow="0 4px 6px -1px rgba(22, 78, 99, 0.1), 0 2px 4px -1px rgba(22, 78, 99, 0.06)"
-      transition="all 0.2s ease-in-out"
+      borderColor="gray.100"
+      boxShadow="0 1px 3px 0 rgba(0, 0, 0, 0.05)"
+      transition="all 0.3s ease"
       _hover={{
-        transform: 'translateY(-1px)',
-        boxShadow: '0 10px 15px -3px rgba(22, 78, 99, 0.1), 0 4px 6px -2px rgba(22, 78, 99, 0.05)',
+        transform: 'translateY(-2px)',
+        boxShadow: '0 12px 24px rgba(0, 217, 126, 0.08)',
+        borderColor: 'primary.100',
       }}
       {...props}
     >
@@ -37,12 +40,12 @@ const DataCard = ({
           <Box display="flex" alignItems="center" justifyContent="space-between">
             <Box>
               {title && (
-                <Heading size="md" color="gray.700">
+                <Heading size="md" color={headingColor} fontWeight="800" letterSpacing="-0.5px">
                   {title}
                 </Heading>
               )}
               {subtitle && (
-                <Text color="gray.500" mt={1}>
+                <Text color={subtitleColor} mt={1} fontWeight="500" fontSize="sm">
                   {subtitle}
                 </Text>
               )}
