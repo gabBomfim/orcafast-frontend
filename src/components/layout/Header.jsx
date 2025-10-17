@@ -19,7 +19,6 @@ import { Link } from 'react-router-dom'
 import { FiZap, FiCrop, FiArrowLeft, FiLogOut, FiUser, FiSun, FiMoon } from 'react-icons/fi'
 import { useAuth } from '../../hooks/useAuth'
 import { useSidebar } from '../../contexts/SidebarContext'
-import Sidebar from './Sidebar'
 import SidebarToggle from './SidebarToggle'
 
 const Header = ({ title, showBackButton = false, rightContent }) => {
@@ -38,21 +37,17 @@ const Header = ({ title, showBackButton = false, rightContent }) => {
 
   return (
     <>
-      {/* Desktop Sidebar */}
-      <Box display={{ base: 'none', lg: 'block' }}>
-        <Sidebar />
-      </Box>
-
       <Box
         as="header"
-        position="sticky"
+        position="fixed"
         top="0"
-        zIndex="50"
+        left="0"
+        right="0"
+        zIndex={1100}
         bg={bgColor}
         borderBottom="1px"
         borderColor={borderColor}
         backdropFilter="blur(8px)"
-        w="100%"
       >
         <Flex
           w="100%"

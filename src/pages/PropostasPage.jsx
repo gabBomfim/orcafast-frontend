@@ -27,7 +27,6 @@ import {
 } from 'react-icons/fi'
 
 // Components
-import Layout from '../components/layout/Layout'
 import Container from '../components/layout/Container'
 import StatsCard from '../components/ui/StatsCard'
 import DataCard from '../components/ui/DataCard'
@@ -55,25 +54,9 @@ const PropostasPage = () => {
     return matchesSearch && matchesStatus
   })
 
-  const headerRightContent = (
-    <Button
-      as={Link}
-      to="/dashboard/propostas/nova"
-      leftIcon={<Icon as={FiPlus} />}
-      variant="gradient"
-    >
-      Nova Proposta
-    </Button>
-  )
-
   return (
-    <Layout
-      headerTitle="Propostas"
-      showBackButton={true}
-      headerRightContent={headerRightContent}
-    >
-      <Container>
-        <VStack align="stretch" spacing={8}>
+    <Container>
+      <VStack align="stretch" spacing={8}>
           {/* Stats */}
           <Grid 
             templateColumns={{ 
@@ -240,9 +223,8 @@ const PropostasPage = () => {
               ))}
             </VStack>
           </DataCard>
-        </VStack>
-      </Container>
-    </Layout>
+      </VStack>
+    </Container>
   )
 }
 

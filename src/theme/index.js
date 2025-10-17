@@ -214,6 +214,30 @@ const components = {
           },
         },
       },
+      filled: {
+        field: {
+          bg: 'white',
+          color: 'gray.900',
+          borderColor: 'gray.300',
+          _hover: {
+            borderColor: 'gray.400',
+            bg: 'white',
+          },
+          _focus: {
+            borderColor: 'emerald.500',
+            boxShadow: '0 0 0 1px var(--chakra-colors-emerald-500)',
+            bg: 'white',
+            color: 'gray.900',
+          },
+          _active: {
+            bg: 'white',
+            color: 'gray.900',
+          },
+          _placeholder: {
+            color: 'gray.500',
+          },
+        },
+      },
     },
   },
 }

@@ -38,10 +38,20 @@ const CreateClientPage = () => {
     e.preventDefault()
     const formData = new FormData(e.target)
     
+    const phone = formData.get('phone')
+    const email = formData.get('email')
+    
+    // Validação: pelo menos telefone ou email deve ser fornecido
+    if (!phone && !email) {
+      // Como não temos toast no onboarding, vamos usar alert por enquanto
+      alert('Adicione pelo menos o telefone ou e-mail do cliente.')
+      return
+    }
+    
     const clientData = {
       name: formData.get('name'),
-      phone: formData.get('phone') || null,
-      email: formData.get('email') || null
+      phone: phone || null,
+      email: email || null
     }
 
     updateClientData(clientData)
@@ -114,7 +124,7 @@ const CreateClientPage = () => {
                     fontWeight="semibold"
                     color="gray.700"
                   >
-                    Telefone
+                    Telefone *
                   </Text>
                   <InputGroup size="lg">
                     <InputLeftElement pointerEvents="none">
@@ -128,6 +138,19 @@ const CreateClientPage = () => {
                       borderRadius="xl"
                       py={6}
                       fontSize="lg"
+                      required
+                      onChange={(e) => {
+                        let value = e.target.value.replace(/\D/g, '')
+                        if (value.length <= 11) {
+                          if (value.length <= 2) {
+                            e.target.value = value
+                          } else if (value.length <= 7) {
+                            e.target.value = `(${value.slice(0, 2)}) ${value.slice(2)}`
+                          } else {
+                            e.target.value = `(${value.slice(0, 2)}) ${value.slice(2, 7)}-${value.slice(7)}`
+                          }
+                        }
+                      }}
                     />
                   </InputGroup>
                 </VStack>
@@ -171,7 +194,7 @@ const CreateClientPage = () => {
               <Box>
                 <AlertTitle fontWeight="semibold">Dica profissional</AlertTitle>
                 <AlertDescription>
-                  Adicione pelo menos um contato para enviar a proposta.
+                  Adicione o Telefone do WhatsApp para enviar a proposta.
                 </AlertDescription>
               </Box>
             </Alert>

@@ -28,9 +28,9 @@ import {
   FiFileText,
   FiZap,
 } from 'react-icons/fi'
+import { useColorModeValue } from '@chakra-ui/react'
 
 // Components
-import Layout from '../components/layout/Layout'
 import Container from '../components/layout/Container'
 import StatsCard from '../components/ui/StatsCard'
 import DataCard from '../components/ui/DataCard'
@@ -50,25 +50,9 @@ const ClientesPage = () => {
       client.company.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  const headerRightContent = (
-    <Button
-      as={Link}
-      to="/dashboard/clientes/novo"
-      leftIcon={<Icon as={FiPlus} />}
-      variant="gradient"
-    >
-      Novo Cliente
-    </Button>
-  )
-
   return (
-    <Layout
-      headerTitle="Clientes"
-      showBackButton={true}
-      headerRightContent={headerRightContent}
-    >
-      <Container>
-        <VStack align="stretch" spacing={8}>
+    <Container>
+      <VStack align="stretch" spacing={8}>
           {/* Stats */}
           <Grid 
             templateColumns={{ 
@@ -127,13 +111,17 @@ const ClientesPage = () => {
                   w="full"
                   p={4}
                   border="1px"
-                  borderColor="gray.200"
+                  borderColor={useColorModeValue('gray.200', 'gray.700')}
                   borderRadius="lg"
-                  _hover={{ bg: 'gray.50' }}
+                  _hover={{ bg: useColorModeValue('gray.50', 'gray.700') }}
                   transition="background 0.2s"
                 >
-                  <Flex justify="space-between" align="center">
-                    <HStack spacing={4} flex="1">
+                  <Flex 
+                    direction={{ base: 'column', md: 'row' }} 
+                    justify="space-between" 
+                    align={{ base: 'start', md: 'center' }}
+                  >
+                    <HStack spacing={4} flex="1" mb={{ base: 4, md: 0 }}>
                       <Box
                         w={12}
                         h={12}
@@ -147,7 +135,7 @@ const ClientesPage = () => {
                       </Box>
                       
                       <Box flex="1">
-                        <HStack spacing={2} mb={1}>
+                        <HStack spacing={2} mb={1} wrap="wrap">
                           <Text fontWeight="semibold">{client.name}</Text>
                           <Badge colorScheme="gray" variant="subtle">
                             {client.proposalsCount} propostas
@@ -171,8 +159,12 @@ const ClientesPage = () => {
                       </Box>
                     </HStack>
 
-                    <HStack spacing={4}>
-                      <Box textAlign="right">
+                    <VStack 
+                      spacing={{ base: 3, md: 2 }} 
+                      align={{ base: 'start', md: 'end' }} 
+                      w={{ base: 'full', md: 'auto' }}
+                    >
+                      <Box textAlign={{ base: 'left', md: 'right' }}>
                         <Text fontWeight="semibold" color="primary.500">
                           R$ {client.totalValue.toLocaleString('pt-BR')}
                         </Text>
@@ -181,13 +173,14 @@ const ClientesPage = () => {
                         </Text>
                       </Box>
 
-                      <HStack spacing={2}>
+                      <HStack spacing={2} w={{ base: 'full', md: 'auto' }}>
                         <Button
                           as={Link}
                           to={`/dashboard/propostas/nova?client=${client.id}`}
                           variant="outline"
                           size="sm"
                           leftIcon={<Icon as={FiFileText} />}
+                          flex={{ base: 1, md: 'auto' }}
                         >
                           Nova Proposta
                         </Button>
@@ -216,15 +209,14 @@ const ClientesPage = () => {
                           </MenuList>
                         </Menu>
                       </HStack>
-                    </HStack>
+                    </VStack>
                   </Flex>
                 </Box>
               ))}
             </VStack>
           </DataCard>
-        </VStack>
-      </Container>
-    </Layout>
+      </VStack>
+    </Container>
   )
 }
 

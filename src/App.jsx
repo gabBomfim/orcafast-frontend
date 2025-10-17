@@ -9,10 +9,12 @@ import PropostasPage from './pages/PropostasPage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import InitialDashboardPage from './pages/InitialDashboardPage'
+import CreateClientPage from './pages/CreateClientPage'
+import CreateProposalPage from './pages/CreateProposalPage'
 
 // Onboarding pages
-import CreateClientPage from './pages/onboarding/CreateClientPage'
-import CreateProposalPage from './pages/onboarding/CreateProposalPage'
+import OnboardingCreateClientPage from './pages/onboarding/CreateClientPage'
+import OnboardingCreateProposalPage from './pages/onboarding/CreateProposalPage'
 import SendProposalPage from './pages/onboarding/SendProposalPage'
 
 // Contexts
@@ -31,8 +33,8 @@ function App() {
               <Route path="/" element={<HomePage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
-              <Route path="/onboarding/create-client" element={<CreateClientPage />} />
-              <Route path="/onboarding/create-proposal" element={<CreateProposalPage />} />
+              <Route path="/onboarding/create-client" element={<OnboardingCreateClientPage />} />
+              <Route path="/onboarding/create-proposal" element={<OnboardingCreateProposalPage />} />
               <Route path="/onboarding/send-proposal" element={<SendProposalPage />} />
 
               {/* Protected Routes */}
@@ -40,7 +42,9 @@ function App() {
                 <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/initial-dashboard" element={<InitialDashboardPage />} />
                 <Route path="/dashboard/clientes" element={<ClientesPage />} />
+                <Route path="/dashboard/clientes/novo" element={<CreateClientPage />} />
                 <Route path="/dashboard/propostas" element={<PropostasPage />} />
+                <Route path="/dashboard/propostas/nova" element={<CreateProposalPage />} />
               </Route>
             </Routes>
           </Router>

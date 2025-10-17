@@ -1,12 +1,12 @@
 import { Container as ChakraContainer } from '@chakra-ui/react'
 
-const Container = ({ children, ...props }) => {
+const Container = ({ children, maxW = "container.xl", ...props }) => {
   return (
     <ChakraContainer
-      maxW="container.xl"
+      maxW={maxW}
       mx="auto"
-      px={4}
-      py={8}
+      px={{ base: 4, md: 6, lg: 8 }}
+      py={{ base: 4, md: 6 }}
       {...props}
     >
       {children}

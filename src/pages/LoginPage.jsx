@@ -196,9 +196,45 @@ const LoginPage = () => {
                       size="lg"
                       borderRadius="md"
                       bg="white"
+                      color="gray.900"
                       borderColor="gray.300"
-                      _hover={{ borderColor: 'gray.400' }}
-                      _focus={{ borderColor: 'emerald.500', boxShadow: '0 0 0 1px var(--chakra-colors-emerald-500)' }}
+                      _hover={{ 
+                        borderColor: 'gray.400',
+                        bg: 'white'
+                      }}
+                      _focus={{ 
+                        borderColor: 'emerald.500', 
+                        boxShadow: '0 0 0 1px var(--chakra-colors-emerald-500)',
+                        bg: 'white',
+                        color: 'gray.900'
+                      }}
+                      _active={{
+                        bg: 'white',
+                        color: 'gray.900'
+                      }}
+                      _placeholder={{ color: 'gray.500' }}
+                      sx={{
+                        '&:-webkit-autofill': {
+                          WebkitBoxShadow: '0 0 0 1000px white inset !important',
+                          WebkitTextFillColor: '#1a202c !important',
+                          backgroundColor: 'white !important',
+                        },
+                        '&:-webkit-autofill:hover': {
+                          WebkitBoxShadow: '0 0 0 1000px white inset !important',
+                          WebkitTextFillColor: '#1a202c !important',
+                          backgroundColor: 'white !important',
+                        },
+                        '&:-webkit-autofill:focus': {
+                          WebkitBoxShadow: '0 0 0 1000px white inset !important',
+                          WebkitTextFillColor: '#1a202c !important',
+                          backgroundColor: 'white !important',
+                        },
+                        '&:-webkit-autofill:active': {
+                          WebkitBoxShadow: '0 0 0 1000px white inset !important',
+                          WebkitTextFillColor: '#1a202c !important',
+                          backgroundColor: 'white !important',
+                        }
+                      }}
                     />
                   </InputGroup>
                 </FormControl>
@@ -224,9 +260,45 @@ const LoginPage = () => {
                       placeholder="Digite sua senha"
                       borderRadius="md"
                       bg="white"
+                      color="gray.900"
                       borderColor="gray.300"
-                      _hover={{ borderColor: 'gray.400' }}
-                      _focus={{ borderColor: 'emerald.500', boxShadow: '0 0 0 1px var(--chakra-colors-emerald-500)' }}
+                      _hover={{ 
+                        borderColor: 'gray.400',
+                        bg: 'white'
+                      }}
+                      _focus={{ 
+                        borderColor: 'emerald.500', 
+                        boxShadow: '0 0 0 1px var(--chakra-colors-emerald-500)',
+                        bg: 'white',
+                        color: 'gray.900'
+                      }}
+                      _active={{
+                        bg: 'white',
+                        color: 'gray.900'
+                      }}
+                      _placeholder={{ color: 'gray.500' }}
+                      sx={{
+                        '&:-webkit-autofill': {
+                          WebkitBoxShadow: '0 0 0 1000px white inset !important',
+                          WebkitTextFillColor: '#1a202c !important',
+                          backgroundColor: 'white !important',
+                        },
+                        '&:-webkit-autofill:hover': {
+                          WebkitBoxShadow: '0 0 0 1000px white inset !important',
+                          WebkitTextFillColor: '#1a202c !important',
+                          backgroundColor: 'white !important',
+                        },
+                        '&:-webkit-autofill:focus': {
+                          WebkitBoxShadow: '0 0 0 1000px white inset !important',
+                          WebkitTextFillColor: '#1a202c !important',
+                          backgroundColor: 'white !important',
+                        },
+                        '&:-webkit-autofill:active': {
+                          WebkitBoxShadow: '0 0 0 1000px white inset !important',
+                          WebkitTextFillColor: '#1a202c !important',
+                          backgroundColor: 'white !important',
+                        }
+                      }}
                     />
                     <InputRightElement>
                       <Button

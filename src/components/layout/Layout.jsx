@@ -27,24 +27,20 @@ const Layout = ({
         },
       }}
     >
-      {/* Header ocupa 100% da largura */}
       <Header 
         title={headerTitle}
         showBackButton={showBackButton}
         rightContent={headerRightContent}
       />
       
-      {/* Sidebar inicia abaixo do header */}
-      <Box position="relative" display={{ base: 'none', lg: 'block' }}>
-        <Sidebar />
-      </Box>
+      <Sidebar />
       
-      {/* Conteúdo principal */}
       <Box 
-        ml={{ base: 0, lg: isCollapsed ? '60px' : '280px' }}
-        transition="margin-left 0.3s ease"
-        minH="calc(100vh - 73px)"
-        pt={4}
+        as="main"
+        ml={{ base: 0, lg: isCollapsed ? '80px' : '280px' }}
+        pt="73px"
+        transition="margin-left 0.2s ease-in-out"
+        p={{ base: 4, md: 6 }}
       >
         {children}
       </Box>

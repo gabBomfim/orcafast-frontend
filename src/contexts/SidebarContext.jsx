@@ -1,37 +1,42 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useState, useEffect } from 'react'
+import { useMediaQuery } from '@chakra-ui/react'
 
 const SidebarContext = createContext()
 
-export const useSidebar = () => {
-  const context = useContext(SidebarContext)
-  if (!context) {
-    throw new Error('useSidebar must be used within a SidebarProvider')
-  }
-  return context
-}
-
 export const SidebarProvider = ({ children }) => {
-  const [isOpen, setIsOpen] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [isMobile] = useMediaQuery('(max-width: 768px)')
 
-  const toggleSidebar = () => setIsOpen(!isOpen)
-  const closeSidebar = () => setIsOpen(false)
-  const openSidebar = () => setIsOpen(true)
+  useEffect(() => {
+    if (isMobile) {
+      setIsCollapsed(false)
+    }
+  }, [isMobile])
 
-  const toggleCollapse = () => setIsCollapsed(!isCollapsed)
+  const toggleCollapse = () => {
+    if (!isMobile) {
+      setIsCollapsed(!isCollapsed)
+    }
+  }
+
+  const openSidebar = () => setIsSidebarOpen(true)
+  const closeSidebar = () => setIsSidebarOpen(false)
+
+  const value = {
+    isCollapsed,
+    toggleCollapse,
+    isSidebarOpen,
+    openSidebar,
+    closeSidebar,
+    isMobile,
+  }
 
   return (
-    <SidebarContext.Provider
-      value={{
-        isOpen,
-        isCollapsed,
-        toggleSidebar,
-        closeSidebar,
-        openSidebar,
-        toggleCollapse,
-      }}
-    >
+    <SidebarContext.Provider value={value}>
       {children}
     </SidebarContext.Provider>
   )
 }
+
+export const useSidebar = () => useContext(SidebarContext)
