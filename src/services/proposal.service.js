@@ -23,5 +23,9 @@ export const proposalService = {
 
   send(id, data) {
     return api.post(`proposals/${id}/send`, data)
+  },
+
+  downloadPDF(id) {
+    return api.get(`proposals/${id}/download`, { responseType: 'blob' })
   }
 }

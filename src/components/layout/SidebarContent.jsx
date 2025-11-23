@@ -143,6 +143,7 @@ const SidebarContent = ({ isCollapsed = false, onItemClick = () => {} }) => {
         {/* Upgrade Pro Card */}
         <Collapse in={!isCollapsed}>
           <Box
+          mt={1}
             bg="transparent"
             border="1px"
             borderColor={upgradeBorderColor}

@@ -46,6 +46,7 @@ const CreateProposalPage = () => {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [discount, setDiscount] = useState(0)
+  const [validUntil, setValidUntil] = useState('')
   const [items, setItems] = useState([
     { id: 1, desc: '', qtd: 1, value: 0 },
   ])
@@ -230,6 +231,17 @@ const CreateProposalPage = () => {
                       onChange={(e) => setDescription(e.target.value)}
                     />
                   </VStack>
+                </VStack>
+
+                <VStack spacing={6} w="full" align="start">
+                  <Heading as="h3" size="md" color="gray.800">
+                  Válida até
+                  </Heading>
+                  <Input
+                    type="date"
+                    value={validUntil}
+                    onChange={(e) => setValidUntil(e.target.value)}
+                  />
                 </VStack>
 
                 <VStack spacing={6} w="full" align="start">

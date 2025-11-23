@@ -20,6 +20,8 @@ import {
   Flex,
   useToast,
   useColorModeValue,
+  Spinner,
+  Center,
 } from '@chakra-ui/react'
 import {
   FiUser,
@@ -29,29 +31,87 @@ import {
   FiInfo,
   FiBriefcase,
 } from 'react-icons/fi'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import Container from '../components/layout/Container'
 import { clientService } from '../services'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 const CreateClientPage = () => {
   const navigate = useNavigate()
   const toast = useToast()
+  const [searchParams] = useSearchParams()
+  const editId = searchParams.get('edit')
+  const isEditMode = !!editId
   const [isLoading, setIsLoading] = useState(false)
+  const [isLoadingData, setIsLoadingData] = useState(isEditMode)
+  const fetching = useRef(false)
   
   const bgColor = useColorModeValue('white', 'gray.800')
   const borderColor = useColorModeValue('gray.200', 'gray.700')
   const textColor = useColorModeValue('gray.900', 'white')
   const subTextColor = useColorModeValue('gray.600', 'gray.300')
 
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    company: '',
+  })
+
+  useEffect(() => {
+    if (!isEditMode || fetching.current) return
+    fetching.current = true
+
+    const loadClient = async () => {
+      try {
+        const { data } = await clientService.get(editId)
+        let phone = data.phone || ''
+        if (phone) {
+          const digits = phone.replace(/\D/g, '')
+          if (digits.length <= 2) {
+            phone = digits
+          } else if (digits.length <= 7) {
+            phone = `(${digits.slice(0, 2)}) ${digits.slice(2)}`
+          } else {
+            phone = `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`
+          }
+        }
+        setFormData({
+          name: data.name || '',
+          email: data.email || '',
+          phone,
+          company: data.company || '',
+        })
+      } catch (error) {
+        toast({
+          title: 'Erro ao carregar cliente',
+          description: error.response?.data?.message || 'Não foi possível carregar os dados do cliente',
+          status: 'error',
+          duration: 4000,
+          isClosable: true,
+        })
+        navigate('/dashboard/clientes')
+      } finally {
+        setIsLoadingData(false)
+      }
+    }
+
+    loadClient()
+  }, [editId, isEditMode, navigate, toast])
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsLoading(true)
     
-    const formData = new FormData(e.target)
+    const formDataObj = new FormData(e.target)
     
-    const phone = formData.get('phone')
-    const email = formData.get('email')
+    let phone = formDataObj.get('phone')
+    const email = formDataObj.get('email')
+    
+    // Remove formatação do telefone antes de enviar
+    if (phone) {
+      phone = phone.replace(/\D/g, '')
+    }
     
     // Validação: pelo menos telefone ou email deve ser fornecido
     if (!phone && !email) {
@@ -67,22 +127,32 @@ const CreateClientPage = () => {
     }
     
     const clientData = {
-      name: formData.get('name'),
+      name: formDataObj.get('name'),
       phone: phone || null,
       email: email || null,
-      company: formData.get('company') || null,
+      company: formDataObj.get('company') || null,
     }
 
     try {
-      await clientService.create(clientData)
-      
-      toast({
-        title: 'Cliente cadastrado!',
-        description: 'O cliente foi cadastrado com sucesso.',
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      })
+      if (isEditMode) {
+        await clientService.update(editId, clientData)
+        toast({
+          title: 'Cliente atualizado!',
+          description: 'O cliente foi atualizado com sucesso.',
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        })
+      } else {
+        await clientService.create(clientData)
+        toast({
+          title: 'Cliente cadastrado!',
+          description: 'O cliente foi cadastrado com sucesso.',
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        })
+      }
 
       navigate('/dashboard/clientes')
     } catch (error) {
@@ -121,15 +191,20 @@ const CreateClientPage = () => {
             <Icon as={FiUser} w={10} h={10} color="emerald.600" />
           </Flex>
           <Heading as="h1" size="xl" fontWeight="bold" color={textColor} mb={4}>
-            Cadastrar cliente
+            {isEditMode ? 'Editar cliente' : 'Cadastrar cliente'}
           </Heading>
           <Text fontSize="lg" color={subTextColor} lineHeight="relaxed">
-            Cadastre um novo cliente para suas propostas
+            {isEditMode ? 'Atualize os dados do cliente' : 'Cadastre um novo cliente para suas propostas'}
           </Text>
         </CardHeader>
 
         <CardBody>
-          <VStack as="form" spacing={8} w="full" onSubmit={handleSubmit}>
+          {isLoadingData ? (
+            <Center py={12}>
+              <Spinner size="lg" color="emerald.500" />
+            </Center>
+          ) : (
+            <VStack as="form" spacing={8} w="full" onSubmit={handleSubmit}>
             <VStack spacing={6} w="full">
               <VStack align="start" spacing={2} w="full">
                 <Text
@@ -152,6 +227,8 @@ const CreateClientPage = () => {
                     borderRadius="xl"
                     py={6}
                     fontSize="lg"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     required
                   />
                 </InputGroup>
@@ -178,6 +255,8 @@ const CreateClientPage = () => {
                     borderRadius="xl"
                     py={6}
                     fontSize="lg"
+                    value={formData.company}
+                    onChange={(e) => setFormData({ ...formData, company: e.target.value })}
                   />
                 </InputGroup>
               </VStack>
@@ -204,19 +283,22 @@ const CreateClientPage = () => {
                       borderRadius="xl"
                       py={6}
                       fontSize="lg"
-                      required
+                      value={formData.phone}
                       onChange={(e) => {
                         let value = e.target.value.replace(/\D/g, '')
+                        let formatted = value
                         if (value.length <= 11) {
                           if (value.length <= 2) {
-                            e.target.value = value
+                            formatted = value
                           } else if (value.length <= 7) {
-                            e.target.value = `(${value.slice(0, 2)}) ${value.slice(2)}`
+                            formatted = `(${value.slice(0, 2)}) ${value.slice(2)}`
                           } else {
-                            e.target.value = `(${value.slice(0, 2)}) ${value.slice(2, 7)}-${value.slice(7)}`
+                            formatted = `(${value.slice(0, 2)}) ${value.slice(2, 7)}-${value.slice(7)}`
                           }
                         }
+                        setFormData({ ...formData, phone: formatted })
                       }}
+                      required
                     />
                   </InputGroup>
                 </VStack>
@@ -242,6 +324,8 @@ const CreateClientPage = () => {
                       borderRadius="xl"
                       py={6}
                       fontSize="lg"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     />
                   </InputGroup>
                 </VStack>
@@ -285,10 +369,11 @@ const CreateClientPage = () => {
                 isLoading={isLoading}
                 loadingText="Salvando..."
               >
-                Salvar Cliente
+                {isEditMode ? 'Atualizar Cliente' : 'Salvar Cliente'}
               </Button>
             </HStack>
           </VStack>
+          )}
         </CardBody>
       </Card>
     </Container>

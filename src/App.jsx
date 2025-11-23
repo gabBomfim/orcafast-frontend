@@ -11,6 +11,7 @@ import RegisterPage from './pages/RegisterPage'
 import InitialDashboardPage from './pages/InitialDashboardPage'
 import CreateClientPage from './pages/CreateClientPage'
 import CreateProposalPage from './pages/CreateProposalPage'
+import ProposalSuccessPage from './pages/ProposalSuccessPage'
 
 // Onboarding pages
 import OnboardingCreateClientPage from './pages/onboarding/CreateClientPage'
@@ -45,6 +46,7 @@ function App() {
                 <Route path="/dashboard/clientes/novo" element={<CreateClientPage />} />
                 <Route path="/dashboard/propostas" element={<PropostasPage />} />
                 <Route path="/dashboard/propostas/nova" element={<CreateProposalPage />} />
+                <Route path="/dashboard/propostas/sucesso" element={<ProposalSuccessPage />} />
               </Route>
             </Routes>
           </Router>

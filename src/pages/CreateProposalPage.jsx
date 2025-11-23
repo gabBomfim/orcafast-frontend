@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   Box,
   Button,
@@ -17,13 +17,15 @@ import {
   IconButton,
   SimpleGrid,
   useToast,
-  Select,
+  Select as ChakraSelect,
   FormControl,
   FormLabel,
   Spinner,
   Flex,
   useColorModeValue,
+  Center,
 } from '@chakra-ui/react'
+import ReactSelect from 'react-select'
 import {
   FiFileText,
   FiArrowRight,
@@ -44,16 +46,68 @@ const CreateProposalPage = () => {
   const navigate = useNavigate()
   const toast = useToast()
   const [searchParams] = useSearchParams()
+  const editId = searchParams.get('edit')
+  const isEditMode = !!editId
   const [isLoading, setIsLoading] = useState(false)
   const [isLoadingAI, setIsLoadingAI] = useState(false)
+  const [isLoadingData, setIsLoadingData] = useState(isEditMode)
   const [clients, setClients] = useState([])
   const [loadingClients, setLoadingClients] = useState(true)
+  const fetching = useRef(false)
   
   const bgColor = useColorModeValue('white', 'gray.800')
   const borderColor = useColorModeValue('gray.200', 'gray.700')
   const textColor = useColorModeValue('gray.900', 'white')
   const subTextColor = useColorModeValue('gray.600', 'gray.300')
   const itemBgColor = useColorModeValue('gray.50', 'gray.700')
+
+  // Estilos customizados para o React Select
+  const customSelectStyles = {
+    control: (provided, state) => ({
+      ...provided,
+      backgroundColor: bgColor,
+      borderColor: state.isFocused ? '#10B981' : borderColor, // emerald.500
+      borderRadius: '0.75rem', // xl
+      padding: '0.3rem',
+      boxShadow: state.isFocused ? '0 0 0 1px #10B981' : 'none',
+      '&:hover': {
+        borderColor: state.isFocused ? '#10B981' : '#A0AEC0', // gray.400
+      },
+    }),
+    menu: (provided) => ({
+      ...provided,
+      backgroundColor: bgColor,
+      borderRadius: '0.75rem',
+      zIndex: 10,
+      border: `1px solid ${borderColor}`,
+      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+    }),
+    option: (provided, state) => ({
+      ...provided,
+      backgroundColor: state.isSelected 
+        ? '#10B981' // emerald.500
+        : state.isFocused 
+          ? '#ECFDF5' // emerald.50
+          : 'transparent',
+      color: state.isSelected ? 'white' : textColor,
+      cursor: 'pointer',
+      '&:active': {
+        backgroundColor: '#10B981',
+      },
+    }),
+    input: (provided) => ({
+      ...provided,
+      color: textColor,
+    }),
+    singleValue: (provided) => ({
+      ...provided,
+      color: textColor,
+    }),
+    placeholder: (provided) => ({
+      ...provided,
+      color: '#A0AEC0', // gray.400
+    }),
+  }
 
   const [formData, setFormData] = useState({
     clientId: searchParams.get('client') || '',
@@ -71,10 +125,52 @@ const CreateProposalPage = () => {
     loadClients()
   }, [])
 
+  useEffect(() => {
+    if (!isEditMode || fetching.current) return
+    fetching.current = true
+
+    const loadProposal = async () => {
+      try {
+        const { data } = await proposalService.get(editId)
+        setFormData({
+          clientId: String(data.client_id || data.clientId || ''),
+          title: data.title || '',
+          description: data.description || '',
+          discount: parseFloat(data.discount || 0),
+          validUntil: data.valid_until ? new Date(data.valid_until).toISOString().split('T')[0] : '',
+        })
+        
+        if (data.items && data.items.length > 0) {
+          setItems(data.items.map((item, index) => ({
+            id: item.id || index + 1,
+            desc: item.description || '',
+            qtd: item.quantity || 1,
+            value: parseFloat(item.unit_price || item.unitPrice || 0),
+          })))
+        }
+      } catch (error) {
+        toast({
+          title: 'Erro ao carregar proposta',
+          description: error.response?.data?.message || 'Não foi possível carregar os dados da proposta',
+          status: 'error',
+          duration: 4000,
+          isClosable: true,
+        })
+        navigate('/dashboard/propostas')
+      } finally {
+        setIsLoadingData(false)
+      }
+    }
+
+    loadProposal()
+  }, [editId, isEditMode, navigate, toast])
+
   const loadClients = async () => {
     try {
       const response = await clientService.list()
-      setClients(response.data)
+      // Extrai o array de clientes da resposta paginada
+      const clientsData = response.data.data || response.data
+      setClients(Array.isArray(clientsData) ? clientsData : [])
     } catch (error) {
       toast({
         title: 'Erro ao carregar clientes',
@@ -83,6 +179,7 @@ const CreateProposalPage = () => {
         duration: 3000,
         isClosable: true,
       })
+      setClients([])
     } finally {
       setLoadingClients(false)
     }
@@ -172,7 +269,17 @@ const CreateProposalPage = () => {
   const discountAmount = (subtotal * (formData.discount / 100))
   const total = subtotal - discountAmount
 
-  const selectedClient = clients.find(c => c.id === parseInt(formData.clientId))
+  const selectedClient = Array.isArray(clients) 
+    ? clients.find(c => c.id === parseInt(formData.clientId))
+    : null
+
+  const clientOptions = Array.isArray(clients) 
+    ? clients.map(client => ({
+        value: client.id,
+        label: `${client.name} ${client.company ? `- ${client.company}` : ''}`,
+        original: client
+      }))
+    : []
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -192,17 +299,26 @@ const CreateProposalPage = () => {
         }))
       }
 
-      await proposalService.create(dataToSend)
-      
-      toast({
-        title: 'Proposta criada!',
-        description: 'A proposta foi criada com sucesso.',
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      })
+      let response
+      if (isEditMode) {
+        response = await proposalService.update(editId, dataToSend)
+      } else {
+        response = await proposalService.create(dataToSend)
+      }
 
-      navigate('/dashboard/propostas')
+      // Navega para página de sucesso com os dados da proposta
+      navigate('/dashboard/propostas/sucesso', {
+        state: {
+          proposalId: response.data.id || editId,
+          proposalData: {
+            clientName: selectedClient?.name || 'Cliente',
+            clientPhone: selectedClient?.phone || '',
+            title: formData.title,
+            totalValue: total,
+          },
+          isEdit: isEditMode,
+        },
+      })
     } catch (error) {
       const message = error.response?.data?.message || 'Erro ao criar proposta'
       toast({
@@ -233,13 +349,18 @@ const CreateProposalPage = () => {
               <HStack spacing={4}>
                 <Icon as={FiFileText} w={6} h={6} color="emerald.600" />
                 <Heading as="h2" size="lg" fontWeight="bold" color={textColor}>
-                  Criar proposta
+                  {isEditMode ? 'Editar proposta' : 'Criar proposta'}
                 </Heading>
               </HStack>
             </CardHeader>
 
             <CardBody>
-              <VStack spacing={8} w="full">
+              {isLoadingData ? (
+                <Center py={12}>
+                  <Spinner size="lg" color="emerald.500" />
+                </Center>
+              ) : (
+                <VStack spacing={8} w="full">
                 <VStack spacing={6} w="full" align="start">
                   <FormControl isRequired>
                     <FormLabel
@@ -249,27 +370,20 @@ const CreateProposalPage = () => {
                     >
                       Cliente
                     </FormLabel>
-                    <InputGroup>
-                      <InputLeftElement pointerEvents="none">
-                        <Icon as={FiUser} color="gray.400" />
-                      </InputLeftElement>
-                      <Select
-                        name="clientId"
-                        value={formData.clientId}
-                        onChange={(e) => setFormData({ ...formData, clientId: e.target.value })}
-                        placeholder="Selecione um cliente"
-                        size="lg"
-                        pl={10}
-                        isDisabled={loadingClients}
-                        borderRadius="xl"
-                      >
-                        {clients.map((client) => (
-                          <option key={client.id} value={client.id}>
-                            {client.name} {client.company && `- ${client.company}`}
-                          </option>
-                        ))}
-                      </Select>
-                    </InputGroup>
+                    <ReactSelect
+                      name="clientId"
+                      value={clientOptions.find(option => option.value === parseInt(formData.clientId)) || null}
+                      onChange={(option) => setFormData({ ...formData, clientId: option ? option.value : '' })}
+                      options={clientOptions}
+                      placeholder={loadingClients ? 'Carregando clientes...' : 'Selecione ou busque um cliente...'}
+                      isDisabled={loadingClients}
+                      isClearable
+                      isSearchable
+                      isLoading={loadingClients}
+                      styles={customSelectStyles}
+                      noOptionsMessage={() => 'Nenhum cliente encontrado'}
+                      loadingMessage={() => 'Carregando...'}
+                    />
                   </FormControl>
 
                   <VStack align="start" spacing={2} w="full">
@@ -476,10 +590,11 @@ const CreateProposalPage = () => {
                     isLoading={isLoading}
                     loadingText="Salvando..."
                   >
-                    Salvar Proposta
+                    {isEditMode ? 'Atualizar Proposta' : 'Salvar Proposta'}
                   </Button>
                 </HStack>
               </VStack>
+              )}
             </CardBody>
           </Card>
         </VStack>
