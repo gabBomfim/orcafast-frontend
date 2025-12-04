@@ -2,9 +2,6 @@ import { useState, useEffect, useRef } from 'react'
 import {
   Box,
   Button,
-  Card,
-  CardBody,
-  CardHeader,
   Heading,
   HStack,
   Icon,
@@ -17,29 +14,26 @@ import {
   IconButton,
   SimpleGrid,
   useToast,
-  Select as ChakraSelect,
   FormControl,
   FormLabel,
   Spinner,
   Flex,
-  useColorModeValue,
   Center,
 } from '@chakra-ui/react'
 import ReactSelect from 'react-select'
 import {
   FiFileText,
-  FiArrowRight,
+  FiChevronRight,
+  FiChevronLeft,
   FiPlus,
   FiTrash2,
   FiDollarSign,
   FiEye,
   FiPercent,
-  FiUser,
   FiCalendar,
 } from 'react-icons/fi'
 import { WiStars } from 'react-icons/wi'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import Container from '../components/layout/Container'
 import { proposalService, clientService } from '../services'
 
 const CreateProposalPage = () => {
@@ -54,32 +48,27 @@ const CreateProposalPage = () => {
   const [clients, setClients] = useState([])
   const [loadingClients, setLoadingClients] = useState(true)
   const fetching = useRef(false)
-  
-  const bgColor = useColorModeValue('white', 'gray.800')
-  const borderColor = useColorModeValue('gray.200', 'gray.700')
-  const textColor = useColorModeValue('gray.900', 'white')
-  const subTextColor = useColorModeValue('gray.600', 'gray.300')
-  const itemBgColor = useColorModeValue('gray.50', 'gray.700')
 
   // Estilos customizados para o React Select
   const customSelectStyles = {
     control: (provided, state) => ({
       ...provided,
-      backgroundColor: bgColor,
-      borderColor: state.isFocused ? '#10B981' : borderColor, // emerald.500
+      backgroundColor: '#F3F4F6', // gray.100
+      borderColor: 'transparent',
       borderRadius: '0.75rem', // xl
       padding: '0.3rem',
-      boxShadow: state.isFocused ? '0 0 0 1px #10B981' : 'none',
+      minHeight: '48px',
+      boxShadow: state.isFocused ? '0 0 0 2px #10B981' : 'none',
       '&:hover': {
-        borderColor: state.isFocused ? '#10B981' : '#A0AEC0', // gray.400
+        backgroundColor: '#F3F4F6',
       },
     }),
     menu: (provided) => ({
       ...provided,
-      backgroundColor: bgColor,
+      backgroundColor: 'white',
       borderRadius: '0.75rem',
       zIndex: 10,
-      border: `1px solid ${borderColor}`,
+      border: '1px solid #E5E7EB',
       boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
     }),
     option: (provided, state) => ({
@@ -89,7 +78,7 @@ const CreateProposalPage = () => {
         : state.isFocused 
           ? '#ECFDF5' // emerald.50
           : 'transparent',
-      color: state.isSelected ? 'white' : textColor,
+      color: state.isSelected ? 'white' : '#111827', // gray.900
       cursor: 'pointer',
       '&:active': {
         backgroundColor: '#10B981',
@@ -97,15 +86,15 @@ const CreateProposalPage = () => {
     }),
     input: (provided) => ({
       ...provided,
-      color: textColor,
+      color: '#111827', // gray.900
     }),
     singleValue: (provided) => ({
       ...provided,
-      color: textColor,
+      color: '#111827', // gray.900
     }),
     placeholder: (provided) => ({
       ...provided,
-      color: '#A0AEC0', // gray.400
+      color: '#9CA3AF', // gray.400
     }),
   }
 
@@ -334,41 +323,53 @@ const CreateProposalPage = () => {
   }
 
   return (
-    <Container maxW="container.xl">
-      <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={8}>
-        {/* Lado Esquerdo: Formulário */}
-        <VStack spacing={6} as="form" onSubmit={handleSubmit}>
-          <Card
-            shadow="xl"
-            border="0"
-            bg={bgColor}
-            borderRadius="2xl"
-            w="full"
-          >
-            <CardHeader>
-              <HStack spacing={4}>
-                <Icon as={FiFileText} w={6} h={6} color="emerald.600" />
-                <Heading as="h2" size="lg" fontWeight="bold" color={textColor}>
+    <Flex minH="100vh" bg="gray.50" direction="column" py={8}>
+      <Flex flex={1} justify="center" px={4}>
+        <Box w="full" maxW="container.xl">
+          <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={8}>
+            {/* Lado Esquerdo: Formulário */}
+            <Box
+              bg="white"
+              borderRadius="2xl"
+              p={8}
+              boxShadow="sm"
+            >
+              <VStack spacing={6} as="form" onSubmit={handleSubmit}>
+                {/* Icon and title */}
+                <VStack textAlign="center" w="full">
+                <Flex
+                  w={16}
+                  h={16}
+                  bg="emerald.50"
+                  borderRadius="2xl"
+                  align="center"
+                  justify="center"
+                  mx="auto"
+                  mb={4}
+                >
+                  <Icon as={FiFileText} w={8} h={8} color="emerald.500" />
+                </Flex>
+                <Heading as="h1" fontSize="2xl" fontWeight="bold" color="gray.900" mb={2}>
                   {isEditMode ? 'Editar orçamento' : 'Criar orçamento'}
                 </Heading>
-              </HStack>
-            </CardHeader>
+                <Text color="gray.600" mb={6}>
+                  {isEditMode ? 'Atualize os dados do orçamento' : 'Crie um novo orçamento para seu cliente'}
+                </Text>
+              </VStack>
 
-            <CardBody>
               {isLoadingData ? (
-                <Center py={12}>
+                <Center py={12} w="full">
                   <Spinner size="lg" color="emerald.500" />
                 </Center>
               ) : (
-                <VStack spacing={8} w="full">
-                <VStack spacing={6} w="full" align="start">
-                  <FormControl isRequired>
+                <VStack spacing={6} w="full">
+                  <FormControl isRequired w="full">
                     <FormLabel
-                      fontSize="lg"
-                      fontWeight="semibold"
-                      color={textColor}
+                      fontSize="sm"
+                      fontWeight="medium"
+                      color="gray.900"
                     >
-                      Cliente
+                      Cliente *
                     </FormLabel>
                     <ReactSelect
                       name="clientId"
@@ -386,11 +387,15 @@ const CreateProposalPage = () => {
                     />
                   </FormControl>
 
-                  <VStack align="start" spacing={2} w="full">
+                  <Box w="full">
                     <Text
-                      fontSize="lg"
-                      fontWeight="semibold"
-                      color={textColor}
+                      as="label"
+                      htmlFor="title"
+                      display="block"
+                      fontSize="sm"
+                      fontWeight="medium"
+                      color="gray.900"
+                      mb={2}
                     >
                       Título do orçamento *
                     </Text>
@@ -399,20 +404,35 @@ const CreateProposalPage = () => {
                       name="title"
                       type="text"
                       placeholder="Ex: Desenvolvimento de Website"
-                      size="lg"
+                      h={12}
+                      px={4}
+                      bg="gray.100"
+                      border="none"
                       borderRadius="xl"
-                      py={6}
+                      color="gray.900"
+                      _placeholder={{ color: 'gray.500' }}
+                      _hover={{ bg: 'gray.100' }}
+                      _focus={{ 
+                        bg: 'gray.100',
+                        boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
+                        outline: 'none'
+                      }}
+                      fontSize="sm"
                       value={formData.title}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                       required
                     />
-                  </VStack>
+                  </Box>
 
-                  <VStack align="start" spacing={2} w="full">
+                  <Box w="full">
                     <Text
-                      fontSize="lg"
-                      fontWeight="semibold"
-                      color={textColor}
+                      as="label"
+                      htmlFor="description"
+                      display="block"
+                      fontSize="sm"
+                      fontWeight="medium"
+                      color="gray.900"
+                      mb={2}
                     >
                       Descrição (opcional)
                     </Text>
@@ -420,269 +440,337 @@ const CreateProposalPage = () => {
                       id="description"
                       name="description"
                       placeholder="Descreva brevemente o projeto..."
-                      size="lg"
-                      borderRadius="xl"
                       minH="120px"
+                      px={4}
+                      py={3}
+                      bg="gray.100"
+                      border="none"
+                      borderRadius="xl"
+                      color="gray.900"
+                      _placeholder={{ color: 'gray.500' }}
+                      _hover={{ bg: 'gray.100' }}
+                      _focus={{ 
+                        bg: 'gray.100',
+                        boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
+                        outline: 'none'
+                      }}
+                      fontSize="sm"
                       value={formData.description}
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     />
-                  </VStack>
+                  </Box>
 
-                  <FormControl isRequired>
+                  <FormControl isRequired w="full">
                     <FormLabel
-                      fontSize="lg"
-                      fontWeight="semibold"
-                      color={textColor}
+                      fontSize="sm"
+                      fontWeight="medium"
+                      color="gray.900"
                     >
-                      Válida até
+                      Válida até *
                     </FormLabel>
-                    <InputGroup>
-                      <InputLeftElement pointerEvents="none">
-                        <Icon as={FiCalendar} color="gray.400" />
-                      </InputLeftElement>
-                      <Input
-                        name="validUntil"
-                        type="date"
-                        value={formData.validUntil}
-                        onChange={(e) => setFormData({ ...formData, validUntil: e.target.value })}
-                        size="lg"
-                        borderRadius="xl"
-                      />
-                    </InputGroup>
-                  </FormControl>
-                </VStack>
-
-                <VStack spacing={6} w="full" align="start">
-                  <Heading as="h3" size="md" color={textColor}>
-                    Itens do orçamento
-                  </Heading>
-                  {items.map((item, index) => (
-                    <VStack
-                      key={item.id}
-                      spacing={4}
-                      w="full"
-                      p={4}
-                      bg={itemBgColor}
+                    <Input
+                      name="validUntil"
+                      type="date"
+                      value={formData.validUntil}
+                      onChange={(e) => setFormData({ ...formData, validUntil: e.target.value })}
+                      h={12}
+                      px={4}
+                      bg="gray.100"
+                      border="none"
                       borderRadius="xl"
-                      borderWidth="1px"
-                      borderColor={borderColor}
-                    >
-                      <VStack align="start" spacing={2} w="full">
-                        <Text>Descrição do item</Text>
-                        <Input
-                          placeholder="Ex: Criação de logo"
-                          value={item.desc}
-                          onChange={(e) =>
-                            handleItemChange(item.id, 'desc', e.target.value)
-                          }
-                        />
-                      </VStack>
-                      <HStack w="full" spacing={4}>
-                        <VStack align="start" spacing={2} w="full">
-                          <Text>Quantidade</Text>
+                      color="gray.900"
+                      _hover={{ bg: 'gray.100' }}
+                      _focus={{ 
+                        bg: 'gray.100',
+                        boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
+                        outline: 'none'
+                      }}
+                    />
+                  </FormControl>
+
+                  <VStack spacing={4} w="full" align="start">
+                    <Heading as="h3" size="sm" color="gray.900">
+                      Itens do orçamento
+                    </Heading>
+                    {items.map((item, index) => (
+                      <VStack
+                        key={item.id}
+                        spacing={3}
+                        w="full"
+                        p={4}
+                        bg="white"
+                        borderRadius="xl"
+                        boxShadow="sm"
+                      >
+                        <Box w="full">
+                          <Text fontSize="sm" fontWeight="medium" color="gray.900" mb={2}>
+                            Descrição do item
+                          </Text>
                           <Input
-                            type="number"
-                            value={item.qtd}
+                            placeholder="Ex: Criação de logo"
+                            h={12}
+                            px={4}
+                            bg="gray.100"
+                            border="none"
+                            borderRadius="xl"
+                            color="gray.900"
+                            _placeholder={{ color: 'gray.500' }}
+                            _hover={{ bg: 'gray.100' }}
+                            _focus={{ 
+                              bg: 'gray.100',
+                              boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
+                              outline: 'none'
+                            }}
+                            fontSize="sm"
+                            value={item.desc}
                             onChange={(e) =>
-                              handleItemChange(item.id, 'qtd', e.target.value)
+                              handleItemChange(item.id, 'desc', e.target.value)
                             }
                           />
-                        </VStack>
-                        <VStack align="start" spacing={2} w="full">
-                          <Text>Valor (R$)</Text>
-                          <InputGroup>
-                            <InputLeftElement pointerEvents="none">
-                              <Icon as={FiDollarSign} color="gray.400" />
-                            </InputLeftElement>
+                        </Box>
+                        <HStack w="full" spacing={3}>
+                          <Box flex={1}>
+                            <Text fontSize="sm" fontWeight="medium" color="gray.900" mb={2}>
+                              Quantidade
+                            </Text>
+                            <Input
+                              type="number"
+                              h={12}
+                              px={4}
+                              bg="gray.100"
+                              border="none"
+                              borderRadius="xl"
+                              color="gray.900"
+                              _hover={{ bg: 'gray.100' }}
+                              _focus={{ 
+                                bg: 'gray.100',
+                                boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
+                                outline: 'none'
+                              }}
+                              value={item.qtd}
+                              onChange={(e) =>
+                                handleItemChange(item.id, 'qtd', e.target.value)
+                              }
+                            />
+                          </Box>
+                          <Box flex={1}>
+                            <Text fontSize="sm" fontWeight="medium" color="gray.900" mb={2}>
+                              Valor (R$)
+                            </Text>
                             <Input
                               type="number"
                               placeholder="1500.00"
                               step="0.01"
+                              h={12}
+                              px={4}
+                              bg="gray.100"
+                              border="none"
+                              borderRadius="xl"
+                              color="gray.900"
+                              _placeholder={{ color: 'gray.500' }}
+                              _hover={{ bg: 'gray.100' }}
+                              _focus={{ 
+                                bg: 'gray.100',
+                                boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
+                                outline: 'none'
+                              }}
+                              fontSize="sm"
                               value={item.value}
                               onChange={(e) =>
                                 handleItemChange(item.id, 'value', e.target.value)
                               }
                             />
-                          </InputGroup>
-                        </VStack>
-                      </HStack>
-                      <IconButton
-                        aria-label="Remover item"
-                        icon={<FiTrash2 />}
-                        variant="ghost"
-                        colorScheme="red"
-                        alignSelf="flex-end"
-                        onClick={() => handleRemoveItem(item.id)}
-                      />
-                    </VStack>
-                  ))}
-                  <Button
-                    leftIcon={<FiPlus />}
-                    variant="outline"
-                    colorScheme="emerald"
-                    onClick={handleAddItem}
-                  >
-                    Adicionar item
-                  </Button>
-                  
-                  {/* Botão IA - aparece quando há dados suficientes */}
-                  {(formData.title.trim() || formData.description.trim() || items.some(item => item.desc.trim())) && (
+                          </Box>
+                        </HStack>
+                        {items.length > 1 && (
+                          <IconButton
+                            aria-label="Remover item"
+                            icon={<FiTrash2 />}
+                            variant="ghost"
+                            colorScheme="red"
+                            size="sm"
+                            alignSelf="flex-end"
+                            onClick={() => handleRemoveItem(item.id)}
+                          />
+                        )}
+                      </VStack>
+                    ))}
                     <Button
-                      leftIcon={<Icon fontSize="24px" as={WiStars} />}
-                      colorScheme="purple"
-                      variant="outline"
-                      onClick={handleAISuggestion}
-                      isLoading={isLoadingAI}
-                      loadingText="Calculando..."
+                      leftIcon={<FiPlus />}
+                      variant="ghost"
+                      colorScheme="emerald"
+                      onClick={handleAddItem}
                       size="sm"
                     >
-                      {isLoadingAI ? 'Calculando...' : 'Sugerir preço com IA'}
+                      Adicionar item
                     </Button>
-                  )}
-                </VStack>
+                    
+                    {/* Botão IA - aparece quando há dados suficientes */}
+                    {(formData.title.trim() || formData.description.trim() || items.some(item => item.desc.trim())) && (
+                      <Button
+                        leftIcon={<Icon fontSize="24px" as={WiStars} />}
+                        colorScheme="purple"
+                        variant="outline"
+                        onClick={handleAISuggestion}
+                        isLoading={isLoadingAI}
+                        loadingText="Calculando..."
+                        size="sm"
+                      >
+                        {isLoadingAI ? 'Calculando...' : 'Sugerir preço com IA'}
+                      </Button>
+                    )}
+                  </VStack>
 
-                {/* Campo de Desconto */}
-                <FormControl>
-                  <FormLabel
-                    fontSize="lg"
-                    fontWeight="semibold"
-                    color={textColor}
-                  >
-                    Desconto (opcional)
-                  </FormLabel>
-                  <InputGroup>
-                    <InputLeftElement pointerEvents="none">
-                      <Icon as={FiPercent} color="gray.400" />
-                    </InputLeftElement>
+                  {/* Campo de Desconto */}
+                  <FormControl w="full">
+                    <FormLabel
+                      fontSize="sm"
+                      fontWeight="medium"
+                      color="gray.900"
+                    >
+                      Desconto (opcional)
+                    </FormLabel>
                     <Input
                       name="discount"
                       type="number"
                       min="0"
                       max="100"
-                      placeholder="0"
-                      size="lg"
+                      placeholder="0%"
+                      h={12}
+                      px={4}
+                      bg="gray.100"
+                      border="none"
                       borderRadius="xl"
+                      color="gray.900"
+                      _placeholder={{ color: 'gray.500' }}
+                      _hover={{ bg: 'gray.100' }}
+                      _focus={{ 
+                        bg: 'gray.100',
+                        boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
+                        outline: 'none'
+                      }}
                       value={formData.discount}
                       onChange={(e) => setFormData({ ...formData, discount: parseFloat(e.target.value) || 0 })}
                     />
-                  </InputGroup>
-                </FormControl>
+                  </FormControl>
 
-                <Box height="1px" bg={borderColor} />
-
-                <HStack w="full" pt={4}>
-                  <Button
-                    onClick={() => navigate('/dashboard/propostas')}
-                    size="lg"
-                    variant="ghost"
-                    flex={1}
-                    py={6}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button
-                    type="submit"
-                    size="lg"
-                    colorScheme="emerald"
-                    flex={1}
-                    py={6}
-                    rightIcon={<Icon as={FiArrowRight} />}
-                    isLoading={isLoading}
-                    loadingText="Salvando..."
-                  >
-                    {isEditMode ? 'Atualizar Orçamento' : 'Salvar Orçamento'}
-                  </Button>
-                </HStack>
-              </VStack>
+                  {/* Navigation */}
+                  <Flex align="center" justify="space-between" w="full" mt={8} pt={6} borderTop="1px" borderColor="gray.200">
+                    <Button
+                      onClick={() => navigate('/dashboard/propostas')}
+                      variant="ghost"
+                      leftIcon={<Icon as={FiChevronLeft} w={4} h={4} />}
+                      color="gray.600"
+                      _hover={{ color: 'gray.900' }}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      type="submit"
+                      h={12}
+                      px={8}
+                      bg="emerald.500"
+                      _hover={{ bg: 'emerald.600' }}
+                      color="white"
+                      fontWeight="semibold"
+                      fontSize="sm"
+                      borderRadius="xl"
+                      boxShadow="lg"
+                      rightIcon={<Icon as={FiChevronRight} w={4} h={4} />}
+                      isLoading={isLoading}
+                      loadingText="Salvando..."
+                    >
+                      {isEditMode ? 'Atualizar Orçamento' : 'Salvar Orçamento'}
+                    </Button>
+                  </Flex>
+                </VStack>
               )}
-            </CardBody>
-          </Card>
-        </VStack>
+              </VStack>
+            </Box>
 
-        {/* Lado Direito: Preview */}
-        <Box display={{ base: 'none', lg: 'block' }}>
-          <Card
-            shadow="xl"
-            border="0"
-            bg={bgColor}
-            borderRadius="2xl"
-            position="sticky"
-            top="100px"
-          >
-            <CardHeader>
-              <HStack justify="space-between">
-                <Heading size="md" color={textColor}>Preview do Orçamento</Heading>
-                <Icon as={FiEye} color="gray.400" />
-              </HStack>
-            </CardHeader>
-            <CardBody>
-              <VStack spacing={4} align="stretch">
-                {/* Cabeçalho da Proposta */}
-                <Box bg="emerald.50" p={4} borderRadius="lg" borderWidth="1px" borderColor="emerald.200">
-                  <Text fontSize="sm" color="emerald.700" fontWeight="semibold" mb={2}>
-                    ORÇAMENTO PARA:
-                  </Text>
-                  <VStack align="start" spacing={1}>
-                    <Text fontWeight="bold" color={textColor}>
-                      {selectedClient?.name || 'Selecione um cliente'}
-                    </Text>
-                    {selectedClient?.phone && (
-                      <Text fontSize="sm" color={subTextColor}>{selectedClient.phone}</Text>
-                    )}
-                    {selectedClient?.email && (
-                      <Text fontSize="sm" color={subTextColor}>{selectedClient.email}</Text>
-                    )}
-                  </VStack>
-                </Box>
+            {/* Lado Direito: Preview */}
+            <Box display={{ base: 'none', lg: 'block' }}>
+              <Box
+                bg="white"
+                borderRadius="2xl"
+                position="sticky"
+                top="100px"
+                p={6}
+                boxShadow="sm"
+              >
+                <HStack justify="space-between" mb={6}>
+                  <Heading size="md" color="gray.900">Preview do Orçamento</Heading>
+                  <Icon as={FiEye} color="gray.400" />
+                </HStack>
                 
-                <Heading size="lg" color={textColor}>{formData.title || 'Título do Orçamento'}</Heading>
-                <Text color={subTextColor}>
-                  {formData.description || 'Descrição do orçamento aparecerá aqui...'}
-                </Text>
-                <Box height="1px" bg={borderColor} />
-                {items.filter(item => item.desc.trim()).map((item) => (
-                  <HStack key={item.id} justify="space-between">
-                    <VStack align="start" spacing={0}>
-                      <Text fontWeight="medium" color={textColor}>{item.desc}</Text>
-                      <Text fontSize="sm" color={subTextColor}>
-                        {item.qtd}x R$ {parseFloat(item.value || 0).toFixed(2)}
-                      </Text>
-                    </VStack>
-                    <Text fontWeight="bold" color={textColor}>
-                      R$ {(parseFloat(item.value || 0) * parseInt(item.qtd || 1)).toFixed(2)}
+                <VStack spacing={4} align="stretch">
+                  {/* Cabeçalho da Proposta */}
+                  <Box bg="emerald.50" p={4} borderRadius="lg" borderWidth="1px" borderColor="emerald.200">
+                    <Text fontSize="sm" color="emerald.700" fontWeight="semibold" mb={2}>
+                      ORÇAMENTO PARA:
                     </Text>
-                  </HStack>
-                ))}
-                <Box height="1px" bg={borderColor} />
-                <VStack spacing={2} align="stretch">
-                  <HStack justify="space-between">
-                    <Text color={textColor}>Subtotal:</Text>
-                    <Text fontWeight="medium" color={textColor}>R$ {subtotal.toFixed(2)}</Text>
-                  </HStack>
-                  {formData.discount > 0 && (
-                    <HStack justify="space-between">
-                      <Text color={textColor}>Desconto ({formData.discount}%):</Text>
-                      <Text fontWeight="medium" color="red.500">
-                        - R$ {discountAmount.toFixed(2)}
+                    <VStack align="start" spacing={1}>
+                      <Text fontWeight="bold" color="gray.900">
+                        {selectedClient?.name || 'Selecione um cliente'}
+                      </Text>
+                      {selectedClient?.phone && (
+                        <Text fontSize="sm" color="gray.600">{selectedClient.phone}</Text>
+                      )}
+                      {selectedClient?.email && (
+                        <Text fontSize="sm" color="gray.600">{selectedClient.email}</Text>
+                      )}
+                    </VStack>
+                  </Box>
+                  
+                  <Heading size="lg" color="gray.900">{formData.title || 'Título do Orçamento'}</Heading>
+                  <Text color="gray.600">
+                    {formData.description || 'Descrição do orçamento aparecerá aqui...'}
+                  </Text>
+                  <Box height="1px" bg="gray.200" />
+                  {items.filter(item => item.desc.trim()).map((item) => (
+                    <HStack key={item.id} justify="space-between">
+                      <VStack align="start" spacing={0}>
+                        <Text fontWeight="medium" color="gray.900">{item.desc}</Text>
+                        <Text fontSize="sm" color="gray.600">
+                          {item.qtd}x R$ {parseFloat(item.value || 0).toFixed(2)}
+                        </Text>
+                      </VStack>
+                      <Text fontWeight="bold" color="gray.900">
+                        R$ {(parseFloat(item.value || 0) * parseInt(item.qtd || 1)).toFixed(2)}
                       </Text>
                     </HStack>
-                  )}
-                  <Box height="1px" bg={borderColor} />
-                  <HStack justify="space-between">
-                    <Text fontSize="xl" fontWeight="bold" color={textColor}>
-                      Total
-                    </Text>
-                    <Text fontSize="xl" fontWeight="bold" color="emerald.600">
-                      R$ {total.toFixed(2)}
-                    </Text>
-                  </HStack>
+                  ))}
+                  <Box height="1px" bg="gray.200" />
+                  <VStack spacing={2} align="stretch">
+                    <HStack justify="space-between">
+                      <Text color="gray.900">Subtotal:</Text>
+                      <Text fontWeight="medium" color="gray.900">R$ {subtotal.toFixed(2)}</Text>
+                    </HStack>
+                    {formData.discount > 0 && (
+                      <HStack justify="space-between">
+                        <Text color="gray.900">Desconto ({formData.discount}%):</Text>
+                        <Text fontWeight="medium" color="red.500">
+                          - R$ {discountAmount.toFixed(2)}
+                        </Text>
+                      </HStack>
+                    )}
+                    <Box height="1px" bg="gray.200" />
+                    <HStack justify="space-between">
+                      <Text fontSize="xl" fontWeight="bold" color="gray.900">
+                        Total
+                      </Text>
+                      <Text fontSize="xl" fontWeight="bold" color="emerald.600">
+                        R$ {total.toFixed(2)}
+                      </Text>
+                    </HStack>
+                  </VStack>
                 </VStack>
-              </VStack>
-            </CardBody>
-          </Card>
+              </Box>
+            </Box>
+          </SimpleGrid>
         </Box>
-      </SimpleGrid>
-    </Container>
+      </Flex>
+    </Flex>
   )
 }
 

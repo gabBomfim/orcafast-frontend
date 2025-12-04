@@ -23,6 +23,13 @@ import {
   AlertDialogHeader,
   AlertDialogContent,
   AlertDialogOverlay,
+  Input,
+  Select,
+  FormControl,
+  FormLabel,
+  InputGroup,
+  InputLeftElement,
+  Stack,
 } from '@chakra-ui/react'
 import { Link } from 'react-router-dom'
 import {
@@ -36,14 +43,15 @@ import {
   FiMessageSquare,
   FiFileText,
   FiZap,
+  FiSearch,
 } from 'react-icons/fi'
+import { FaWhatsapp } from 'react-icons/fa'
 import { useColorModeValue } from '@chakra-ui/react'
 
 // Components
 import Container from '../components/layout/Container'
 import StatsCard from '../components/ui/StatsCard'
 import DataCard from '../components/ui/DataCard'
-import SearchBar from '../components/ui/SearchBar'
 import Pagination from '../components/ui/Pagination'
 
 import { clientService } from '../services'
@@ -54,6 +62,11 @@ const ClientesPage = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
   const [selectedClient, setSelectedClient] = useState(null)
+  
+  // Date Filters
+  const [datePreset, setDatePreset] = useState('all')
+  const [dateRange, setDateRange] = useState({ start: '', end: '' })
+  
   const [pagination, setPagination] = useState({
     currentPage: 1,
     lastPage: 1,
@@ -67,7 +80,14 @@ const ClientesPage = () => {
     setIsLoading(true)
     setError(null)
     try {
-      const { data } = await clientService.list({ page })
+      const params = {
+        page,
+        search: searchTerm || undefined,
+        beginDate: dateRange.start || undefined,
+        endDate: dateRange.end || undefined
+      }
+
+      const { data } = await clientService.list(params)
       const normalizedClients = data.data.map((client) => ({
         ...client,
         proposalsCount: client.proposals ? client.proposals.length : 0,
@@ -88,11 +108,50 @@ const ClientesPage = () => {
     }
   }
 
+  // Debounce search
   useEffect(() => {
-    fetchClients()
+    const timer = setTimeout(() => {
+      fetchClients(1)
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [searchTerm])
+
+  // Date filters
+  useEffect(() => {
+    fetchClients(1)
+  }, [dateRange.start, dateRange.end])
+
+  // Initial load
+  useEffect(() => {
+    fetchClients(1)
   }, [])
 
-  const totalClients = clients.length
+  const handleDatePresetChange = (preset) => {
+    setDatePreset(preset)
+    const today = new Date()
+    let start = new Date()
+    let end = new Date()
+
+    if (preset === '7days') {
+      start.setDate(today.getDate() - 7)
+    } else if (preset === '30days') {
+      start.setDate(today.getDate() - 30)
+    } else if (preset === 'thisMonth') {
+      start.setDate(1)
+    } else if (preset === 'all') {
+      start = null
+      end = null
+    }
+
+    const formatDateInput = (d) => d ? d.toISOString().split('T')[0] : ''
+    
+    setDateRange({
+      start: start ? formatDateInput(start) : '',
+      end: end ? formatDateInput(end) : ''
+    })
+  }
+
+  const totalClients = pagination.total || clients.length
   const totalProposalsSent = clients.reduce(
     (total, client) => total + (client.proposalsCount || 0),
     0
@@ -102,13 +161,6 @@ const ClientesPage = () => {
     0
   )
   const averageTicket = totalClients ? Math.round(totalProposalValue / totalClients) : 0
-
-  const filteredClients = clients.filter(
-    (client) =>
-      `${client.name ?? ''} ${client.email ?? ''} ${client.company ?? ''}`
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase())
-  )
 
   const handleDelete = async () => {
     try {
@@ -137,6 +189,37 @@ const ClientesPage = () => {
   const handlePageChange = (page) => {
     fetchClients(page)
     window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const handleWhatsApp = (client) => {
+    if (!client.phone) {
+      toast({
+        title: 'Telefone não informado',
+        description: 'Este cliente não possui telefone cadastrado.',
+        status: 'warning',
+        duration: 3000,
+        isClosable: true,
+      })
+      return
+    }
+
+    // Remove todos os caracteres não numéricos do telefone
+    const phoneNumber = client.phone.replace(/\D/g, '')
+    
+    // Se o número não começar com 55 (código do Brasil), adiciona
+    const formattedNumber = phoneNumber.startsWith('55') ? phoneNumber : `55${phoneNumber}`
+    
+    // Abre o WhatsApp Web com o número formatado
+    const whatsappUrl = `https://web.whatsapp.com/send?phone=${formattedNumber}`
+    window.open(whatsappUrl, '_blank')
+    
+    toast({
+      title: 'Abrindo WhatsApp',
+      description: 'Selecione o contato no WhatsApp.',
+      status: 'success',
+      duration: 3000,
+      isClosable: true,
+    })
   }
 
   return (
@@ -179,18 +262,61 @@ const ClientesPage = () => {
             />
           </Grid>
 
-          {/* Search */}
-          <SearchBar
-            p={2}
-            placeholder="Buscar clientes por nome, email ou empresa..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+          {/* Filters */}
+          <DataCard title="Filtros e Busca">
+            <Stack direction={{ base: 'column', lg: 'row' }} spacing={4} align={{ lg: 'flex-end' }}>
+              <FormControl flex={2}>
+                <FormLabel>Buscar</FormLabel>
+                <InputGroup>
+                  <InputLeftElement pointerEvents="none">
+                    <Icon as={FiSearch} color="gray.400" />
+                  </InputLeftElement>
+                  <Input 
+                    placeholder="Buscar por nome, email ou empresa..." 
+                    value={searchTerm} 
+                    onChange={(e) => setSearchTerm(e.target.value)} 
+                  />
+                </InputGroup>
+              </FormControl>
+
+              <FormControl flex={1}>
+                <FormLabel>Período</FormLabel>
+                <Select value={datePreset} onChange={(e) => handleDatePresetChange(e.target.value)}>
+                  <option value="all">Todo o período</option>
+                  <option value="7days">Últimos 7 dias</option>
+                  <option value="30days">Últimos 30 dias</option>
+                  <option value="thisMonth">Este mês</option>
+                  <option value="custom">Personalizado</option>
+                </Select>
+              </FormControl>
+
+              {(datePreset === 'custom') && (
+                <>
+                  <FormControl w={{ base: 'full', lg: 'auto' }}>
+                    <FormLabel>De</FormLabel>
+                    <Input 
+                      type="date" 
+                      value={dateRange.start} 
+                      onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })} 
+                    />
+                  </FormControl>
+                  <FormControl w={{ base: 'full', lg: 'auto' }}>
+                    <FormLabel>Até</FormLabel>
+                    <Input 
+                      type="date" 
+                      value={dateRange.end} 
+                      onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })} 
+                    />
+                  </FormControl>
+                </>
+              )}
+            </Stack>
+          </DataCard>
 
           {/* Clients List */}
           <DataCard
             title="Seus Clientes"
-            subtitle={`${filteredClients.length} cliente${filteredClients.length !== 1 ? 's' : ''} encontrado${filteredClients.length !== 1 ? 's' : ''}`}
+            subtitle={`${pagination.total} cliente${pagination.total !== 1 ? 's' : ''} encontrado${pagination.total !== 1 ? 's' : ''}`}
           >
             {isLoading ? (
               <Center w="full" py={12}>
@@ -202,12 +328,12 @@ const ClientesPage = () => {
               </Box>
             ) : (
               <VStack spacing={4}>
-                {filteredClients.length === 0 ? (
+                {clients.length === 0 ? (
                   <Box w="full" textAlign="center" py={6} color="gray.500">
                     Nenhum cliente encontrado.
                   </Box>
                 ) : (
-                  filteredClients.map((client) => (
+                  clients.map((client) => (
                     <Box
                       key={client.id}
                       w="full"
@@ -303,7 +429,10 @@ const ClientesPage = () => {
                                 >
                                   Editar
                                 </MenuItem>
-                                <MenuItem icon={<Icon as={FiMessageSquare} />}>
+                                <MenuItem 
+                                  icon={<Icon as={FaWhatsapp} color="#25D366" />}
+                                  onClick={() => handleWhatsApp(client)}
+                                >
                                   WhatsApp
                                 </MenuItem>
                                 <MenuItem
