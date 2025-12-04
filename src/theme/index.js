@@ -242,19 +242,22 @@ const components = {
   },
 }
 
-// Configurações globais
+// Configurações globais - Dark mode removido
 const config = {
-  initialColorMode: 'dark',
+  initialColorMode: 'light',
   useSystemColorMode: false,
 }
 
-// Estilos globais com suporte a dark mode
+// Estilos globais
 const styles = {
-  global: (props) => ({
-    '*::placeholder': {
-      color: props.colorMode === 'dark' ? 'whiteAlpha.400' : 'gray.400',
+  global: {
+    body: {
+      bg: 'gray.50',
     },
-  }),
+    '*::placeholder': {
+      color: 'gray.400',
+    },
+  },
 }
 
 // Breakpoints responsivos

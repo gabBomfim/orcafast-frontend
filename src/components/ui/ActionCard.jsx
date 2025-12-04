@@ -3,7 +3,6 @@ import {
   VStack,
   Icon,
   Text,
-  useColorModeValue,
 } from '@chakra-ui/react'
 import { Link } from 'react-router-dom'
 
@@ -16,22 +15,15 @@ const ActionCard = ({
   onClick,
   ...props 
 }) => {
-  const bgColor = useColorModeValue('white', 'whiteAlpha.100')
-  const borderColor = useColorModeValue('gray.200', 'whiteAlpha.200')
-  const iconBgColor = useColorModeValue('gray.50', 'whiteAlpha.50')
-  const textColor = useColorModeValue('gray.800', 'white')
-  const subtitleColor = useColorModeValue('gray.500', 'whiteAlpha.700')
-  const iconColor = useColorModeValue('gray.600', 'whiteAlpha.800')
-  
   const isDashed = variant === 'dashed'
   
   const CardContent = (
     <Box
-      bg={bgColor}
+      bg="white"
       p={8}
       borderRadius="16px"
       border="2px"
-      borderColor={borderColor}
+      borderColor="gray.200"
       borderStyle={isDashed ? 'dashed' : 'solid'}
       boxShadow="0 1px 3px 0 rgba(0, 0, 0, 0.05)"
       cursor="pointer"
@@ -39,7 +31,7 @@ const ActionCard = ({
       _hover={{
         transform: 'translateY(-2px)',
         boxShadow: '0 12px 24px rgba(0, 217, 126, 0.1)',
-        borderColor: isDashed ? 'primary.500' : 'primary.200',
+        borderColor: isDashed ? 'emerald.500' : 'emerald.200',
       }}
       onClick={onClick}
       {...props}
@@ -48,9 +40,9 @@ const ActionCard = ({
         <Box
           w={14}
           h={14}
-          bg={isDashed ? 'linear-gradient(135deg, rgba(0, 217, 126, 0.1) 0%, rgba(0, 217, 126, 0.05) 100%)' : iconBgColor}
+          bg={isDashed ? 'linear-gradient(135deg, rgba(0, 217, 126, 0.1) 0%, rgba(0, 217, 126, 0.05) 100%)' : 'gray.50'}
           border={isDashed ? '1px solid' : 'none'}
-          borderColor={isDashed ? 'primary.200' : 'transparent'}
+          borderColor={isDashed ? 'emerald.200' : 'transparent'}
           borderRadius="14px"
           display="flex"
           alignItems="center"
@@ -65,20 +57,20 @@ const ActionCard = ({
           <Icon 
             as={icon} 
             boxSize={7} 
-            color={isDashed ? 'primary.500' : iconColor} 
+            color={isDashed ? 'emerald.500' : 'gray.600'} 
             strokeWidth={2}
           />
         </Box>
         <VStack spacing={1} textAlign="center">
           <Text 
             fontWeight="700" 
-            color={isDashed ? 'primary.500' : textColor}
+            color={isDashed ? 'emerald.500' : 'gray.800'}
             letterSpacing="-0.3px"
           >
             {title}
           </Text>
           {subtitle && (
-            <Text fontSize="sm" color={subtitleColor} fontWeight="500">
+            <Text fontSize="sm" color="gray.500" fontWeight="500">
               {subtitle}
             </Text>
           )}

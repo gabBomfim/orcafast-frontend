@@ -8,7 +8,6 @@ import {
   Button,
   Icon,
   Flex,
-  useColorModeValue,
 } from '@chakra-ui/react'
 import { Link } from 'react-router-dom'
 import {
@@ -37,24 +36,18 @@ import { recentProposals } from '../mock/propostas'
 const DashboardPage = () => {
   const [stats] = useState(dashboardStats)
   const [proposals] = useState(recentProposals)
-  
-  const headingColor = useColorModeValue('gray.700', 'white')
-  const subTextColor = useColorModeValue('gray.500', 'whiteAlpha.700')
-  const cardBgColor = useColorModeValue('white', 'whiteAlpha.100')
-  const cardBorderColor = useColorModeValue('gray.200', 'whiteAlpha.200')
-  const cardHoverBg = useColorModeValue('gray.50', 'whiteAlpha.50')
 
   return (
     <Container>
       {/* Welcome Section */}
       <VStack align="stretch" spacing={8}>
         <Box>
-          <Text fontSize="3xl" fontWeight="bold" color={headingColor} mb={2}>
+          <Text fontSize="3xl" fontWeight="bold" color="gray.700" mb={2}>
             {userInfo.greeting}
           </Text>
-          <Text color={subTextColor} fontSize="lg">
+          <Text color="gray.500" fontSize="lg">
             Você já faturou{' '}
-            <Text as="span" fontWeight="semibold" color="primary.500">
+            <Text as="span" fontWeight="semibold" color="emerald.500">
               R$ {stats.totalRevenue.toLocaleString('pt-BR')}
             </Text>{' '}
             este mês
@@ -65,7 +58,7 @@ const DashboardPage = () => {
         <Grid templateColumns={{ base: '1fr', md: 'repeat(3, 1fr)' }} gap={6}>
           <ActionCard
             icon={FiPlus}
-            title="Nova Proposta"
+            title="Novo Orçamento"
             subtitle="Criar em 3 cliques"
             to="/dashboard/propostas/nova"
             variant="dashed"
@@ -78,7 +71,7 @@ const DashboardPage = () => {
           />
           <ActionCard
             icon={FiFileText}
-            title="Propostas"
+            title="Orçamentos"
             subtitle="Ver todas"
             to="/dashboard/propostas"
           />
@@ -107,7 +100,7 @@ const DashboardPage = () => {
           />
           
           <StatsCard
-            title="Propostas Aprovadas"
+            title="Orçamentos Aprovados"
             value={stats.approvedProposals}
             helpText={`Taxa de ${Math.round((stats.approvedProposals / stats.totalProposals) * 100)}% de aprovação`}
             icon={FiCheckCircle}
@@ -133,8 +126,8 @@ const DashboardPage = () => {
 
         {/* Recent Proposals */}
         <DataCard
-          title="Propostas Recentes"
-          subtitle="Suas últimas propostas enviadas"
+          title="Orçamentos Recentes"
+          subtitle="Seus últimos orçamentos enviados"
           headerAction={
             <Button
               as={Link}
@@ -153,10 +146,10 @@ const DashboardPage = () => {
                 w="full"
                 p={4}
                 border="1px"
-                borderColor={cardBorderColor}
+                borderColor="gray.200"
                 borderRadius="lg"
-                bg={cardBgColor}
-                _hover={{ bg: cardHoverBg }}
+                bg="white"
+                _hover={{ bg: 'gray.50' }}
                 transition="background 0.2s"
               >
                 <Flex justify="space-between" align="center">
@@ -164,17 +157,17 @@ const DashboardPage = () => {
                     <HStack spacing={3} mb={1}>
                       <Text fontWeight="medium">{proposal.client}</Text>
                     </HStack>
-                    <Text fontSize="sm" color={subTextColor}>
+                    <Text fontSize="sm" color="gray.500">
                       {proposal.service}
                     </Text>
                   </Box>
                   
                   <HStack spacing={4}>
                     <Box textAlign="right">
-                      <Text fontWeight="semibold" color="primary.500">
+                      <Text fontWeight="semibold" color="emerald.500">
                         R$ {proposal.value.toLocaleString('pt-BR')}
                       </Text>
-                      <Text fontSize="xs" color={subTextColor}>
+                      <Text fontSize="xs" color="gray.500">
                         {proposal.createdAt}
                       </Text>
                     </Box>

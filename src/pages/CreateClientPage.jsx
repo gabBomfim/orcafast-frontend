@@ -194,7 +194,7 @@ const CreateClientPage = () => {
             {isEditMode ? 'Editar cliente' : 'Cadastrar cliente'}
           </Heading>
           <Text fontSize="lg" color={subTextColor} lineHeight="relaxed">
-            {isEditMode ? 'Atualize os dados do cliente' : 'Cadastre um novo cliente para suas propostas'}
+            {isEditMode ? 'Atualize os dados do cliente' : 'Cadastre um novo cliente para seus orçamentos'}
           </Text>
         </CardHeader>
 
@@ -344,7 +344,7 @@ const CreateClientPage = () => {
               <Box>
                 <AlertTitle fontWeight="semibold">Dica profissional</AlertTitle>
                 <AlertDescription>
-                  Adicione o Telefone do WhatsApp para enviar a proposta.
+                  Adicione o Telefone do WhatsApp para enviar o orçamento.
                 </AlertDescription>
               </Box>
             </Alert>

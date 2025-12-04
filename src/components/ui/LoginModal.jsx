@@ -98,9 +98,9 @@ const LoginModal = ({ isOpen, onClose, onSuccess }) => {
     })
   }
 
-  const handleFacebookLogin = () => {
+  const handleAppleLogin = () => {
     toast({
-      title: 'Login com Facebook',
+      title: 'Login com Apple',
       description: 'Funcionalidade será implementada em breve',
       status: 'info',
       duration: 3000,
@@ -109,57 +109,59 @@ const LoginModal = ({ isOpen, onClose, onSuccess }) => {
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="lg">
+    <Modal isOpen={isOpen} onClose={onClose} size="md">
       <ModalOverlay backdropFilter="blur(4px)" />
-      <ModalContent borderRadius="2xl" mx={4}>
-        <ModalHeader textAlign="center" pt={8}>
-          <VStack spacing={2}>
+      <ModalContent borderRadius="2xl" mx={4} bg="white">
+        <ModalHeader textAlign="center" pt={8} pb={2}>
+          <VStack spacing={1}>
             <Text fontSize="2xl" fontWeight="bold" color="gray.900">
-              {isLoginMode ? 'Fazer login' : 'Criar sua conta'}
+              {isLoginMode ? 'Entrar na sua conta' : 'Criar sua conta'}
             </Text>
-            <Text fontSize="sm" color="gray.600">
+            <Text fontSize="sm" color="gray.600" fontWeight="normal">
               {isLoginMode
-                ? 'Entre para continuar enviando sua proposta'
+                ? 'Digite seus dados para continuar.'
                 : 'Crie sua conta para enviar e acompanhar sua proposta'
               }
             </Text>
           </VStack>
         </ModalHeader>
 
-        <ModalCloseButton />
+        <ModalCloseButton top={4} right={4} />
 
-        <ModalBody pb={8}>
-          <VStack spacing={6}>
+        <ModalBody pb={8} px={6}>
+          <VStack spacing={4}>
             {isLoginMode ? (
               <LoginForm
                 onSubmit={handleSubmit}
                 onGoogleLogin={handleGoogleLogin}
-                onFacebookLogin={handleFacebookLogin}
+                onFacebookLogin={handleAppleLogin}
                 isLoading={isLoading}
               />
             ) : (
               <RegisterForm
                 onSubmit={handleSubmit}
                 onGoogleLogin={handleGoogleLogin}
-                onFacebookLogin={handleFacebookLogin}
+                onFacebookLogin={handleAppleLogin}
                 isLoading={isLoading}
               />
             )}
 
-            <Text fontSize="sm" color="gray.500" textAlign="center">
-              {isLoginMode ? 'Não tem conta?' : 'Já tem conta?'}{' '}
+            <Text fontSize="sm" color="gray.600" textAlign="center">
+              {isLoginMode ? 'Ainda não tem conta?' : 'Já tem conta?'}{' '}
               <Button
                 variant="link"
-                colorScheme="emerald"
+                color="emerald.600"
                 fontSize="sm"
+                fontWeight="medium"
                 onClick={() => setIsLoginMode(!isLoginMode)}
+                _hover={{ textDecoration: 'underline' }}
               >
-                {isLoginMode ? 'Criar conta' : 'Fazer login'}
+                {isLoginMode ? 'Criar conta grátis' : 'Fazer login'}
               </Button>
             </Text>
 
             {!isLoginMode && (
-              <Text fontSize="xs" color="gray.500" textAlign="center">
+              <Text fontSize="xs" color="gray.500" textAlign="center" mt={2}>
                 Sem cartão de crédito • Você está a 1 clique de enviar sua proposta 🚀
               </Text>
             )}

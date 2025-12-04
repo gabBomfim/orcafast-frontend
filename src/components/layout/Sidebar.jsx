@@ -1,18 +1,14 @@
 import {
   Box,
-  useColorModeValue,
   Drawer,
   DrawerContent,
   DrawerOverlay,
-  useDisclosure,
 } from '@chakra-ui/react'
 import { useSidebar } from '../../contexts/SidebarContext'
 import SidebarContent from './SidebarContent'
 
 const Sidebar = () => {
   const { isCollapsed, isSidebarOpen, closeSidebar } = useSidebar()
-  const bgColor = useColorModeValue('white', 'gray.800')
-  const borderColor = useColorModeValue('gray.200', 'gray.700')
 
   return (
     <>
@@ -26,7 +22,7 @@ const Sidebar = () => {
         size="xs"
       >
         <DrawerOverlay />
-        <DrawerContent bg={bgColor}>
+        <DrawerContent bg="white">
           <SidebarContent isCollapsed={false} onLinkClick={closeSidebar} />
         </DrawerContent>
       </Drawer>
@@ -37,9 +33,9 @@ const Sidebar = () => {
         display={{ base: 'none', lg: 'block' }}
         w={isCollapsed ? '80px' : '280px'}
         h="100vh"
-        bg={bgColor}
+        bg="white"
         borderRight="1px"
-        borderColor={borderColor}
+        borderColor="gray.200"
         position="fixed"
         top="0"
         left="0"

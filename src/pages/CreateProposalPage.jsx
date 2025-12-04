@@ -150,8 +150,8 @@ const CreateProposalPage = () => {
         }
       } catch (error) {
         toast({
-          title: 'Erro ao carregar proposta',
-          description: error.response?.data?.message || 'Não foi possível carregar os dados da proposta',
+          title: 'Erro ao carregar orçamento',
+          description: error.response?.data?.message || 'Não foi possível carregar os dados do orçamento',
           status: 'error',
           duration: 4000,
           isClosable: true,
@@ -192,7 +192,7 @@ const CreateProposalPage = () => {
   const handleRemoveItem = (id) => {
     if (items.length <= 1) {
       toast({
-        title: 'A proposta deve ter pelo menos um item.',
+        title: 'O orçamento deve ter pelo menos um item.',
         status: 'warning',
         duration: 3000,
         isClosable: true,
@@ -306,7 +306,7 @@ const CreateProposalPage = () => {
         response = await proposalService.create(dataToSend)
       }
 
-      // Navega para página de sucesso com os dados da proposta
+      // Navega para página de sucesso com os dados do orçamento
       navigate('/dashboard/propostas/sucesso', {
         state: {
           proposalId: response.data.id || editId,
@@ -320,7 +320,7 @@ const CreateProposalPage = () => {
         },
       })
     } catch (error) {
-      const message = error.response?.data?.message || 'Erro ao criar proposta'
+      const message = error.response?.data?.message || 'Erro ao criar orçamento'
       toast({
         title: 'Erro',
         description: message,
@@ -349,7 +349,7 @@ const CreateProposalPage = () => {
               <HStack spacing={4}>
                 <Icon as={FiFileText} w={6} h={6} color="emerald.600" />
                 <Heading as="h2" size="lg" fontWeight="bold" color={textColor}>
-                  {isEditMode ? 'Editar proposta' : 'Criar proposta'}
+                  {isEditMode ? 'Editar orçamento' : 'Criar orçamento'}
                 </Heading>
               </HStack>
             </CardHeader>
@@ -392,7 +392,7 @@ const CreateProposalPage = () => {
                       fontWeight="semibold"
                       color={textColor}
                     >
-                      Título da proposta *
+                      Título do orçamento *
                     </Text>
                     <Input
                       id="title"
@@ -454,7 +454,7 @@ const CreateProposalPage = () => {
 
                 <VStack spacing={6} w="full" align="start">
                   <Heading as="h3" size="md" color={textColor}>
-                    Itens da proposta
+                    Itens do orçamento
                   </Heading>
                   {items.map((item, index) => (
                     <VStack
@@ -590,7 +590,7 @@ const CreateProposalPage = () => {
                     isLoading={isLoading}
                     loadingText="Salvando..."
                   >
-                    {isEditMode ? 'Atualizar Proposta' : 'Salvar Proposta'}
+                    {isEditMode ? 'Atualizar Orçamento' : 'Salvar Orçamento'}
                   </Button>
                 </HStack>
               </VStack>
@@ -611,7 +611,7 @@ const CreateProposalPage = () => {
           >
             <CardHeader>
               <HStack justify="space-between">
-                <Heading size="md" color={textColor}>Preview da Proposta</Heading>
+                <Heading size="md" color={textColor}>Preview do Orçamento</Heading>
                 <Icon as={FiEye} color="gray.400" />
               </HStack>
             </CardHeader>
@@ -620,7 +620,7 @@ const CreateProposalPage = () => {
                 {/* Cabeçalho da Proposta */}
                 <Box bg="emerald.50" p={4} borderRadius="lg" borderWidth="1px" borderColor="emerald.200">
                   <Text fontSize="sm" color="emerald.700" fontWeight="semibold" mb={2}>
-                    PROPOSTA PARA:
+                    ORÇAMENTO PARA:
                   </Text>
                   <VStack align="start" spacing={1}>
                     <Text fontWeight="bold" color={textColor}>
@@ -635,9 +635,9 @@ const CreateProposalPage = () => {
                   </VStack>
                 </Box>
                 
-                <Heading size="lg" color={textColor}>{formData.title || 'Título da Proposta'}</Heading>
+                <Heading size="lg" color={textColor}>{formData.title || 'Título do Orçamento'}</Heading>
                 <Text color={subTextColor}>
-                  {formData.description || 'Descrição da proposta aparecerá aqui...'}
+                  {formData.description || 'Descrição do orçamento aparecerá aqui...'}
                 </Text>
                 <Box height="1px" bg={borderColor} />
                 {items.filter(item => item.desc.trim()).map((item) => (

@@ -1,4 +1,4 @@
-import { IconButton, Icon, useColorModeValue } from '@chakra-ui/react'
+import { IconButton, Icon } from '@chakra-ui/react'
 import { FiMenu, FiX } from 'react-icons/fi'
 import { useSidebar } from '../../contexts/SidebarContext'
 

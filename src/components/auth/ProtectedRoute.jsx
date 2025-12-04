@@ -1,6 +1,6 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { storage } from '../../utils/storage'
-import { Box, useColorModeValue, Button, Icon } from '@chakra-ui/react'
+import { Box, Button, Icon } from '@chakra-ui/react'
 import { Link } from 'react-router-dom'
 import { FiPlus } from 'react-icons/fi'
 import Header from '../layout/Header'
@@ -10,9 +10,6 @@ import { useSidebar } from '../../contexts/SidebarContext'
 const ProtectedRoute = () => {
   const token = storage.getToken()
   const location = useLocation()
-  const bgColor = useColorModeValue('gray.50', 'dark.500')
-  const textColor = useColorModeValue('gray.700', 'whiteAlpha.900')
-  const headingColor = useColorModeValue('gray.900', 'white')
   const { isCollapsed } = useSidebar()
 
   if (!token) {
@@ -56,7 +53,7 @@ const ProtectedRoute = () => {
     }
     if (path.includes('/propostas')) {
       return { 
-        title: 'Propostas', 
+        title: 'Orçamentos', 
         showBackButton: true,
         rightContent: (
           <Button
@@ -78,11 +75,11 @@ const ProtectedRoute = () => {
   return (
     <Box 
       minH="100vh" 
-      bg={bgColor} 
-      color={textColor}
+      bg="gray.50" 
+      color="gray.700"
       sx={{
         'h1, h2, h3, h4, h5, h6': {
-          color: headingColor,
+          color: 'gray.900',
           fontWeight: '700',
           letterSpacing: '-0.5px',
         },

@@ -4,7 +4,6 @@ import {
   InputGroup,
   InputLeftElement,
   Icon,
-  useColorModeValue,
 } from '@chakra-ui/react'
 import { FiSearch } from 'react-icons/fi'
 
@@ -14,16 +13,13 @@ const SearchBar = ({
   onChange, 
   ...props 
 }) => {
-  const bgColor = useColorModeValue('white', 'gray.800')
-  const borderColor = useColorModeValue('gray.200', 'gray.700')
-
   return (
     <Box
-      bg={bgColor}
+      bg="white"
       p={6}
       borderRadius="xl"
       border="1px"
-      borderColor={borderColor}
+      borderColor="gray.200"
       boxShadow="0 4px 6px -1px rgba(22, 78, 99, 0.1), 0 2px 4px -1px rgba(22, 78, 99, 0.06)"
       mb={6}
       {...props}

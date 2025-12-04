@@ -32,6 +32,7 @@ const ProposalSuccessPage = () => {
   const location = useLocation()
   const toast = useToast()
   const [isDownloading, setIsDownloading] = useState(false)
+  const [isSendingWhatsApp, setIsSendingWhatsApp] = useState(false)
 
   const bgColor = useColorModeValue('white', 'gray.800')
   const textColor = useColorModeValue('gray.900', 'white')
@@ -48,14 +49,20 @@ const ProposalSuccessPage = () => {
     }
   }, [proposalId, proposalData, navigate])
 
-  const handleWhatsAppShare = () => {
-    // Constrói a URL pública da proposta (será ajustada quando o backend fornecer o UUID)
-    const proposalUrl = `${window.location.origin}/proposta/${proposalId}`
+  const handleWhatsAppShare = async () => {
+    setIsSendingWhatsApp(true)
     
-    // Mensagem personalizada
-    const message = `Olá ${proposalData.clientName}!
+    try {
+      // Atualiza o status do orçamento para "enviado" (status 2)
+      await proposalService.updateStatus(proposalId, 2)
+      
+      // Constrói a URL pública do orçamento (será ajustada quando o backend fornecer o UUID)
+      const proposalUrl = `${window.location.origin}/proposta/${proposalId}`
+      
+      // Mensagem personalizada
+      const message = `Olá ${proposalData.clientName}!
 
-Sua proposta "${proposalData.title}" está pronta!
+Seu orçamento "${proposalData.title}" está pronto!
 
 Valor: R$ ${proposalData.totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
 
@@ -63,20 +70,31 @@ Visualize os detalhes completos aqui:
 ${proposalUrl}
 
 Qualquer dúvida, estou à disposição!`
-    
-    // URL do WhatsApp Web (sem número específico - permite escolher o contato)
-    const whatsappUrl = `https://web.whatsapp.com/send?text=${encodeURIComponent(message)}`
-    
-    // Abre em nova guia
-    window.open(whatsappUrl, '_blank')
-    
-    toast({
-      title: 'WhatsApp aberto',
-      description: 'Selecione o contato para enviar a proposta.',
-      status: 'info',
-      duration: 3000,
-      isClosable: true,
-    })
+      
+      // URL do WhatsApp Web (sem número específico - permite escolher o contato)
+      const whatsappUrl = `https://web.whatsapp.com/send?text=${encodeURIComponent(message)}`
+      
+      // Abre em nova guia
+      window.open(whatsappUrl, '_blank')
+      
+      toast({
+        title: 'Orçamento marcado como enviado',
+        description: 'Selecione o contato no WhatsApp para enviar.',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      })
+    } catch (error) {
+      toast({
+        title: 'Erro ao atualizar status',
+        description: error.response?.data?.message || 'Não foi possível marcar como enviada.',
+        status: 'error',
+        duration: 4000,
+        isClosable: true,
+      })
+    } finally {
+      setIsSendingWhatsApp(false)
+    }
   }
 
   const handleDownloadPDF = async () => {
@@ -97,7 +115,7 @@ Qualquer dúvida, estou à disposição!`
 
       toast({
         title: 'Download concluído',
-        description: 'O PDF da proposta foi baixado com sucesso.',
+        description: 'O PDF do orçamento foi baixado com sucesso.',
         status: 'success',
         duration: 3000,
         isClosable: true,
@@ -155,18 +173,18 @@ Qualquer dúvida, estou à disposição!`
               {/* Título */}
               <VStack spacing={2}>
                 <Heading as="h1" size="xl" textAlign="center" color={textColor}>
-                  {isEdit ? 'Proposta atualizada!' : 'Proposta criada!'}
+                  {isEdit ? 'Orçamento atualizado!' : 'Orçamento criado!'}
                 </Heading>
                 <Text fontSize="lg" color={subTextColor} textAlign="center">
                   {isEdit
                     ? 'As alterações foram salvas com sucesso.'
-                    : 'Sua proposta foi criada e está pronta para ser enviada.'}
+                    : 'Seu orçamento foi criado e está pronto para ser enviado.'}
                 </Text>
               </VStack>
 
               <Divider />
 
-              {/* Informações da Proposta */}
+              {/* Informações do Orçamento */}
               <VStack spacing={4} align="stretch" bg={successBg} p={6} borderRadius="xl">
                 <HStack spacing={3}>
                   <Icon as={FiUser} color={successColor} boxSize={5} />
@@ -220,6 +238,8 @@ Qualquer dúvida, estou à disposição!`
                   color="white"
                   _hover={{ bg: '#128C7E' }}
                   _active={{ bg: '#075E54' }}
+                  isLoading={isSendingWhatsApp}
+                  loadingText="Enviando..."
                 >
                   Enviar via WhatsApp
                 </Button>
@@ -244,7 +264,7 @@ Qualquer dúvida, estou à disposição!`
                   w="full"
                   onClick={handleGoToList}
                 >
-                  Ver todas as propostas
+                  Ver todos os orçamentos
                 </Button>
               </VStack>
             </VStack>

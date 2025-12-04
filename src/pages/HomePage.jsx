@@ -15,7 +15,8 @@ import {
   FiZap,
   FiClock,
   FiTrendingUp,
-  FiStar
+  FiStar,
+  FiFileText
 } from 'react-icons/fi';
 import '../styles/landing.css';
 
@@ -42,25 +43,24 @@ const HomePage = () => {
         <div className="nav-content">
           <div className="nav-logo">
             <div className="logo-icon">
-              <FiTrendingUp className="logo-arrow" />
+              <FiZap className="logo-arrow" />
             </div>
             <span className="logo-text">OrçaFast</span>
           </div>
           
           {/* Desktop Menu */}
           <div className="nav-menu">
-            <a href="#features" className="nav-link">Recursos</a>
-            <a href="#how-it-works" className="nav-link">Como funciona</a>
-            <a href="#pricing" className="nav-link">Preços</a>
+            <a href="#recursos" className="nav-link">Recursos</a>
+            <a href="#como-funciona" className="nav-link">Como funciona</a>
+            <a href="#precos" className="nav-link">Preços</a>
           </div>
 
           <div className="nav-actions">
-            <Link to="/login" className="nav-btn-secondary" style={{ textDecoration: 'none', padding: '0.5rem 1rem', borderRadius: '0.5rem', display: 'inline-block' }}>
+            <Link to="/login" className="nav-btn-secondary" style={{ textDecoration: 'none' }}>
               Entrar
             </Link>
-            <Link to="/onboarding/create-client" className="nav-btn-primary" style={{ textDecoration: 'none', padding: '0.5rem 1.5rem', borderRadius: '0.5rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Link to="/onboarding/create-client" className="nav-btn-primary" style={{ textDecoration: 'none' }}>
               Começar grátis
-              <FiArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </div>
 
@@ -76,15 +76,15 @@ const HomePage = () => {
         {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="mobile-menu">
-            <a href="#features" className="mobile-link">Recursos</a>
-            <a href="#how-it-works" className="mobile-link">Como funciona</a>
-            <a href="#pricing" className="mobile-link">Preços</a>
+            <a href="#recursos" className="mobile-link">Recursos</a>
+            <a href="#como-funciona" className="mobile-link">Como funciona</a>
+            <a href="#precos" className="mobile-link">Preços</a>
             <Link 
-                to="/onboarding/create-client"
+              to="/onboarding/create-client"
               className="nav-btn-primary"
-              style={{ textDecoration: 'none', padding: '0.75rem 1.5rem', borderRadius: '0.5rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '100%', marginTop: '1rem' }}
-              >
-                Começar grátis
+              style={{ textDecoration: 'none', width: '100%', justifyContent: 'center', marginTop: '1rem' }}
+            >
+              Começar grátis
             </Link>
           </div>
         )}
@@ -93,47 +93,113 @@ const HomePage = () => {
       {/* Hero Section */}
       <section className="hero-section">
         <div className="hero-content">
-          <Badge className="hero-badge">
-            <FiStar className="mr-1 h-3 w-3" />
-            MAIS DE 1.000 PROPOSTAS ENVIADAS ESTE MÊS
-          </Badge>
+          <div className="hero-left">
+            <Badge className="hero-badge">
+              <div style={{ display: 'flex', gap: '0.25rem' }}>
+                {[...Array(5)].map((_, i) => (
+                  <FiStar key={i} style={{ width: '1rem', height: '1rem', fill: 'var(--primary)', color: 'var(--primary)' }} />
+                ))}
+              </div>
+              <span>+1.000 orçamentos enviados este mês</span>
+            </Badge>
 
-          <h1 className="hero-title">
+            <div>
+              <h1 className="hero-title">
                 Orça rápido,
-            <span className="hero-title-accent"> fecha fácil</span>
-          </h1>
-          
-          <p className="hero-subtitle">
-            A plataforma mais simples para criar, enviar e acompanhar propostas profissionais. 
-            Sem enrolação, sem complexidade.
-          </p>
+                <span className="hero-title-accent"> fecha fácil</span>
+              </h1>
+              
+              <p className="hero-subtitle">
+                A plataforma mais simples para criar, enviar e acompanhar orçamentos profissionais. 
+                Sem enrolação, sem complexidade.
+              </p>
+            </div>
 
-          <div className="hero-cta">
-            <Link 
-                  to="/onboarding/create-client"
-              className="cta-primary"
-              style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
-                >
-                  Começar grátis
-              <FiArrowRight className="ml-2 h-5 w-5" />
-            </Link>
-            <button className="cta-secondary" style={{ cursor: 'pointer' }}>
-                  Ver demonstração
-            </button>
+            <div className="hero-cta">
+              <Link 
+                to="/onboarding/create-client"
+                className="cta-primary"
+                style={{ textDecoration: 'none' }}
+              >
+                Começar grátis
+                <FiArrowRight />
+              </Link>
+              <button className="cta-secondary">
+                Ver demonstração
+              </button>
+            </div>
+
+            <div className="hero-trust">
+              <div className="trust-item">
+                <FiCheck className="trust-icon" />
+                <span>Grátis para sempre</span>
+              </div>
+              <div className="trust-item">
+                <FiCheck className="trust-icon" />
+                <span>Sem cartão de crédito</span>
+              </div>
+              <div className="trust-item">
+                <FiCheck className="trust-icon" />
+                <span>Pronto em 2 minutos</span>
+              </div>
+            </div>
           </div>
 
-          <div className="hero-trust">
-            <div className="trust-item">
-              <FiCheck className="trust-icon" />
-              <span>Grátis para sempre</span>
-            </div>
-            <div className="trust-item">
-              <FiCheck className="trust-icon" />
-              <span>Sem cartão de crédito</span>
-            </div>
-            <div className="trust-item">
-              <FiCheck className="trust-icon" />
-              <span>Pronto em 2 minutos</span>
+          {/* Dashboard Mockup */}
+          <div className="hero-mockup">
+            <div className="dashboard-card">
+              <div className="dashboard-header">
+                <h3 className="dashboard-title">Dashboard</h3>
+                <span className="dashboard-time">Atualizado agora</span>
+              </div>
+
+              <div className="dashboard-stats">
+                <div className="stat-box">
+                  <div className="stat-label">
+                    <FiClock style={{ width: '1rem', height: '1rem' }} />
+                    <span>Tempo médio</span>
+                  </div>
+                  <p className="stat-value">2 min</p>
+                </div>
+                <div className="stat-box">
+                  <div className="stat-label">
+                    <FiTrendingUp style={{ width: '1rem', height: '1rem' }} />
+                    <span>Taxa aprovação</span>
+                  </div>
+                  <p className="stat-value">85%</p>
+                </div>
+              </div>
+
+              <div className="dashboard-proposals">
+                <div className="proposal-item">
+                  <div className="proposal-left">
+                    <div className="proposal-icon">
+                      <FiDollarSign style={{ width: '1.25rem', height: '1.25rem' }} />
+                    </div>
+                    <div>
+                      <p className="proposal-title">Proposta #1234</p>
+                      <p className="proposal-status">Cliente visualizou</p>
+                    </div>
+                  </div>
+                  <span className="proposal-value">R$ 2.500</span>
+                </div>
+                <div className="proposal-item">
+                  <div className="proposal-left">
+                    <div className="proposal-icon approved">
+                      <span style={{ fontSize: '0.75rem' }}>✓</span>
+                    </div>
+                    <div>
+                      <p className="proposal-title">Proposta #1233</p>
+                      <p className="proposal-status">Aprovada</p>
+                    </div>
+                  </div>
+                  <span className="proposal-value approved">R$ 4.800</span>
+                </div>
+              </div>
+
+              <div className="floating-badge">
+                3 cliques para criar
+              </div>
             </div>
           </div>
         </div>
@@ -142,16 +208,6 @@ const HomePage = () => {
       {/* Stats Section */}
       <section className="stats-section">
         <div className="stats-container">
-          <Card className="stat-card">
-            <CardContent className="stat-content">
-              <FiZap className="stat-icon" />
-              <div className="stat-text">
-                <div className="stat-number">3 cliques</div>
-                <div className="stat-label">Para criar proposta</div>
-              </div>
-            </CardContent>
-          </Card>
-
           <Card className="stat-card">
             <CardContent className="stat-content">
               <FiClock className="stat-icon" />
@@ -185,19 +241,21 @@ const HomePage = () => {
       </section>
 
       {/* How It Works Section */}
-      <section id="how-it-works" className="how-section">
+      <section id="como-funciona" className="how-section">
         <div className="section-header">
-          <h2 className="section-title">Como funciona</h2>
-          <p className="section-subtitle">Processo simples em 4 etapas para fechar mais negócios</p>
+          <span className="section-category">Como funciona</span>
+          <h2 className="section-title">Processo simples em 4 etapas para fechar mais negócios</h2>
         </div>
 
         <div className="steps-container">
           <Card className="step-card">
             <CardContent className="step-content">
-              <div className="step-icon-wrapper">
-                <FiUsers className="step-icon" />
+              <div className="step-header">
+                <span className="step-number">01</span>
+                <div className="step-icon-wrapper">
+                  <FiFileText className="step-icon" />
+                </div>
               </div>
-              <div className="step-number">01</div>
               <h3 className="step-title">Criar</h3>
               <p className="step-description">
                 Monte sua proposta em minutos com templates prontos e personalizáveis
@@ -207,10 +265,12 @@ const HomePage = () => {
 
           <Card className="step-card">
             <CardContent className="step-content">
-              <div className="step-icon-wrapper">
-                <FiSend className="step-icon" />
+              <div className="step-header">
+                <span className="step-number">02</span>
+                <div className="step-icon-wrapper">
+                  <FiSend className="step-icon" />
+                </div>
               </div>
-              <div className="step-number">02</div>
               <h3 className="step-title">Enviar</h3>
               <p className="step-description">
                 Compartilhe por email, WhatsApp ou link em um único clique
@@ -220,10 +280,12 @@ const HomePage = () => {
 
           <Card className="step-card">
             <CardContent className="step-content">
-              <div className="step-icon-wrapper">
-                <FiEye className="step-icon" />
+              <div className="step-header">
+                <span className="step-number">03</span>
+                <div className="step-icon-wrapper">
+                  <FiEye className="step-icon" />
+                </div>
               </div>
-              <div className="step-number">03</div>
               <h3 className="step-title">Acompanhar</h3>
               <p className="step-description">
                 Saiba em tempo real quando sua proposta foi visualizada
@@ -233,10 +295,12 @@ const HomePage = () => {
 
           <Card className="step-card">
             <CardContent className="step-content">
-              <div className="step-icon-wrapper">
-                <FiDollarSign className="step-icon" />
+              <div className="step-header">
+                <span className="step-number">04</span>
+                <div className="step-icon-wrapper">
+                  <FiDollarSign className="step-icon" />
+                </div>
               </div>
-              <div className="step-number">04</div>
               <h3 className="step-title">Ser pago</h3>
               <p className="step-description">
                 Receba aprovações mais rápido e feche mais negócios
@@ -247,8 +311,9 @@ const HomePage = () => {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="features-section">
+      <section id="recursos" className="features-section">
         <div className="section-header">
+          <span className="section-category">Recursos</span>
           <h2 className="section-title">Dashboard que funciona</h2>
           <p className="section-subtitle">Acompanhe suas métricas e tome decisões baseadas em dados reais</p>
         </div>
@@ -288,13 +353,14 @@ const HomePage = () => {
                 Seus dados e de seus clientes protegidos com criptografia de ponta a ponta
               </p>
             </CardContent>
-                </Card>
+          </Card>
         </div>
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="pricing-section">
+      <section id="precos" className="pricing-section">
         <div className="section-header">
+          <span className="section-category">Preços</span>
           <h2 className="section-title">Preços simples e transparentes</h2>
           <p className="section-subtitle">Comece grátis e evolua conforme seu negócio cresce</p>
         </div>
@@ -303,12 +369,12 @@ const HomePage = () => {
           <Card className="pricing-card">
             <CardContent className="pricing-content">
               <h3 className="pricing-plan">Gratuito</h3>
+              <p className="pricing-description">Perfeito para começar</p>
               <div className="pricing-price">
                 <span className="price-currency">R$</span>
                 <span className="price-amount">0</span>
                 <span className="price-period">/mês</span>
               </div>
-              <p className="pricing-description">Perfeito para começar</p>
               <ul className="pricing-features">
                 <li><FiCheck className="feature-check" /> Até 5 propostas/mês</li>
                 <li><FiCheck className="feature-check" /> Templates básicos</li>
@@ -316,25 +382,25 @@ const HomePage = () => {
                 <li><FiCheck className="feature-check" /> Suporte por email</li>
               </ul>
               <Link 
-                      to="/onboarding/create-client"
+                to="/onboarding/create-client"
                 className="pricing-btn"
-                style={{ textDecoration: 'none', display: 'inline-block', textAlign: 'center', border: '1px solid rgba(255, 255, 255, 0.2)', borderRadius: '0.5rem' }}
-                    >
-                      Começar grátis
+                style={{ textDecoration: 'none' }}
+              >
+                Começar grátis
               </Link>
             </CardContent>
-              </Card>
+          </Card>
 
           <Card className="pricing-card pricing-card-popular">
             <Badge className="popular-badge">MAIS POPULAR</Badge>
             <CardContent className="pricing-content">
               <h3 className="pricing-plan">Pro</h3>
+              <p className="pricing-description">Para profissionais</p>
               <div className="pricing-price">
                 <span className="price-currency">R$</span>
                 <span className="price-amount">29</span>
                 <span className="price-period">/mês</span>
               </div>
-              <p className="pricing-description">Para profissionais</p>
               <ul className="pricing-features">
                 <li><FiCheck className="feature-check" /> Propostas ilimitadas</li>
                 <li><FiCheck className="feature-check" /> Todos os templates</li>
@@ -343,24 +409,24 @@ const HomePage = () => {
                 <li><FiCheck className="feature-check" /> Suporte prioritário</li>
               </ul>
               <Link 
-                        to="/onboarding/create-client"
+                to="/onboarding/create-client"
                 className="pricing-btn-primary"
-                style={{ textDecoration: 'none', display: 'inline-block', textAlign: 'center' }}
-                      >
-                        Começar teste grátis
+                style={{ textDecoration: 'none' }}
+              >
+                Começar teste grátis
               </Link>
             </CardContent>
-                </Card>
+          </Card>
 
           <Card className="pricing-card">
             <CardContent className="pricing-content">
               <h3 className="pricing-plan">Business</h3>
+              <p className="pricing-description">Para equipes</p>
               <div className="pricing-price">
                 <span className="price-currency">R$</span>
                 <span className="price-amount">79</span>
                 <span className="price-period">/mês</span>
               </div>
-              <p className="pricing-description">Para equipes</p>
               <ul className="pricing-features">
                 <li><FiCheck className="feature-check" /> Tudo do Pro</li>
                 <li><FiCheck className="feature-check" /> Usuários ilimitados</li>
@@ -368,11 +434,11 @@ const HomePage = () => {
                 <li><FiCheck className="feature-check" /> Gerenciamento de equipe</li>
                 <li><FiCheck className="feature-check" /> Suporte 24/7</li>
               </ul>
-              <button className="pricing-btn" style={{ border: '1px solid rgba(255, 255, 255, 0.2)', borderRadius: '0.5rem', cursor: 'pointer' }}>
-                      Falar com vendas
+              <button className="pricing-btn">
+                Falar com vendas
               </button>
             </CardContent>
-              </Card>
+          </Card>
         </div>
       </section>
 
@@ -384,19 +450,19 @@ const HomePage = () => {
             Junte-se a mais de 1.000 profissionais que já usam o OrçaFast para fechar mais negócios
           </p>
           <Link 
-              to="/onboarding/create-client"
+            to="/onboarding/create-client"
             className="cta-btn-final"
-            style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
-            >
-              Começar grátis agora
-            <FiArrowRight className="ml-2 h-5 w-5" />
+            style={{ textDecoration: 'none' }}
+          >
+            Começar grátis agora
+            <FiArrowRight />
           </Link>
           <div className="cta-trust">
-            <span>Sem cartão de crédito</span>
+            <span>✓ Sem cartão de crédito</span>
             <span>•</span>
-            <span>Configuração em 2 minutos</span>
+            <span>✓ Configuração em 2 minutos</span>
             <span>•</span>
-            <span>Suporte em português</span>
+            <span>✓ Suporte em português</span>
           </div>
         </div>
       </section>
@@ -407,7 +473,7 @@ const HomePage = () => {
           <div className="footer-brand">
             <div className="footer-logo">
               <div className="logo-icon">
-                <FiTrendingUp className="logo-arrow" />
+                <FiZap className="logo-arrow" />
               </div>
               <span className="logo-text">OrçaFast</span>
             </div>

@@ -1,48 +1,57 @@
 import {
   Box,
   Button,
-  Card,
-  CardBody,
-  CardHeader,
-  Divider,
-  FormControl,
-  FormLabel,
+  Flex,
   Heading,
-  HStack,
   Icon,
   Input,
   InputGroup,
-  InputLeftElement,
   InputRightElement,
   Link as ChakraLink,
   Text,
   VStack,
-  Badge,
-  Flex,
-  SimpleGrid,
   useToast,
-  useColorModeValue,
 } from '@chakra-ui/react'
 import {
   FiZap,
-  FiArrowRight,
-  FiCheckCircle,
-  FiMail,
-  FiUser,
-  FiLock,
   FiEye,
   FiEyeOff,
 } from 'react-icons/fi'
-import { FaFacebook } from 'react-icons/fa'
-import { FcGoogle } from 'react-icons/fc'
+import { FaApple } from 'react-icons/fa'
 import { Link as RouterLink, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import { authService } from '../services'
 import { storage } from '../utils/storage'
 
+// Componente SVG do Google inline
+const GoogleIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24">
+    <path
+      fill="#4285F4"
+      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+    />
+    <path
+      fill="#34A853"
+      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+    />
+    <path
+      fill="#FBBC05"
+      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+    />
+    <path
+      fill="#EA4335"
+      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+    />
+  </svg>
+)
+
 const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [showPasswordConfirmation, setShowPasswordConfirmation] = useState(false)
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [passwordConfirmation, setPasswordConfirmation] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const toast = useToast()
   const navigate = useNavigate()
@@ -51,12 +60,11 @@ const RegisterPage = () => {
     e.preventDefault()
     setIsLoading(true)
 
-    const formData = new FormData(e.target)
     const data = {
-      name: formData.get('name'),
-      email: formData.get('email'),
-      password: formData.get('password'),
-      password_confirmation: formData.get('password_confirmation'),
+      name,
+      email,
+      password,
+      password_confirmation: passwordConfirmation,
     }
 
     try {
@@ -99,326 +107,279 @@ const RegisterPage = () => {
   }
 
   return (
-    <SimpleGrid columns={{ base: 1, lg: 2 }} minH="100vh">
+    <Flex
+      minH="100vh"
+      bg="gray.50"
+      direction="column"
+      align="center"
+      justify="center"
+      px={4}
+      py={8}
+    >
+      {/* Logo */}
       <Flex
-        display={{ base: 'none', lg: 'flex' }}
-        bg="dark.500"
-        color="white"
-        p={12}
-        direction="column"
-        justify="center"
+        as={RouterLink}
+        to="/"
+        align="center"
+        gap={2}
+        mb={10}
       >
-        <VStack align="start" spacing={8} maxW="md">
-          <Flex
-            w={12}
-            h={12}
-            bg="whiteAlpha.200"
-            borderRadius="lg"
-            align="center"
-            justify="center"
-          >
-            <Icon as={FiZap} color="emerald.400" w={7} h={7} />
-          </Flex>
-
-          <Heading as="h1" size="2xl" fontWeight="bold" lineHeight="tight">
-            Orça rápido,
-            <br />
-            <Text as="span" color="emerald.400">
-              fecha fácil
-            </Text>
-          </Heading>
-
-          <Text fontSize="lg" color="gray.300">
-            A plataforma mais simples para criar, enviar e acompanhar propostas
-            profissionais. Sem enrolação, sem complexidade.
-          </Text>
-
-          <HStack color="emerald.400" spacing={3}>
-            <Icon as={FiZap} w={5} h={5} />
-            <Text fontWeight="medium">3 cliques para enviar sua proposta</Text>
-          </HStack>
-        </VStack>
+        <Flex
+          w={10}
+          h={10}
+          bg="emerald.50"
+          borderRadius="xl"
+          align="center"
+          justify="center"
+        >
+          <Icon as={FiZap} w={6} h={6} color="emerald.500" />
+        </Flex>
+        <Text fontSize="xl" fontWeight="bold" color="gray.900">
+          OrçaFast
+        </Text>
       </Flex>
 
-      <Flex
-        align="center"
-        justify="center"
-        p={{ base: 4, md: 8 }}
-        bg="gray.50"
-        direction="column"
-        justify={{ base: 'start', lg: 'center' }}
-      >
-        <HStack
-          display={{ base: 'flex', lg: 'none' }}
-          spacing={3}
-          mb={8}
-          alignSelf="center"
-        >
-          <Flex
-            w={10}
-            h={10}
-            bgGradient="linear(to-r, emerald.600, emerald.500)"
-            borderRadius="lg"
-            alignItems="center"
-            justifyContent="center"
-          >
-            <Icon as={FiZap} w={6} h={6} color="white" />
-          </Flex>
-          <Text fontSize="2xl" fontWeight="bold" color="gray.900">
-            OrçaFast
+      {/* Card Container */}
+      <Box w="full" maxW="sm">
+        {/* Header */}
+        <VStack textAlign="center" mb={8} spacing={2}>
+          <Heading as="h1" fontSize="2xl" fontWeight="bold" color="gray.900">
+            Criar sua conta
+          </Heading>
+          <Text color="gray.600" fontSize="sm">
+            Sem cartão de crédito, sem compromisso.
           </Text>
-        </HStack>
+        </VStack>
 
-        <Card w="full" maxW="md" shadow="lg" borderRadius="xl" p={6}>
-          <CardHeader textAlign="center" pb={6}>
-            <Heading as="h2" size="lg" fontWeight="bold" color="gray.900">
-              Criar conta grátis
-            </Heading>
-            <Text color="gray.600">
-              Sem cartão de crédito, sem compromisso
-            </Text>
-          </CardHeader>
+        {/* Social buttons first */}
+        <VStack spacing={3} mb={6}>
+          <Button
+            w="full"
+            h={12}
+            bg="gray.100"
+            _hover={{ bg: 'gray.200' }}
+            borderRadius="xl"
+            fontWeight="medium"
+            color="gray.900"
+            fontSize="sm"
+            leftIcon={<GoogleIcon />}
+            onClick={() => handleSocialLogin('Google')}
+          >
+            Continuar com Google
+          </Button>
+          {/* <Button
+            w="full"
+            h={12}
+            bg="gray.900"
+            _hover={{ bg: 'gray.800' }}
+            borderRadius="xl"
+            fontWeight="medium"
+            color="white"
+            fontSize="sm"
+            leftIcon={<Icon as={FaApple} boxSize={5} />}
+            onClick={() => handleSocialLogin('Apple')}
+          >
+            Continuar com Apple
+          </Button> */}
+        </VStack>
 
-          <CardBody>
-            <VStack spacing={6}>
-              <VStack as="form" onSubmit={handleSubmit} spacing={5} w="full">
-                <FormControl>
-                  <FormLabel
-                    htmlFor="name"
-                    fontSize="sm"
-                    fontWeight="medium"
-                    color="gray.700"
-                  >
-                    Nome completo
-                  </FormLabel>
-                  <InputGroup>
-                    <InputLeftElement pointerEvents="none">
-                      <Icon as={FiUser} color="gray.400" />
-                    </InputLeftElement>
-                    <Input
-                      id="name"
-                      name="name"
-                      type="text"
-                      required
-                      placeholder="Seu nome completo"
-                      size="lg"
-                      borderRadius="md"
-                      bg="white"
-                      borderColor="gray.300"
-                      _hover={{ borderColor: 'gray.400' }}
-                      _focus={{ borderColor: 'emerald.500', boxShadow: '0 0 0 1px var(--chakra-colors-emerald-500)' }}
-                    />
-                  </InputGroup>
-                </FormControl>
+        {/* Divider */}
+        <Flex align="center" gap={4} mb={6}>
+          <Box flex={1} h="1px" bg="gray.300" />
+          <Text fontSize="xs" color="gray.500" fontWeight="medium" textTransform="uppercase" letterSpacing="wide">
+            ou
+          </Text>
+          <Box flex={1} h="1px" bg="gray.300" />
+        </Flex>
 
-                <FormControl>
-                  <FormLabel
-                    htmlFor="email"
-                    fontSize="sm"
-                    fontWeight="medium"
-                    color="gray.700"
-                  >
-                    E-mail
-                  </FormLabel>
-                  <InputGroup>
-                    <InputLeftElement pointerEvents="none">
-                      <Icon as={FiMail} color="gray.400" />
-                    </InputLeftElement>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      required
-                      placeholder="seu@email.com"
-                      size="lg"
-                      borderRadius="md"
-                      bg="white"
-                      borderColor="gray.300"
-                      _hover={{ borderColor: 'gray.400' }}
-                      _focus={{ borderColor: 'emerald.500', boxShadow: '0 0 0 1px var(--chakra-colors-emerald-500)' }}
-                    />
-                  </InputGroup>
-                </FormControl>
+        {/* Form */}
+        <VStack as="form" onSubmit={handleSubmit} spacing={4}>
+          {/* Name field */}
+          <Input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Nome completo"
+            h={12}
+            px={4}
+            bg="gray.100"
+            border="none"
+            borderRadius="xl"
+            color="gray.900"
+            _placeholder={{ color: 'gray.500' }}
+            _hover={{ bg: 'gray.100' }}
+            _focus={{ 
+              bg: 'gray.100',
+              boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
+              outline: 'none'
+            }}
+            fontSize="sm"
+            required
+          />
 
-                <FormControl>
-                  <FormLabel
-                    htmlFor="password"
-                    fontSize="sm"
-                    fontWeight="medium"
-                    color="gray.700"
-                  >
-                    Senha
-                  </FormLabel>
-                  <InputGroup size="lg">
-                    <InputLeftElement pointerEvents="none">
-                      <Icon as={FiLock} color="gray.400" />
-                    </InputLeftElement>
-                    <Input
-                      id="password"
-                      name="password"
-                      type={showPassword ? 'text' : 'password'}
-                      required
-                      placeholder="Mínimo 8 caracteres"
-                      minLength={8}
-                      borderRadius="md"
-                      bg="white"
-                      borderColor="gray.300"
-                      _hover={{ borderColor: 'gray.400' }}
-                      _focus={{ borderColor: 'emerald.500', boxShadow: '0 0 0 1px var(--chakra-colors-emerald-500)' }}
-                    />
-                    <InputRightElement>
-                      <Button
-                        variant="ghost"
-                        onClick={() => setShowPassword(!showPassword)}
-                      >
-                        <Icon
-                          as={showPassword ? FiEyeOff : FiEye}
-                          color="gray.500"
-                        />
-                      </Button>
-                    </InputRightElement>
-                  </InputGroup>
-                </FormControl>
+          {/* Email field */}
+          <Input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
+            h={12}
+            px={4}
+            bg="gray.100"
+            border="none"
+            borderRadius="xl"
+            color="gray.900"
+            _placeholder={{ color: 'gray.500' }}
+            _hover={{ bg: 'gray.100' }}
+            _focus={{ 
+              bg: 'gray.100',
+              boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
+              outline: 'none'
+            }}
+            fontSize="sm"
+            required
+          />
 
-                <FormControl>
-                  <FormLabel
-                    htmlFor="password_confirmation"
-                    fontSize="sm"
-                    fontWeight="medium"
-                    color="gray.700"
-                  >
-                    Confirmar senha
-                  </FormLabel>
-                  <InputGroup size="lg">
-                    <InputLeftElement pointerEvents="none">
-                      <Icon as={FiLock} color="gray.400" />
-                    </InputLeftElement>
-                    <Input
-                      id="password_confirmation"
-                      name="password_confirmation"
-                      type={showPasswordConfirmation ? 'text' : 'password'}
-                      required
-                      placeholder="Digite a senha novamente"
-                      minLength={8}
-                      borderRadius="md"
-                      bg="white"
-                      borderColor="gray.300"
-                      _hover={{ borderColor: 'gray.400' }}
-                      _focus={{ borderColor: 'emerald.500', boxShadow: '0 0 0 1px var(--chakra-colors-emerald-500)' }}
-                    />
-                    <InputRightElement>
-                      <Button
-                        variant="ghost"
-                        onClick={() => setShowPasswordConfirmation(!showPasswordConfirmation)}
-                      >
-                        <Icon
-                          as={showPasswordConfirmation ? FiEyeOff : FiEye}
-                          color="gray.500"
-                        />
-                      </Button>
-                    </InputRightElement>
-                  </InputGroup>
-                </FormControl>
-
-                <Button
-                  type="submit"
-                  w="full"
-                  size="lg"
-                  py={6}
-                  fontSize="md"
-                  fontWeight="bold"
-                  colorScheme="emerald"
-                  bg="emerald.500"
-                  _hover={{
-                    bg: 'emerald.600',
-                  }}
-                  borderRadius="md"
-                  rightIcon={<Icon as={FiArrowRight} />}
-                  isLoading={isLoading}
-                  loadingText="Criando conta..."
-                >
-                  Criar conta grátis
-                </Button>
-              </VStack>
-
-              <HStack w="full">
-                <Divider />
-                <Text
-                  fontSize="sm"
+          {/* Password field */}
+          <InputGroup size="lg">
+            <Input
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Senha (mínimo 8 caracteres)"
+              minLength={8}
+              h={12}
+              px={4}
+              pr={12}
+              bg="gray.100"
+              border="none"
+              borderRadius="xl"
+              color="gray.900"
+              _placeholder={{ color: 'gray.500' }}
+              _hover={{ bg: 'gray.100' }}
+              _focus={{ 
+                bg: 'gray.100',
+                boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
+                outline: 'none'
+              }}
+              fontSize="sm"
+              required
+            />
+            <InputRightElement h={12}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowPassword(!showPassword)}
+                _hover={{ bg: 'transparent' }}
+              >
+                <Icon
+                  as={showPassword ? FiEyeOff : FiEye}
+                  w={4}
+                  h={4}
                   color="gray.500"
-                  fontWeight="medium"
-                  whiteSpace="nowrap"
-                >
-                  ou continue com
-                </Text>
-                <Divider />
-              </HStack>
+                />
+              </Button>
+            </InputRightElement>
+          </InputGroup>
 
-              <VStack spacing={3} w="full">
-                <Button
-                  w="full"
-                  size="lg"
-                  py={6}
-                  variant="outline"
-                  fontSize="md"
-                  fontWeight="semibold"
-                  leftIcon={<Icon as={FcGoogle} boxSize={5} />}
-                  borderColor="gray.300"
-                  onClick={() => handleSocialLogin('Google')}
-                >
-                  Continuar com Google
-                </Button>
-                <Button
-                  w="full"
-                  size="lg"
-                  py={6}
-                  colorScheme="facebook"
-                  fontSize="md"
-                  fontWeight="semibold"
-                  leftIcon={<Icon as={FaFacebook} boxSize={5} />}
-                  onClick={() => handleSocialLogin('Facebook')}
-                >
-                  Continuar com Facebook
-                </Button>
-              </VStack>
+          {/* Password confirmation field */}
+          <InputGroup size="lg">
+            <Input
+              type={showPasswordConfirmation ? 'text' : 'password'}
+              value={passwordConfirmation}
+              onChange={(e) => setPasswordConfirmation(e.target.value)}
+              placeholder="Confirmar senha"
+              minLength={8}
+              h={12}
+              px={4}
+              pr={12}
+              bg="gray.100"
+              border="none"
+              borderRadius="xl"
+              color="gray.900"
+              _placeholder={{ color: 'gray.500' }}
+              _hover={{ bg: 'gray.100' }}
+              _focus={{ 
+                bg: 'gray.100',
+                boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
+                outline: 'none'
+              }}
+              fontSize="sm"
+              required
+            />
+            <InputRightElement h={12}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowPasswordConfirmation(!showPasswordConfirmation)}
+                _hover={{ bg: 'transparent' }}
+              >
+                <Icon
+                  as={showPasswordConfirmation ? FiEyeOff : FiEye}
+                  w={4}
+                  h={4}
+                  color="gray.500"
+                />
+              </Button>
+            </InputRightElement>
+          </InputGroup>
 
-              <Text fontSize="xs" color="gray.500" textAlign="center">
-                Ao criar sua conta, você concorda com nossos{' '}
-                <ChakraLink
-                  as={RouterLink}
-                  to="/termos"
-                  color="emerald.600"
-                  fontWeight="medium"
-                >
-                  Termos de Uso
-                </ChakraLink>{' '}
-                e{' '}
-                <ChakraLink
-                  as={RouterLink}
-                  to="/privacidade"
-                  color="emerald.600"
-                  fontWeight="medium"
-                >
-                  Política de Privacidade
-                </ChakraLink>
-              </Text>
-            </VStack>
-          </CardBody>
-        </Card>
+          {/* Submit button */}
+          <Button
+            type="submit"
+            w="full"
+            h={12}
+            bg="emerald.500"
+            _hover={{ bg: 'emerald.600' }}
+            color="white"
+            fontWeight="semibold"
+            fontSize="sm"
+            borderRadius="xl"
+            boxShadow="lg"
+            isLoading={isLoading}
+            loadingText="Criando conta..."
+          >
+            Criar conta grátis
+          </Button>
+        </VStack>
 
-        <Text mt={6} textAlign="center" fontSize="sm" color="gray.600">
+        {/* Footer */}
+        <Text textAlign="center" fontSize="sm" color="gray.600" mt={8}>
           Já tem uma conta?{' '}
           <ChakraLink
             as={RouterLink}
             to="/login"
             color="emerald.600"
             fontWeight="medium"
+            _hover={{ textDecoration: 'underline' }}
           >
             Fazer login
           </ChakraLink>
         </Text>
-      </Flex>
-    </SimpleGrid>
+      </Box>
+
+      {/* Terms - bottom */}
+      <Text fontSize="xs" color="gray.500" textAlign="center" mt={12} maxW="sm">
+        Ao criar sua conta, você concorda com nossos{' '}
+        <ChakraLink
+          as={RouterLink}
+          to="/termos"
+          textDecoration="underline"
+          _hover={{ color: 'gray.700' }}
+        >
+          Termos de Uso
+        </ChakraLink>{' '}
+        e{' '}
+        <ChakraLink
+          as={RouterLink}
+          to="/privacidade"
+          textDecoration="underline"
+          _hover={{ color: 'gray.700' }}
+        >
+          Política de Privacidade
+        </ChakraLink>
+      </Text>
+    </Flex>
   )
 }
 

@@ -10,7 +10,6 @@ import {
   Box,
   Flex,
   Badge,
-  useColorModeValue,
 } from '@chakra-ui/react'
 import { Link, useLocation } from 'react-router-dom'
 import {
@@ -18,7 +17,6 @@ import {
   FiUsers,
   FiFileText,
   FiSettings,
-  FiLogOut,
   FiZap,
   FiTrendingUp,
   FiDollarSign,
@@ -34,25 +32,11 @@ const SidebarContent = ({ isCollapsed = false, onItemClick = () => {} }) => {
   const { toggleCollapse } = useSidebar()
   const location = useLocation()
   const user = getCurrentUser()
-  
-  // Dark mode colors
-  const userBgColor = useColorModeValue('gray.50', 'whiteAlpha.100')
-  const userNameColor = useColorModeValue('gray.900', 'white')
-  const userRoleColor = useColorModeValue('gray.500', 'whiteAlpha.600')
-  const sectionTitleColor = useColorModeValue('gray.500', 'whiteAlpha.600')
-  const buttonTextColor = useColorModeValue('gray.700', 'whiteAlpha.900')
-  const buttonIconColor = useColorModeValue('gray.600', 'whiteAlpha.700')
-  const activeTextColor = useColorModeValue('primary.600', 'primary.400')
-  const activeBgColor = useColorModeValue('primary.50', 'whiteAlpha.200')
-  const hoverBgColor = useColorModeValue('gray.50', 'whiteAlpha.100')
-  const upgradeBorderColor = useColorModeValue('primary.400', 'primary.500')
-  const upgradeTextColor = useColorModeValue('gray.800', 'white')
-  const upgradeSubtextColor = useColorModeValue('gray.600', 'whiteAlpha.700')
 
   const menuItems = [
     { icon: FiHome, label: 'Dashboard', path: '/dashboard' },
     { icon: FiUsers, label: 'Clientes', path: '/dashboard/clientes' },
-    { icon: FiFileText, label: 'Propostas', path: '/dashboard/propostas' },
+    { icon: FiFileText, label: 'Orçamentos', path: '/dashboard/propostas' },
   ]
 
   const quickActions = [
@@ -77,13 +61,13 @@ const SidebarContent = ({ isCollapsed = false, onItemClick = () => {} }) => {
           <Icon 
             as={item.icon} 
             boxSize={4}
-            color={isActive ? activeTextColor : buttonIconColor}
+            color={isActive ? 'emerald.600' : 'gray.600'}
           />
         }
-        color={isActive ? activeTextColor : buttonTextColor}
-        bg={isActive ? activeBgColor : 'transparent'}
+        color={isActive ? 'emerald.600' : 'gray.700'}
+        bg={isActive ? 'emerald.50' : 'transparent'}
         _hover={{ 
-          bg: isActive ? activeBgColor : hoverBgColor,
+          bg: isActive ? 'emerald.50' : 'gray.50',
         }}
         fontWeight={isActive ? 'semibold' : 'normal'}
         onClick={onItemClick}
@@ -108,7 +92,7 @@ const SidebarContent = ({ isCollapsed = false, onItemClick = () => {} }) => {
           top={0}
           bottom={0}
           width="3px"
-          bg="primary.500"
+          bg="emerald.500"
           borderRadius="0 2px 2px 0"
         />
       )}
@@ -119,21 +103,20 @@ const SidebarContent = ({ isCollapsed = false, onItemClick = () => {} }) => {
     <Flex direction="column" h="full" p={isCollapsed ? 2 : 4} pt={4}>
       {/* Header */}
       <Box mb={6}>
-
         {/* User Info */}
         <Collapse in={!isCollapsed}>
-          <HStack spacing={3} p={3} bg={userBgColor} borderRadius="lg" mb={4}>
+          <HStack spacing={3} p={3} bg="gray.50" borderRadius="lg" mb={4}>
             <Avatar
               size="sm"
               name={user?.name}
-              bg="primary.500"
+              bg="emerald.500"
               color="white"
             />
             <Box flex="1" minW={0}>
-              <Text fontWeight="semibold" fontSize="sm" color={userNameColor} isTruncated>
+              <Text fontWeight="semibold" fontSize="sm" color="gray.900" isTruncated>
                 {user?.name}
               </Text>
-              <Text fontSize="xs" color={userRoleColor} isTruncated>
+              <Text fontSize="xs" color="gray.500" isTruncated>
                 Admin
               </Text>
             </Box>
@@ -143,15 +126,15 @@ const SidebarContent = ({ isCollapsed = false, onItemClick = () => {} }) => {
         {/* Upgrade Pro Card */}
         <Collapse in={!isCollapsed}>
           <Box
-          mt={1}
+            mt={1}
             bg="transparent"
             border="1px"
-            borderColor={upgradeBorderColor}
+            borderColor="emerald.400"
             borderRadius="lg"
             p={3}
             cursor="pointer"
             _hover={{ 
-              borderColor: 'primary.500',
+              borderColor: 'emerald.500',
               boxShadow: '0 2px 8px rgba(0, 217, 126, 0.15)',
               transform: 'translateY(-1px)'
             }}
@@ -186,12 +169,12 @@ const SidebarContent = ({ isCollapsed = false, onItemClick = () => {} }) => {
               
               <VStack spacing={0} align="flex-start" flex={1}>
                 <HStack spacing={1.5}>
-                  <Text fontSize="sm" fontWeight="bold" color={upgradeTextColor}>
+                  <Text fontSize="sm" fontWeight="bold" color="gray.800">
                     Upgrade Pro
                   </Text>
                   <Badge
-                    bg="primary.100"
-                    color="primary.700"
+                    bg="emerald.100"
+                    color="emerald.700"
                     px={1.5}
                     py={0.5}
                     borderRadius="sm"
@@ -201,17 +184,16 @@ const SidebarContent = ({ isCollapsed = false, onItemClick = () => {} }) => {
                     Premium
                   </Badge>
                 </HStack>
-                <Text fontSize="xs" color={upgradeSubtextColor}>
+                <Text fontSize="xs" color="gray.600">
                   Recursos ilimitados
                 </Text>
               </VStack>
               
               <Icon 
                 as={FiChevronRight} 
-                color="primary.500" 
+                color="emerald.500" 
                 boxSize={4}
                 transition="transform 0.2s"
-                _groupHover={{ transform: 'translateX(2px)' }}
               />
             </HStack>
           </Box>
@@ -222,7 +204,7 @@ const SidebarContent = ({ isCollapsed = false, onItemClick = () => {} }) => {
       <VStack spacing={4} align="stretch" flex="1">
         <VStack spacing={1} align="stretch">
           {!isCollapsed && (
-            <Text fontSize="xs" fontWeight="semibold" color={sectionTitleColor} px={4} mb={2} letterSpacing="wide">
+            <Text fontSize="xs" fontWeight="semibold" color="gray.500" px={4} mb={2} letterSpacing="wide">
               PRINCIPAL
             </Text>
           )}
@@ -235,7 +217,7 @@ const SidebarContent = ({ isCollapsed = false, onItemClick = () => {} }) => {
 
         <VStack spacing={1} align="stretch">
           {!isCollapsed && (
-            <Text fontSize="xs" fontWeight="semibold" color={sectionTitleColor} px={4} mb={2} letterSpacing="wide">
+            <Text fontSize="xs" fontWeight="semibold" color="gray.500" px={4} mb={2} letterSpacing="wide">
               AÇÕES RÁPIDAS
             </Text>
           )}
@@ -252,8 +234,8 @@ const SidebarContent = ({ isCollapsed = false, onItemClick = () => {} }) => {
           size="sm"
           justifyContent={isCollapsed ? 'center' : 'flex-start'}
           leftIcon={<Icon as={FiSettings} boxSize={4} />}
-          color={buttonTextColor}
-          _hover={{ bg: hoverBgColor }}
+          color="gray.700"
+          _hover={{ bg: 'gray.50' }}
           onClick={onItemClick}
           h="40px"
           w="full"
@@ -272,8 +254,8 @@ const SidebarContent = ({ isCollapsed = false, onItemClick = () => {} }) => {
           size="sm"
           justifyContent={isCollapsed ? 'center' : 'flex-start'}
           leftIcon={<Icon as={isCollapsed ? FiChevronRight : FiChevronLeft} boxSize={4} />}
-          color={buttonIconColor}
-          _hover={{ bg: hoverBgColor, transform: 'translateX(2px)' }}
+          color="gray.600"
+          _hover={{ bg: 'gray.50', transform: 'translateX(2px)' }}
           onClick={toggleCollapse}
           h="40px"
           w="full"

@@ -3,11 +3,6 @@ import {
   Flex,
   Icon,
   Text,
-  Badge,
-  Container,
-  Progress,
-  Heading,
-  VStack,
 } from '@chakra-ui/react'
 import { FiZap } from 'react-icons/fi'
 import { Link as RouterLink } from 'react-router-dom'
@@ -16,68 +11,62 @@ const OnboardingLayout = ({
   children,
   currentStep,
   totalSteps,
-  stepTitle,
 }) => {
-  const progressPercent = ((currentStep / totalSteps) * 100).toFixed(0)
-
   return (
-    <Box minH="100vh" bg="gray.50">
-      {/* Header */}
-      <Box bg="gray.900" color="white" py={8}>
-        <Container maxW="container.md">
-          <VStack spacing={6}>
-            <RouterLink to="/">
-              <Flex align="center">
-                <Flex
-                  w={10}
-                  h={10}
-                  bg="whiteAlpha.200"
-                  borderRadius="lg"
-                  align="center"
-                  justify="center"
-                  mr={3}
-                >
-                  <Icon as={FiZap} color="emerald.400" w={6} h={6} />
-                </Flex>
-                <Text fontSize="2xl" fontWeight="bold">
-                  OrçaFast
-                </Text>
-              </Flex>
-            </RouterLink>
-            <Heading as="h1" size="lg">
-              {stepTitle}
-            </Heading>
-            <VStack w="full" spacing={2}>
-              <Progress
-                value={progressPercent}
-                size="sm"
-                colorScheme="emerald"
+    <Flex minH="100vh" bg="gray.50" direction="column">
+      {/* Header with progress */}
+      <Box w="full" py={6} px={4}>
+        <Box maxW="lg" mx="auto">
+          {/* Logo */}
+          <Flex
+            as={RouterLink}
+            to="/"
+            align="center"
+            justify="center"
+            gap={2}
+            mb={8}
+          >
+            <Flex
+              w={10}
+              h={10}
+              bg="emerald.50"
+              borderRadius="xl"
+              align="center"
+              justify="center"
+            >
+              <Icon as={FiZap} w={6} h={6} color="emerald.500" />
+            </Flex>
+            <Text fontSize="xl" fontWeight="bold" color="gray.900">
+              OrçaFast
+            </Text>
+          </Flex>
+
+          {/* Progress bar */}
+          <Flex align="center" gap={2} mb={2}>
+            {[...Array(totalSteps)].map((_, index) => (
+              <Box
+                key={index}
+                h="4px"
+                flex={1}
                 borderRadius="full"
-                w="full"
-                bg="gray.700"
+                bg={index < currentStep ? 'emerald.500' : 'gray.200'}
+                transition="all 0.3s"
               />
-              <Flex w="full" justify="space-between">
-                <Text fontSize="xs" color="gray.400">
-                  Progresso
-                </Text>
-                <Badge
-                  colorScheme="emerald"
-                  variant="subtle"
-                  borderRadius="full"
-                  fontSize="xs"
-                >
-                  Etapa {currentStep} de {totalSteps}
-                </Badge>
-              </Flex>
-            </VStack>
-          </VStack>
-        </Container>
+            ))}
+          </Flex>
+          <Text fontSize="xs" color="gray.500" textAlign="right">
+            Etapa {currentStep} de {totalSteps}
+          </Text>
+        </Box>
       </Box>
 
-      <Container maxW="container.md" py={12}>
-        {children}
-      </Container>
-    </Box>
+      {/* Main content */}
+      <Flex flex={1} align="start" justify="center" px={4} pb={8}>
+        <Box w="full" maxW="lg">
+          {children}
+        </Box>
+      </Flex>
+    </Flex>
   )
 }
 

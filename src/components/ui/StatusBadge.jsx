@@ -7,7 +7,7 @@ import {
   FiClock 
 } from 'react-icons/fi'
 
-const StatusBadge = ({ status }) => {
+const StatusBadge = ({ status, customLabel }) => {
   const getStatusConfig = (status) => {
     switch (status) {
       case 'approved':
@@ -61,7 +61,7 @@ const StatusBadge = ({ status }) => {
     >
       <HStack spacing={1}>
         <Icon as={config.icon} boxSize={3} />
-        <span>{config.text}</span>
+        <span>{customLabel || config.text}</span>
       </HStack>
     </Badge>
   )

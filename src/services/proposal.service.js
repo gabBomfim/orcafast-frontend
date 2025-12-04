@@ -27,5 +27,9 @@ export const proposalService = {
 
   downloadPDF(id) {
     return api.get(`proposals/${id}/download`, { responseType: 'blob' })
+  },
+
+  updateStatus(id, status) {
+    return api.patch(`proposals/${id}/status`, { status })
   }
 }

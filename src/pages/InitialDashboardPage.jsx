@@ -86,7 +86,7 @@ const InitialDashboardPage = () => {
             <HStack spacing={2} justify="center">
               <Icon as={FiAward} color="primary.500" boxSize={8} />
               <Text fontSize={{ base: '2xl', md: '3xl' }} fontWeight="bold" color={headingColor}>
-                Parabéns, você enviou sua 1ª proposta!
+                Parabéns, você enviou seu 1º orçamento!
               </Text>
               <Icon as={FiAward} color="primary.500" boxSize={8} />
             </HStack>
@@ -113,7 +113,7 @@ const InitialDashboardPage = () => {
               <VStack spacing={2}>
                 <Icon as={FiFileText} color="primary.500" boxSize={6} />
                 <Text fontSize="2xl" fontWeight="bold" color={cardTextColor}>{stats.sent}</Text>
-                <Text fontSize="sm" color={cardSubTextColor}>Propostas Enviadas</Text>
+                <Text fontSize="sm" color={cardSubTextColor}>Orçamentos Enviados</Text>
               </VStack>
             </CardBody>
           </Card>
@@ -151,7 +151,7 @@ const InitialDashboardPage = () => {
           <CardBody>
             <VStack align="stretch" spacing={6}>
               <HStack justify="space-between" align="center">
-                <Heading size="md" color={headingColor}>Sua Primeira Proposta</Heading>
+                <Heading size="md" color={headingColor}>Seu Primeiro Orçamento</Heading>
                 <Button as={Link} to="/dashboard" variant="outline" size="sm" rightIcon={<Icon as={FiArrowRight} />}>
                   Ver Todas
                 </Button>
@@ -173,7 +173,7 @@ const InitialDashboardPage = () => {
                   </HStack>
                 </Box>
               ) : (
-                <Text color={subTextColor}>Nenhuma proposta encontrada.</Text>
+                <Text color={subTextColor}>Nenhum orçamento encontrado.</Text>
               )}
             </VStack>
           </CardBody>
@@ -185,7 +185,7 @@ const InitialDashboardPage = () => {
             <VStack align="stretch" spacing={6}>
               <Heading size="md" color={headingColor}>Próximos Passos</Heading>
               <SimpleGrid columns={{ base: 1, md: 3 }} gap={6}>
-                <ActionCard icon={FiPlus} title="Nova Proposta" subtitle="Criar outra proposta" to="/onboarding/create-client" variant="dashed" />
+                <ActionCard icon={FiPlus} title="Novo Orçamento" subtitle="Criar outro orçamento" to="/onboarding/create-client" variant="dashed" />
                 <ActionCard icon={FiUsers} title="Clientes" subtitle="Gerenciar seus contatos" to="/dashboard/clientes" />
                 <ActionCard icon={FiZap} title="Plano Pro" subtitle="Desbloquear recursos" to="/planos" />
               </SimpleGrid>

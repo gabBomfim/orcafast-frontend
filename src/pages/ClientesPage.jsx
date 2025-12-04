@@ -158,7 +158,7 @@ const ClientesPage = () => {
             />
             
             <StatsCard
-              title="Propostas Enviadas"
+              title="Orçamentos Enviados"
               value={totalProposalsSent}
               icon={FiFileText}
               colorScheme="primary"
@@ -240,7 +240,7 @@ const ClientesPage = () => {
                             <HStack spacing={2} mb={1} wrap="wrap">
                               <Text fontWeight="semibold">{client.name}</Text>
                               <Badge colorScheme="gray" variant="subtle">
-                                {client.proposalsCount} {client.proposalsCount !== 1 ? 'propostas' : 'proposta'}
+                                {client.proposalsCount} {client.proposalsCount !== 1 ? 'orçamentos' : 'orçamento'}
                               </Badge>
                             </HStack>
                             
@@ -271,7 +271,7 @@ const ClientesPage = () => {
                               R$ {(client.totalValue || 0).toLocaleString('pt-BR')}
                             </Text>
                             <Text fontSize="xs" color="gray.500">
-                              Última proposta: {client.lastProposal || 'Sem registro'}
+                              Último orçamento: {client.lastProposal || 'Sem registro'}
                             </Text>
                           </Box>
 
@@ -284,7 +284,7 @@ const ClientesPage = () => {
                               leftIcon={<Icon as={FiFileText} />}
                               flex={{ base: 1, md: 'auto' }}
                             >
-                              Nova Proposta
+                              Novo Orçamento
                             </Button>
 
                             <Menu>
@@ -366,8 +366,8 @@ const ClientesPage = () => {
                       ⚠️ Atenção
                     </Text>
                     <Text fontSize="sm" color="orange.700">
-                      Este cliente possui <strong>{selectedClient.proposalsCount}</strong> proposta{selectedClient.proposalsCount !== 1 ? 's' : ''} associada{selectedClient.proposalsCount !== 1 ? 's' : ''}.
-                      A exclusão do cliente também removerá todas as propostas relacionadas a ele.
+                      Este cliente possui <strong>{selectedClient.proposalsCount}</strong> orçamento{selectedClient.proposalsCount !== 1 ? 's' : ''} associado{selectedClient.proposalsCount !== 1 ? 's' : ''}.
+                      A exclusão do cliente também removerá todos os orçamentos relacionados a ele.
                     </Text>
                   </Box>
                   <Text fontSize="sm" color="gray.600">
