@@ -18,6 +18,11 @@ import OnboardingCreateClientPage from './pages/onboarding/CreateClientPage'
 import OnboardingCreateProposalPage from './pages/onboarding/CreateProposalPage'
 import SendProposalPage from './pages/onboarding/SendProposalPage'
 
+// Settings pages
+import SettingsProfile from './pages/settings/SettingsProfile'
+import SettingsGoals from './pages/settings/SettingsGoals'
+import SettingsSubscription from './pages/settings/SettingsSubscription'
+
 // Contexts
 import { OnboardingProvider } from './contexts/OnboardingContext'
 import { SidebarProvider } from './contexts/SidebarContext'
@@ -47,6 +52,11 @@ function App() {
                 <Route path="/dashboard/propostas" element={<PropostasPage />} />
                 <Route path="/dashboard/propostas/nova" element={<CreateProposalPage />} />
                 <Route path="/dashboard/propostas/sucesso" element={<ProposalSuccessPage />} />
+
+                {/* Settings Routes */}
+                <Route path="/dashboard/configuracoes/perfil" element={<SettingsProfile />} />
+                <Route path="/dashboard/configuracoes/metas" element={<SettingsGoals />} />
+                <Route path="/dashboard/configuracoes/assinatura" element={<SettingsSubscription />} />
               </Route>
             </Routes>
           </Router>
