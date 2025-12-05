@@ -96,7 +96,7 @@ const PropostasPage = () => {
   const [proposals, setProposals] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
-  
+
   // Date Filters
   const [datePreset, setDatePreset] = useState('all')
   const [dateRange, setDateRange] = useState({ start: '', end: '' })
@@ -104,7 +104,7 @@ const PropostasPage = () => {
   const [selectedProposal, setSelectedProposal] = useState(null)
   const [actionType, setActionType] = useState(null) // 'delete', 'approve', 'reject'
   const [isConfirming, setIsConfirming] = useState(false)
-  
+
   const [pagination, setPagination] = useState({
     currentPage: 1,
     lastPage: 1,
@@ -126,7 +126,7 @@ const PropostasPage = () => {
   // Debounce search term to avoid excessive API calls
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm)
   const debounceTimerRef = useRef(null)
-  
+
   useEffect(() => {
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current)
@@ -266,7 +266,7 @@ const PropostasPage = () => {
     }
 
     const formatDateInput = (d) => d ? d.toISOString().split('T')[0] : ''
-    
+
     setDateRange({
       start: start ? formatDateInput(start) : '',
       end: end ? formatDateInput(end) : ''
@@ -459,13 +459,13 @@ const PropostasPage = () => {
 
   const handleWhatsAppShare = async (proposal) => {
     setLoadingAction({ ...loadingAction, [proposal.id]: 'whatsapp' })
-    
+
     try {
       // Only update status if NOT approved
       if (proposal.status !== 'approved') {
         await proposalService.updateStatus(proposal.id, 2)
       }
-      
+
       const proposalUrl = `${window.location.origin}/proposta/${proposal.id}`
       const message = `Olá ${proposal.client}!
 
@@ -477,10 +477,10 @@ Visualize os detalhes completos aqui:
 ${proposalUrl}
 
 Qualquer dúvida, estou à disposição!`
-      
+
       const whatsappUrl = `https://web.whatsapp.com/send?text=${encodeURIComponent(message)}`
       window.open(whatsappUrl, '_blank')
-      
+
       toast({
         title: proposal.status === 'approved' ? 'Abrindo WhatsApp' : 'Orçamento marcado como enviado',
         description: 'Selecione o contato no WhatsApp.',
@@ -488,7 +488,7 @@ Qualquer dúvida, estou à disposição!`
         duration: 3000,
         isClosable: true,
       })
-      
+
       await reloadData()
     } catch (error) {
       toast({
@@ -568,200 +568,232 @@ Qualquer dúvida, estou à disposição!`
   return (
     <Container>
       <VStack align="stretch" spacing={8}>
-          {/* Stats */}
-          <Box>
-            <Text fontSize="lg" fontWeight="semibold" mb={4}>Filtrar por Status</Text>
-            <Grid 
-              templateColumns={{ 
-                base: 'repeat(2, 1fr)', 
-                md: 'repeat(5, 1fr)' 
-              }} 
-              gap={4}
-            >
-              <StatsCard
-                title="Total"
-                value={getStatusCount('all')}
-                colorScheme="primary"
-                isActive={statusFilter === 'all'}
-                onClick={() => setStatusFilter('all')}
-              />
-              <StatsCard
-                title="Aprovadas"
-                value={getStatusCount('approved')}
-                colorScheme="green"
-                isActive={statusFilter === 'approved'}
-                onClick={() => setStatusFilter('approved')}
-              />
-              <StatsCard
-                title="Visualizadas"
-                value={getStatusCount('viewed')}
-                colorScheme="blue"
-                isActive={statusFilter === 'viewed'}
-                onClick={() => setStatusFilter('viewed')}
-              />
-              <StatsCard
-                title="Enviadas"
-                value={getStatusCount('sent')}
-                colorScheme="yellow"
-                isActive={statusFilter === 'sent'}
-                onClick={() => setStatusFilter('sent')}
-              />
-              <StatsCard
-                title="Rascunhos"
-                value={getStatusCount('draft')}
-                colorScheme="gray"
-                isActive={statusFilter === 'draft'}
-                onClick={() => setStatusFilter('draft')}
-              />
-            </Grid>
-          </Box>
-
-          {/* Filters */}
-          <DataCard title="Filtros e Busca">
-            <Stack direction={{ base: 'column', lg: 'row' }} spacing={4} align={{ lg: 'flex-end' }}>
-              <FormControl flex={2}>
-                <FormLabel>Buscar</FormLabel>
-                <InputGroup>
-                  <InputLeftElement pointerEvents="none">
-                    <Icon as={FiSearch} color="gray.400" />
-                  </InputLeftElement>
-                  <Input 
-                    placeholder="Buscar por cliente ou serviço..." 
-                    value={searchTerm} 
-                    onChange={(e) => setSearchTerm(e.target.value)} 
-                  />
-                </InputGroup>
-              </FormControl>
-
-              <FormControl flex={1}>
-                <FormLabel>Período</FormLabel>
-                <Select value={datePreset} onChange={(e) => handleDatePresetChange(e.target.value)}>
-                  <option value="all">Todo o período</option>
-                  <option value="7days">Últimos 7 dias</option>
-                  <option value="30days">Últimos 30 dias</option>
-                  <option value="thisMonth">Este mês</option>
-                  <option value="custom">Personalizado</option>
-                </Select>
-              </FormControl>
-
-              {(datePreset === 'custom') && (
-                <>
-                  <FormControl w={{ base: 'full', lg: 'auto' }}>
-                    <FormLabel>De</FormLabel>
-                    <Input 
-                      type="date" 
-                      value={dateRange.start} 
-                      onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })} 
-                    />
-                  </FormControl>
-                  <FormControl w={{ base: 'full', lg: 'auto' }}>
-                    <FormLabel>Até</FormLabel>
-                    <Input 
-                      type="date" 
-                      value={dateRange.end} 
-                      onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })} 
-                    />
-                  </FormControl>
-                </>
-              )}
-            </Stack>
-          </DataCard>
-
-          {/* Proposals List */}
-          <DataCard
-            title="Seus Orçamentos"
-            subtitle={`${pagination.total} orçamento${pagination.total !== 1 ? 's' : ''} encontrado${pagination.total !== 1 ? 's' : ''}`}
+        {/* Stats */}
+        <Box>
+          <Text fontSize="lg" fontWeight="semibold" mb={4}>Filtrar por Status</Text>
+          <Grid
+            templateColumns={{
+              base: 'repeat(2, 1fr)',
+              md: 'repeat(5, 1fr)'
+            }}
+            gap={4}
           >
-            {isLoading ? (
-              <Center w="full" py={12}>
-                <Spinner size="lg" color="primary.500" />
-              </Center>
-            ) : error ? (
-              <Box w="full" p={4} borderRadius="lg" bg="red.50" color="red.600">
-                {error}
-              </Box>
-            ) : (
-              <VStack spacing={4}>
-                {proposals.length === 0 ? (
-                  <Box w="full" textAlign="center" py={6} color="gray.500">
-                    Nenhum orçamento encontrado.
-                  </Box>
-                ) : (
-                  proposals.map((proposal) => (
-                    <Box
-                      key={proposal.id}
-                      w="full"
-                      p={4}
-                      border="1px"
-                      borderColor="gray.200"
-                      borderRadius="lg"
-                      _hover={{ bg: 'gray.50' }}
-                      transition="background 0.2s"
-                    >
-                      <Flex justify="space-between" align="center" direction={{ base: 'column', md: 'row' }} gap={4}>
-                        <HStack spacing={4} flex="1" w="full">
-                          <Box
-                            w={12}
-                            h={12}
-                            bg="primary.50"
-                            borderRadius="lg"
-                            display="flex"
-                            alignItems="center"
-                            justifyContent="center"
-                            flexShrink={0}
-                          >
-                            <Icon as={FiFileText} color="primary.500" boxSize={6} />
-                          </Box>
-                          
-                          <Box flex="1">
-                            <HStack spacing={2} mb={1} wrap="wrap">
-                              <Text fontWeight="semibold">{proposal.client}</Text>
-                              <StatusBadge 
-                                status={proposal.status} 
-                                customLabel={
-                                  proposal.status === 'approved' ? 'Orçamento aceito pelo cliente' :
+            <StatsCard
+              title="Total"
+              value={getStatusCount('all')}
+              colorScheme="primary"
+              isActive={statusFilter === 'all'}
+              onClick={() => setStatusFilter('all')}
+            />
+            <StatsCard
+              title="Aprovadas"
+              value={getStatusCount('approved')}
+              colorScheme="green"
+              isActive={statusFilter === 'approved'}
+              onClick={() => setStatusFilter('approved')}
+            />
+            <StatsCard
+              title="Visualizadas"
+              value={getStatusCount('viewed')}
+              colorScheme="blue"
+              isActive={statusFilter === 'viewed'}
+              onClick={() => setStatusFilter('viewed')}
+            />
+            <StatsCard
+              title="Enviadas"
+              value={getStatusCount('sent')}
+              colorScheme="yellow"
+              isActive={statusFilter === 'sent'}
+              onClick={() => setStatusFilter('sent')}
+            />
+            <StatsCard
+              title="Rascunhos"
+              value={getStatusCount('draft')}
+              colorScheme="gray"
+              isActive={statusFilter === 'draft'}
+              onClick={() => setStatusFilter('draft')}
+            />
+          </Grid>
+        </Box>
+
+        {/* Filters */}
+        <DataCard title="Filtros e Busca">
+          <Stack direction={{ base: 'column', lg: 'row' }} spacing={4} align={{ lg: 'flex-end' }}>
+            <FormControl flex={2}>
+              <FormLabel>Buscar</FormLabel>
+              <InputGroup>
+                <InputLeftElement pointerEvents="none">
+                  <Icon as={FiSearch} color="gray.400" />
+                </InputLeftElement>
+                <Input
+                  placeholder="Buscar por cliente ou serviço..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </InputGroup>
+            </FormControl>
+
+            <FormControl flex={1}>
+              <FormLabel>Período</FormLabel>
+              <Select value={datePreset} onChange={(e) => handleDatePresetChange(e.target.value)}>
+                <option value="all">Todo o período</option>
+                <option value="7days">Últimos 7 dias</option>
+                <option value="30days">Últimos 30 dias</option>
+                <option value="thisMonth">Este mês</option>
+                <option value="custom">Personalizado</option>
+              </Select>
+            </FormControl>
+
+            {(datePreset === 'custom') && (
+              <>
+                <FormControl w={{ base: 'full', lg: 'auto' }}>
+                  <FormLabel>De</FormLabel>
+                  <Input
+                    type="date"
+                    value={dateRange.start}
+                    onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
+                  />
+                </FormControl>
+                <FormControl w={{ base: 'full', lg: 'auto' }}>
+                  <FormLabel>Até</FormLabel>
+                  <Input
+                    type="date"
+                    value={dateRange.end}
+                    onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
+                  />
+                </FormControl>
+              </>
+            )}
+          </Stack>
+        </DataCard>
+
+        {/* Proposals List */}
+        <DataCard
+          title="Seus Orçamentos"
+          subtitle={`${pagination.total} orçamento${pagination.total !== 1 ? 's' : ''} encontrado${pagination.total !== 1 ? 's' : ''}`}
+        >
+          {isLoading ? (
+            <Center w="full" py={12}>
+              <Spinner size="lg" color="primary.500" />
+            </Center>
+          ) : error ? (
+            <Box w="full" p={4} borderRadius="lg" bg="red.50" color="red.600">
+              {error}
+            </Box>
+          ) : (
+            <VStack spacing={4}>
+              {proposals.length === 0 ? (
+                <Box w="full" textAlign="center" py={6} color="gray.500">
+                  Nenhum orçamento encontrado.
+                </Box>
+              ) : (
+                proposals.map((proposal) => (
+                  <Box
+                    key={proposal.id}
+                    w="full"
+                    p={4}
+                    border="1px"
+                    borderColor="gray.200"
+                    borderRadius="lg"
+                    _hover={{ bg: 'gray.50' }}
+                    transition="background 0.2s"
+                  >
+                    <Flex justify="space-between" align="center" direction={{ base: 'column', md: 'row' }} gap={4}>
+                      <HStack spacing={4} flex="1" w="full">
+                        <Box
+                          w={12}
+                          h={12}
+                          bg="primary.50"
+                          borderRadius="lg"
+                          display="flex"
+                          alignItems="center"
+                          justifyContent="center"
+                          flexShrink={0}
+                        >
+                          <Icon as={FiFileText} color="primary.500" boxSize={6} />
+                        </Box>
+
+                        <Box flex="1">
+                          <HStack spacing={2} mb={1} wrap="wrap">
+                            <Text fontWeight="semibold">{proposal.client}</Text>
+                            <StatusBadge
+                              status={proposal.status}
+                              customLabel={
+                                proposal.status === 'approved' ? 'Orçamento aceito pelo cliente' :
                                   proposal.status === 'rejected' ? 'Orçamento negado pelo cliente' : undefined
-                                }
-                              />
-                            </HStack>
-                            <Text fontSize="sm" color="gray.500" mb={2}>
-                              {proposal.service}
-                            </Text>
-                            <HStack spacing={4} fontSize="xs" color="gray.400" wrap="wrap">
-                              <Text>Criada: {formatDateTime(proposal.createdAt)}</Text>
-                              {proposal.viewedAt && (
-                                <Text>Visualizada: {formatDateTime(proposal.viewedAt)}</Text>
-                              )}
-                              <Text>Válida até: {formatDate(proposal.validUntil)}</Text>
-                            </HStack>
-                          </Box>
-                        </HStack>
+                              }
+                            />
+                          </HStack>
+                          <Text fontSize="sm" color="gray.500" mb={2}>
+                            {proposal.service}
+                          </Text>
+                          <HStack spacing={4} fontSize="xs" color="gray.400" wrap="wrap">
+                            <Text>Criada: {formatDateTime(proposal.createdAt)}</Text>
+                            {proposal.viewedAt && (
+                              <Text>Visualizada: {formatDateTime(proposal.viewedAt)}</Text>
+                            )}
+                            <Text>Válida até: {formatDate(proposal.validUntil)}</Text>
+                          </HStack>
+                        </Box>
+                      </HStack>
 
-                        <Stack direction={{ base: 'column', sm: 'row' }} spacing={4} align="center" w={{ base: 'full', md: 'auto' }} justify={{ base: 'space-between', md: 'flex-end' }}>
-                          <Box textAlign={{ base: 'left', md: 'right' }}>
-                            <Text
-                              fontWeight="semibold"
-                              color="primary.500"
-                              fontSize="lg"
+                      <Stack direction={{ base: 'column', sm: 'row' }} spacing={4} align="center" w={{ base: 'full', md: 'auto' }} justify={{ base: 'space-between', md: 'flex-end' }}>
+                        <Box textAlign={{ base: 'left', md: 'right' }}>
+                          <Text
+                            fontWeight="semibold"
+                            color="primary.500"
+                            fontSize="lg"
+                          >
+                            R$ {(proposal.value || 0).toLocaleString('pt-BR')}
+                          </Text>
+                        </Box>
+
+                        <HStack spacing={2}>
+                          {/* Action Buttons */}
+                          {proposal.status === 'draft' ? (
+                            <Button
+                              as={Link}
+                              to={`/dashboard/propostas/nova?edit=${proposal.id}`}
+                              variant="outline"
+                              colorScheme="emerald"
+                              size="sm"
+                              leftIcon={<Icon as={FiEdit} />}
                             >
-                              R$ {(proposal.value || 0).toLocaleString('pt-BR')}
-                            </Text>
-                          </Box>
-
-                          <HStack spacing={2}>
-                            {/* Action Buttons */}
-                            {proposal.status === 'draft' ? (
+                              Continuar
+                            </Button>
+                          ) : proposal.status === 'approved' ? (
+                            <Button
+                              size="sm"
+                              colorScheme="red"
+                              variant="outline"
+                              onClick={() => confirmAction('reject', proposal)}
+                              leftIcon={<Icon as={FiXCircle} />}
+                              _hover={{ bg: 'red.50', borderColor: 'red.500', color: 'red.600' }}
+                            >
+                              Reprovar orçamento
+                            </Button>
+                          ) : proposal.status === 'rejected' ? (
+                            <Button
+                              size="sm"
+                              colorScheme="green"
+                              variant="outline"
+                              onClick={() => confirmAction('approve', proposal)}
+                              leftIcon={<Icon as={FiCheckCircle} />}
+                            >
+                              Aprovar orçamento
+                            </Button>
+                          ) : (
+                            // Status is sent or viewed
+                            <HStack spacing={1}>
                               <Button
-                                as={Link}
-                                to={`/dashboard/propostas/nova?edit=${proposal.id}`}
-                                variant="outline"
-                                colorScheme="emerald"
                                 size="sm"
-                                leftIcon={<Icon as={FiEdit} />}
+                                colorScheme="green"
+                                variant="outline"
+                                onClick={() => confirmAction('approve', proposal)}
+                                leftIcon={<Icon as={FiCheckCircle} />}
                               >
-                                Continuar
+                                Aprovar orçamento
                               </Button>
-                            ) : proposal.status === 'approved' ? (
                               <Button
                                 size="sm"
                                 colorScheme="red"
@@ -772,99 +804,67 @@ Qualquer dúvida, estou à disposição!`
                               >
                                 Reprovar orçamento
                               </Button>
-                            ) : proposal.status === 'rejected' ? (
-                              <Button
-                                size="sm"
-                                colorScheme="green"
-                                variant="outline"
-                                onClick={() => confirmAction('approve', proposal)}
-                                leftIcon={<Icon as={FiCheckCircle} />}
-                              >
-                                Aprovar orçamento
-                              </Button>
-                            ) : (
-                              // Status is sent or viewed
-                              <HStack spacing={1}>
-                                <Button
-                                  size="sm"
-                                  colorScheme="green"
-                                  variant="outline"
-                                  onClick={() => confirmAction('approve', proposal)}
-                                  leftIcon={<Icon as={FiCheckCircle} />}
-                                >
-                                  Aprovar orçamento
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  colorScheme="red"
-                                  variant="outline"
-                                  onClick={() => confirmAction('reject', proposal)}
-                                  leftIcon={<Icon as={FiXCircle} />}
-                                  _hover={{ bg: 'red.50', borderColor: 'red.500', color: 'red.600' }}
-                                >
-                                  Reprovar orçamento
-                                </Button>
-                              </HStack>
-                            )}
+                            </HStack>
+                          )}
 
-                            <Menu>
-                              <MenuButton
-                                as={Button}
-                                variant="ghost"
-                                size="sm"
-                                isLoading={loadingAction[proposal.id] === 'whatsapp' || loadingAction[proposal.id] === 'download'}
+                          <Menu>
+                            <MenuButton
+                              as={Button}
+                              variant="ghost"
+                              size="sm"
+                              isLoading={loadingAction[proposal.id] === 'whatsapp' || loadingAction[proposal.id] === 'download'}
+                            >
+                              <Icon as={FiMoreVertical} />
+                            </MenuButton>
+                            <MenuList>
+                              <MenuItem
+                                icon={<Icon as={FaWhatsapp} color="#25D366" />}
+                                onClick={() => handleWhatsAppShare(proposal)}
                               >
-                                <Icon as={FiMoreVertical} />
-                              </MenuButton>
-                              <MenuList>
-                                <MenuItem 
-                                  icon={<Icon as={FaWhatsapp} color="#25D366" />}
-                                  onClick={() => handleWhatsAppShare(proposal)}
-                                >
-                                  {proposal.status === 'draft' ? 'Enviar via WhatsApp' : 'Reenviar via WhatsApp'}
-                                </MenuItem>
-                                <MenuItem 
-                                  icon={<Icon as={FiDownload} />}
-                                  onClick={() => handleDownloadPDF(proposal.id)}
-                                >
-                                  Baixar PDF
-                                </MenuItem>
-                                <MenuItem icon={<Icon as={FiCopy} />}>
-                                  Duplicar
-                                </MenuItem>
-                                <MenuItem
-                                  as={Link}
-                                  to={`/dashboard/propostas/nova?edit=${proposal.id}`}
-                                  icon={<Icon as={FiEdit} />}
-                                >
-                                  Editar
-                                </MenuItem>
-                                <MenuItem
-                                  icon={<Icon as={FiTrash2} />}
-                                  color="red.500"
-                                  onClick={() => confirmAction('delete', proposal)}
-                                >
-                                  Excluir
-                                </MenuItem>
-                              </MenuList>
-                            </Menu>
-                          </HStack>
-                        </Stack>
-                      </Flex>
-                    </Box>
-                  ))
-                )}
-              </VStack>
-            )}
-          </DataCard>
+                                {proposal.status === 'draft' ? 'Enviar via WhatsApp' : 'Reenviar via WhatsApp'}
+                              </MenuItem>
+                              <MenuItem
+                                icon={<Icon as={FiDownload} />}
+                                onClick={() => handleDownloadPDF(proposal.id)}
+                              >
+                                Baixar PDF
+                              </MenuItem>
+                              <MenuItem icon={<Icon as={FiCopy} />}>
+                                Duplicar
+                              </MenuItem>
+                              <MenuItem
+                                as={Link}
+                                to={`/dashboard/propostas/nova?edit=${proposal.id}`}
+                                icon={<Icon as={FiEdit} />}
+                              >
+                                Editar
+                              </MenuItem>
+                              <MenuItem
+                                icon={<Icon as={FiTrash2} />}
+                                color="red.500"
+                                onClick={() => confirmAction('delete', proposal)}
+                              >
+                                Excluir
+                              </MenuItem>
+                            </MenuList>
+                          </Menu>
+                        </HStack>
+                      </Stack>
+                    </Flex>
+                  </Box>
+                ))
+              )}
+            </VStack>
+          )}
+        </DataCard>
 
-          {/* Paginação */}
-          <Pagination
-            currentPage={pagination.currentPage}
-            lastPage={pagination.lastPage}
-            onPageChange={handlePageChange}
-            isLoading={isLoading}
-          />
+        {/* Paginação */}
+        <Pagination
+          currentPage={pagination.currentPage}
+          lastPage={pagination.lastPage}
+          onPageChange={handlePageChange}
+          isLoading={isLoading}
+        />
       </VStack>
 
       <AlertDialog
@@ -887,9 +887,9 @@ Qualquer dúvida, estou à disposição!`
               <Button ref={cancelRef} onClick={onClose} variant="ghost" isDisabled={isConfirming}>
                 Cancelar
               </Button>
-              <Button 
-                colorScheme={dialogContent.confirmColor} 
-                onClick={executeAction} 
+              <Button
+                colorScheme={dialogContent.confirmColor}
+                onClick={executeAction}
                 ml={3}
                 isLoading={isConfirming}
                 bg={dialogContent.confirmColor === 'red' ? 'red.500' : undefined}
