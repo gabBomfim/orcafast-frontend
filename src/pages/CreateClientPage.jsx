@@ -231,17 +231,17 @@ const CreateClientPage = () => {
                 </Box>
 
                 <Box w="full">
-                  <Text
+                <Text
                     as="label"
-                    htmlFor="company"
+                  htmlFor="company"
                     display="block"
                     fontSize="sm"
                     fontWeight="medium"
                     color="gray.900"
                     mb={2}
-                  >
-                    Empresa
-                  </Text>
+                >
+                  Empresa
+                </Text>
                   <Input
                     id="company"
                     name="company"
@@ -266,19 +266,19 @@ const CreateClientPage = () => {
                   />
                 </Box>
 
-                <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6} w="full">
+              <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6} w="full">
                   <Box>
-                    <Text
+                <Text
                       as="label"
-                      htmlFor="phone"
+                  htmlFor="phone"
                       display="block"
                       fontSize="sm"
                       fontWeight="medium"
                       color="gray.900"
                       mb={2}
-                    >
-                      Telefone *
-                    </Text>
+                >
+                  Telefone *
+                </Text>
                     <Input
                       id="phone"
                       name="phone"
@@ -318,17 +318,17 @@ const CreateClientPage = () => {
                   </Box>
 
                   <Box>
-                    <Text
+                  <Text
                       as="label"
-                      htmlFor="email"
+                    htmlFor="email"
                       display="block"
                       fontSize="sm"
                       fontWeight="medium"
                       color="gray.900"
                       mb={2}
-                    >
-                      E-mail
-                    </Text>
+                  >
+                    E-mail
+                  </Text>
                     <Input
                       id="email"
                       name="email"
@@ -352,14 +352,14 @@ const CreateClientPage = () => {
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     />
                   </Box>
-                </SimpleGrid>
+              </SimpleGrid>
 
                 {/* Tip */}
                 <Flex
                   bg="emerald.50"
                   border="1px"
                   borderColor="emerald.100"
-                  borderRadius="xl"
+              borderRadius="xl"
                   p={4}
                   gap={3}
                   w="full"
@@ -372,32 +372,32 @@ const CreateClientPage = () => {
                     align="center"
                     justify="center"
                     flexShrink={0}
-                  >
+            >
                     <Icon as={FiMessageSquare} w={4} h={4} color="emerald.600" />
                   </Flex>
-                  <Box>
+              <Box>
                     <Text fontSize="sm" fontWeight="medium" color="gray.900" mb={1}>
                       Dica profissional
                     </Text>
                     <Text fontSize="sm" color="gray.600">
                       Adicione o telefone do WhatsApp para enviar o orçamento diretamente.
                     </Text>
-                  </Box>
+              </Box>
                 </Flex>
 
                 {/* Navigation */}
                 <Flex align="center" justify="space-between" w="full" mt={8} pt={6} borderTop="1px" borderColor="gray.200">
-                  <Button
-                    onClick={() => navigate('/dashboard/clientes')}
-                    variant="ghost"
+              <Button
+                onClick={() => navigate('/dashboard/clientes')}
+                variant="ghost"
                     leftIcon={<Icon as={FiChevronLeft} w={4} h={4} />}
                     color="gray.600"
                     _hover={{ color: 'gray.900' }}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button
-                    type="submit"
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
                     h={12}
                     px={8}
                     bg="emerald.500"
@@ -408,13 +408,13 @@ const CreateClientPage = () => {
                     borderRadius="xl"
                     boxShadow="lg"
                     rightIcon={<Icon as={FiChevronRight} w={4} h={4} />}
-                    isLoading={isLoading}
-                    loadingText="Salvando..."
-                  >
-                    {isEditMode ? 'Atualizar Cliente' : 'Salvar Cliente'}
-                  </Button>
+                isLoading={isLoading}
+                loadingText="Salvando..."
+              >
+                {isEditMode ? 'Atualizar Cliente' : 'Salvar Cliente'}
+              </Button>
                 </Flex>
-              </VStack>
+          </VStack>
             </Box>
           )}
         </Box>

@@ -9,6 +9,7 @@ import {
   Collapse,
   Box,
   Flex,
+  useDisclosure,
   Badge,
 } from '@chakra-ui/react'
 import { Link, useLocation } from 'react-router-dom'
@@ -17,12 +18,16 @@ import {
   FiUsers,
   FiFileText,
   FiSettings,
-  FiZap,
-  FiTrendingUp,
-  FiDollarSign,
+  FiChevronDown,
+  FiChevronUp,
+  FiUser,
+  FiTarget,
+  FiMessageSquare,
+  FiStar,
+  FiLogOut,
+  FiAward,
   FiChevronRight,
   FiChevronLeft,
-  FiAward,
 } from 'react-icons/fi'
 import { useAuth } from '../../hooks/useAuth'
 import { useSidebar } from '../../contexts/SidebarContext'
@@ -32,21 +37,30 @@ const SidebarContent = ({ isCollapsed = false, onItemClick = () => {} }) => {
   const { toggleCollapse } = useSidebar()
   const location = useLocation()
   const user = getCurrentUser()
+  const { isOpen: isSettingsOpen, onToggle: onSettingsToggle } = useDisclosure()
 
   const menuItems = [
-    { icon: FiHome, label: 'Dashboard', path: '/dashboard' },
+    { icon: FiHome, label: 'Início', path: '/dashboard' },
     { icon: FiUsers, label: 'Clientes', path: '/dashboard/clientes' },
     { icon: FiFileText, label: 'Orçamentos', path: '/dashboard/propostas' },
   ]
 
-  const quickActions = [
-    { icon: FiTrendingUp, label: 'Analytics', path: '/dashboard/analytics' },
-    { icon: FiDollarSign, label: 'Financeiro', path: '/dashboard/financeiro' },
+  const settingsSubItems = [
+    { icon: FiUser, label: 'Meu Perfil', path: '/dashboard/configuracoes/perfil' },
+    { icon: FiTarget, label: 'Metas', path: '/dashboard/configuracoes/metas' },
+    { icon: FiMessageSquare, label: 'Mensagens', path: '/dashboard/configuracoes/mensagens' },
+    { icon: FiStar, label: 'Assinatura', path: '/dashboard/configuracoes/assinatura' },
   ]
 
   const handleLogout = () => {
     logout()
     onItemClick()
+  }
+
+  // Auto-expand settings if on a settings page
+  const isSettingsPage = location.pathname.startsWith('/dashboard/configuracoes')
+  if (isSettingsPage && !isSettingsOpen) {
+    onSettingsToggle()
   }
 
   const renderButton = (item, isActive = false) => (
@@ -105,22 +119,32 @@ const SidebarContent = ({ isCollapsed = false, onItemClick = () => {} }) => {
       <Box mb={6}>
         {/* User Info */}
         <Collapse in={!isCollapsed}>
-          <HStack spacing={3} p={3} bg="gray.50" borderRadius="lg" mb={4}>
+          <Box p={3} bg="gray.50" borderRadius="xl" mb={4}>
+            <HStack spacing={3}>
             <Avatar
               size="sm"
-              name={user?.name}
+                name={user?.name || 'User'}
               bg="emerald.500"
               color="white"
+                getInitials={(name) => {
+                  if (!name) return 'U'
+                  const parts = name.split(' ')
+                  if (parts.length >= 2) {
+                    return `${parts[0][0]}${parts[1][0]}`.toUpperCase()
+                  }
+                  return name.substring(0, 2).toUpperCase()
+                }}
             />
             <Box flex="1" minW={0}>
-              <Text fontWeight="semibold" fontSize="sm" color="gray.900" isTruncated>
-                {user?.name}
+                <Text fontWeight="medium" fontSize="sm" color="gray.900" isTruncated>
+                  {user?.name || 'Usuário'}
               </Text>
               <Text fontSize="xs" color="gray.500" isTruncated>
                 Admin
               </Text>
             </Box>
           </HStack>
+          </Box>
         </Collapse>
 
         {/* Upgrade Pro Card */}
@@ -201,54 +225,106 @@ const SidebarContent = ({ isCollapsed = false, onItemClick = () => {} }) => {
       </Box>
 
       {/* Main Menu */}
-      <VStack spacing={4} align="stretch" flex="1">
-        <VStack spacing={1} align="stretch">
+      <VStack spacing={1} align="stretch" flex="1" overflowY="auto">
           {!isCollapsed && (
-            <Text fontSize="xs" fontWeight="semibold" color="gray.500" px={4} mb={2} letterSpacing="wide">
+          <Text fontSize="xs" fontWeight="semibold" color="gray.500" px={3} mb={2} letterSpacing="wide">
               PRINCIPAL
             </Text>
           )}
           {menuItems.map((item) => 
             renderButton(item, location.pathname === item.path)
           )}
-        </VStack>
 
-        <Divider opacity={0.2} />
-
-        <VStack spacing={1} align="stretch">
+        {/* Settings Accordion */}
           {!isCollapsed && (
-            <Text fontSize="xs" fontWeight="semibold" color="gray.500" px={4} mb={2} letterSpacing="wide">
-              AÇÕES RÁPIDAS
-            </Text>
-          )}
-          {quickActions.map((item) => renderButton(item))}
-        </VStack>
-      </VStack>
-
-      <Divider opacity={0.2} />
-
-      {/* Settings & Logout */}
-      <VStack spacing={1} align="stretch" mt={4} pb={2}>
+          <Box mt={4}>
         <Button
           variant="ghost"
           size="sm"
-          justifyContent={isCollapsed ? 'center' : 'flex-start'}
+              justifyContent="flex-start"
           leftIcon={<Icon as={FiSettings} boxSize={4} />}
-          color="gray.700"
-          _hover={{ bg: 'gray.50' }}
-          onClick={onItemClick}
+              rightIcon={
+                <Icon 
+                  as={isSettingsOpen ? FiChevronUp : FiChevronDown} 
+                  boxSize={4}
+                  transition="transform 0.2s"
+                />
+              }
+              color={isSettingsPage ? 'emerald.600' : 'gray.700'}
+              bg={isSettingsPage ? 'emerald.50' : 'transparent'}
+              _hover={{ 
+                bg: isSettingsPage ? 'emerald.50' : 'gray.50',
+              }}
+              onClick={onSettingsToggle}
           h="40px"
           w="full"
           borderRadius="lg"
           transition="all 0.2s"
-          pl={isCollapsed ? 0 : 4}
-          pr={isCollapsed ? 0 : 4}
+              pl={4}
+              pr={4}
+              fontSize="sm"
+              leftIconSpacing={3}
+            >
+              Configurações
+            </Button>
+
+            <Collapse in={isSettingsOpen} animateOpacity>
+              <VStack spacing={1} align="stretch" mt={1} ml={4} pl={4} borderLeft="2px" borderColor="gray.200">
+                {settingsSubItems.map((item) => {
+                  const isActive = location.pathname === item.path
+                  return (
+                    <Button
+                      key={item.path}
+                      as={Link}
+                      to={item.path}
+                      variant="ghost"
+                      size="sm"
+                      justifyContent="flex-start"
+                      leftIcon={<Icon as={item.icon} boxSize={4} />}
+                      color={isActive ? 'emerald.600' : 'gray.600'}
+                      fontWeight={isActive ? 'medium' : 'normal'}
+                      _hover={{ 
+                        bg: 'gray.50',
+                        color: 'gray.900'
+                      }}
+                      onClick={onItemClick}
+                      h="36px"
+                      w="full"
+                      borderRadius="lg"
+                      pl={3}
+                      pr={3}
           fontSize="sm"
-          leftIconSpacing={isCollapsed ? 0 : 3}
-          minW={isCollapsed ? '60px' : 'auto'}
+                      leftIconSpacing={3}
         >
-          {!isCollapsed && 'Configurações'}
+                      {item.label}
         </Button>
+                  )
+                })}
+              </VStack>
+            </Collapse>
+          </Box>
+        )}
+
+        {isCollapsed && (
+          <Button
+            variant="ghost"
+            size="sm"
+            justifyContent="center"
+            leftIcon={<Icon as={FiSettings} boxSize={4} />}
+            color={isSettingsPage ? 'emerald.600' : 'gray.700'}
+            bg={isSettingsPage ? 'emerald.50' : 'transparent'}
+            _hover={{ bg: 'gray.50' }}
+            h="40px"
+            w="full"
+            borderRadius="lg"
+            fontSize="sm"
+          />
+        )}
+      </VStack>
+
+      {/* Settings & Collapse/Logout Buttons at Bottom */}
+      <Box borderTop="1px" borderColor="gray.200" pt={4} mt="auto">
+        <VStack spacing={1} align="stretch">
         <Button
           variant="ghost"
           size="sm"
@@ -265,11 +341,30 @@ const SidebarContent = ({ isCollapsed = false, onItemClick = () => {} }) => {
           pr={isCollapsed ? 0 : 4}
           fontSize="sm"
           leftIconSpacing={isCollapsed ? 0 : 3}
-          minW={isCollapsed ? '60px' : 'auto'}
         >
           {!isCollapsed && (isCollapsed ? 'Expandir' : 'Recolher')}
         </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            justifyContent={isCollapsed ? 'center' : 'flex-start'}
+            leftIcon={<Icon as={FiLogOut} boxSize={4} />}
+            color="gray.600"
+            _hover={{ bg: 'red.50', color: 'red.600' }}
+            onClick={handleLogout}
+            h="40px"
+            w="full"
+            borderRadius="lg"
+            transition="all 0.2s"
+            pl={isCollapsed ? 0 : 4}
+            pr={isCollapsed ? 0 : 4}
+            fontSize="sm"
+            leftIconSpacing={isCollapsed ? 0 : 3}
+          >
+            {!isCollapsed && 'Sair'}
+          </Button>
       </VStack>
+      </Box>
     </Flex>
   )
 }
