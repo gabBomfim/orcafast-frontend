@@ -7,6 +7,7 @@ import {
     FormControl,
     FormLabel,
     Input,
+    Textarea,
     Button,
     Card,
     CardBody,
@@ -24,6 +25,7 @@ const SettingsProfile = () => {
         nomeCompleto: '',
         chavePix: '',
         telefone: '',
+        condicoesPadrao: '',
     })
 
     const handleLogoUpload = (e) => {
@@ -265,6 +267,31 @@ const SettingsProfile = () => {
                                     }}
                                 />
                             </HStack>
+                        </FormControl>
+
+                        {/* Condições Padrão do Orçamento */}
+                        <FormControl>
+                            <FormLabel fontSize="sm" fontWeight="medium" color="gray.800">
+                                Condições Padrão do Orçamento
+                            </FormLabel>
+                            <Textarea
+                                value={formData.condicoesPadrao}
+                                onChange={(e) => handleInputChange('condicoesPadrao', e.target.value)}
+                                placeholder="Ex: Pagamento: 50% na aprovação e 50% na conclusão. Aceitamos Pix/Cartão. Orçamento válido por 15 dias."
+                                bg="gray.50"
+                                border="1px"
+                                borderColor="gray.200"
+                                rounded="xl"
+                                minH="120px"
+                                resize="vertical"
+                                _focus={{
+                                    borderColor: 'green.400',
+                                    boxShadow: '0 0 0 1px var(--chakra-colors-green-400)',
+                                }}
+                            />
+                            <FormHelperText fontSize="xs" color="gray.500" mt={1.5}>
+                                Este texto será exibido automaticamente no rodapé de todos os seus orçamentos, como regras de pagamento e validade.
+                            </FormHelperText>
                         </FormControl>
                     </VStack>
 
