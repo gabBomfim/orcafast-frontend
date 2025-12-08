@@ -3,8 +3,10 @@ import {
   Button,
   Flex,
   Heading,
+  HStack,
   Icon,
   Input,
+  SimpleGrid,
   Text,
   VStack,
   Textarea,
@@ -17,6 +19,7 @@ import {
   FiChevronLeft,
   FiPlus,
   FiTrash2,
+  FiEye,
 } from 'react-icons/fi'
 import { WiStars } from 'react-icons/wi'
 import { Link as RouterLink, useNavigate } from 'react-router-dom'
@@ -27,7 +30,8 @@ import { useState } from 'react'
 const CreateProposalPage = () => {
   const navigate = useNavigate()
   const toast = useToast()
-  const { updateProposalData } = useOnboarding()
+  const { updateProposalData, guestData } = useOnboarding()
+  const clientData = guestData?.client || {}
 
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -71,7 +75,7 @@ const CreateProposalPage = () => {
     return acc + value * qtd
   }, 0)
 
-  const discountAmount = parseFloat(discount) || 0
+  const discountAmount = (subtotal * (discount / 100))
   const total = subtotal - discountAmount
 
   const handleAISuggestion = async () => {
@@ -87,13 +91,13 @@ const CreateProposalPage = () => {
     }
 
     setIsLoadingAI(true)
-    
+
     // Simulação da IA baseada nos dados do formulário
     await new Promise(resolve => setTimeout(resolve, 2000))
-    
+
     // Lógica simples de precificação baseada nos dados
     let suggestedPrice = 500 // base
-    
+
     if (title.toLowerCase().includes('website') || title.toLowerCase().includes('site')) {
       suggestedPrice = 2500
     } else if (title.toLowerCase().includes('logo') || title.toLowerCase().includes('design')) {
@@ -101,12 +105,12 @@ const CreateProposalPage = () => {
     } else if (title.toLowerCase().includes('consultoria') || title.toLowerCase().includes('consultor')) {
       suggestedPrice = 1500
     }
-    
+
     // Ajustes baseados na descrição
     if (description.toLowerCase().includes('complexo') || description.toLowerCase().includes('avançado')) {
       suggestedPrice *= 1.5
     }
-    
+
     // Aplica no primeiro item
     if (items.length > 0) {
       handleItemChange(items[0].id, 'value', suggestedPrice)
@@ -118,13 +122,13 @@ const CreateProposalPage = () => {
         isClosable: true,
       })
     }
-    
+
     setIsLoadingAI(false)
   }
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    
+
     const proposalData = {
       title,
       description,
@@ -142,7 +146,7 @@ const CreateProposalPage = () => {
   }
 
   return (
-    <OnboardingLayout currentStep={2} totalSteps={3}>
+    <OnboardingLayout currentStep={2} totalSteps={3} contentWidth="7xl">
       {/* Icon and title */}
       <VStack textAlign="center" mb={8}>
         <Flex
@@ -165,359 +169,413 @@ const CreateProposalPage = () => {
         </Text>
       </VStack>
 
-      {/* Form */}
-      <VStack as="form" onSubmit={handleSubmit} spacing={4}>
-        <Box w="full">
-          <Text
-            as="label"
-            htmlFor="title"
-            display="block"
-            fontSize="sm"
-            fontWeight="medium"
-            color="gray.900"
-            mb={2}
-          >
-            Título do orçamento
-          </Text>
-          <Input
-            id="title"
-            name="title"
-            type="text"
-            placeholder="Ex: Desenvolvimento de Website"
-            h={12}
-            px={4}
-            bg="gray.100"
-            border="none"
-            borderRadius="xl"
-            color="gray.900"
-            _placeholder={{ color: 'gray.500' }}
-            _hover={{ bg: 'gray.100' }}
-            _focus={{ 
-              bg: 'gray.100',
-              boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
-              outline: 'none'
-            }}
-            fontSize="sm"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-          />
-        </Box>
-
-        <Box w="full">
-          <Text
-            as="label"
-            htmlFor="description"
-            display="block"
-            fontSize="sm"
-            fontWeight="medium"
-            color="gray.900"
-            mb={2}
-          >
-            Descrição <Text as="span" color="gray.500">(opcional)</Text>
-          </Text>
-          <Textarea
-            id="description"
-            name="description"
-            placeholder="Descreva brevemente o projeto..."
-            rows={3}
-            px={4}
-            py={3}
-            bg="gray.100"
-            border="none"
-            borderRadius="xl"
-            color="gray.900"
-            _placeholder={{ color: 'gray.500' }}
-            _hover={{ bg: 'gray.100' }}
-            _focus={{ 
-              bg: 'gray.100',
-              boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
-              outline: 'none'
-            }}
-            fontSize="sm"
-            resize="none"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-        </Box>
-
-        <Box w="full">
-          <Text
-            as="label"
-            htmlFor="validUntil"
-            display="block"
-            fontSize="sm"
-            fontWeight="medium"
-            color="gray.900"
-            mb={2}
-          >
-            Válido até
-          </Text>
-          <Input
-            id="validUntil"
-            name="validUntil"
-            type="date"
-            h={12}
-            px={4}
-            bg="gray.100"
-            border="none"
-            borderRadius="xl"
-            color="gray.900"
-            _hover={{ bg: 'gray.100' }}
-            _focus={{ 
-              bg: 'gray.100',
-              boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
-              outline: 'none'
-            }}
-            fontSize="sm"
-            value={validUntil}
-            onChange={(e) => setValidUntil(e.target.value)}
-          />
-        </Box>
-
-        {/* Items */}
-        <Box w="full">
-          <Text
-            display="block"
-            fontSize="sm"
-            fontWeight="medium"
-            color="gray.900"
-            mb={3}
-          >
-            Itens do orçamento
-          </Text>
-          <VStack spacing={3} w="full">
-            {items.map((item) => (
-              <Box
-                key={item.id}
-                w="full"
-                bg="gray.100"
-                borderRadius="xl"
-                p={4}
+      {/* Grid Layout */}
+      <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={8} w="full">
+        {/* Lado Esquerdo: Formulário */}
+        <Box>
+          <VStack as="form" onSubmit={handleSubmit} spacing={4}>
+            <Box w="full">
+              <Text
+                as="label"
+                htmlFor="title"
+                display="block"
+                fontSize="sm"
+                fontWeight="medium"
+                color="gray.900"
+                mb={2}
               >
-                <VStack spacing={3} w="full">
-                  <Input
-                    type="text"
-                    value={item.desc}
-                    onChange={(e) => handleItemChange(item.id, 'desc', e.target.value)}
-                    placeholder="Descrição do item"
-                    h={10}
-                    px={3}
-                    bg="white"
-                    border="none"
-                    borderRadius="lg"
-                    color="gray.900"
-                    _placeholder={{ color: 'gray.500' }}
-                    _focus={{ 
-                      boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
-                      outline: 'none'
-                    }}
-                    fontSize="sm"
-                  />
-                  <Flex align="center" gap={3} w="full">
-                    <Box flex={1}>
-                      <Text fontSize="xs" color="gray.600" mb={1}>
-                        Qtd
-                      </Text>
+                Título do orçamento
+              </Text>
+              <Input
+                id="title"
+                name="title"
+                type="text"
+                placeholder="Ex: Desenvolvimento de Website"
+                h={12}
+                px={4}
+                bg="gray.100"
+                border="none"
+                borderRadius="xl"
+                color="gray.900"
+                _placeholder={{ color: 'gray.500' }}
+                _hover={{ bg: 'gray.100' }}
+                _focus={{
+                  bg: 'gray.100',
+                  boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
+                  outline: 'none'
+                }}
+                fontSize="sm"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+              />
+            </Box>
+
+            <Box w="full">
+              <Text
+                as="label"
+                htmlFor="description"
+                display="block"
+                fontSize="sm"
+                fontWeight="medium"
+                color="gray.900"
+                mb={2}
+              >
+                Descrição <Text as="span" color="gray.500">(opcional)</Text>
+              </Text>
+              <Textarea
+                id="description"
+                name="description"
+                placeholder="Descreva brevemente o projeto..."
+                rows={3}
+                px={4}
+                py={3}
+                bg="gray.100"
+                border="none"
+                borderRadius="xl"
+                color="gray.900"
+                _placeholder={{ color: 'gray.500' }}
+                _hover={{ bg: 'gray.100' }}
+                _focus={{
+                  bg: 'gray.100',
+                  boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
+                  outline: 'none'
+                }}
+                fontSize="sm"
+                resize="none"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </Box>
+
+            <Box w="full">
+              <Text
+                as="label"
+                htmlFor="validUntil"
+                display="block"
+                fontSize="sm"
+                fontWeight="medium"
+                color="gray.900"
+                mb={2}
+              >
+                Válido até
+              </Text>
+              <Input
+                id="validUntil"
+                name="validUntil"
+                type="date"
+                h={12}
+                px={4}
+                bg="gray.100"
+                border="none"
+                borderRadius="xl"
+                color="gray.900"
+                _hover={{ bg: 'gray.100' }}
+                _focus={{
+                  bg: 'gray.100',
+                  boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
+                  outline: 'none'
+                }}
+                fontSize="sm"
+                value={validUntil}
+                onChange={(e) => setValidUntil(e.target.value)}
+              />
+            </Box>
+
+            {/* Items */}
+            <Box w="full">
+              <Text
+                display="block"
+                fontSize="sm"
+                fontWeight="medium"
+                color="gray.900"
+                mb={3}
+              >
+                Itens do orçamento
+              </Text>
+              <VStack spacing={3} w="full">
+                {items.map((item) => (
+                  <Box
+                    key={item.id}
+                    w="full"
+                    bg="gray.100"
+                    borderRadius="xl"
+                    p={4}
+                  >
+                    <VStack spacing={3} w="full">
                       <Input
-                        type="number"
-                        min="1"
-                        value={item.qtd}
-                        onChange={(e) => handleItemChange(item.id, 'qtd', parseInt(e.target.value) || 1)}
+                        type="text"
+                        value={item.desc}
+                        onChange={(e) => handleItemChange(item.id, 'desc', e.target.value)}
+                        placeholder="Descrição do item"
                         h={10}
                         px={3}
                         bg="white"
                         border="none"
                         borderRadius="lg"
                         color="gray.900"
-                        _focus={{ 
+                        _placeholder={{ color: 'gray.500' }}
+                        _focus={{
                           boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
                           outline: 'none'
                         }}
                         fontSize="sm"
                       />
-                    </Box>
-                    <Box flex={1}>
-                      <Text fontSize="xs" color="gray.600" mb={1}>
-                        Valor (R$)
-                      </Text>
-                      <Input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={item.value}
-                        onChange={(e) => handleItemChange(item.id, 'value', parseFloat(e.target.value) || 0)}
-                        h={10}
-                        px={3}
-                        bg="white"
-                        border="none"
-                        borderRadius="lg"
-                        color="gray.900"
-                        _focus={{ 
-                          boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
-                          outline: 'none'
-                        }}
-                        fontSize="sm"
-                      />
-                    </Box>
-                    <IconButton
-                      aria-label="Remover item"
-                      icon={<FiTrash2 />}
-                      variant="ghost"
-                      color="gray.500"
-                      _hover={{ color: 'red.500' }}
-                      mt={5}
-                      size="sm"
-                      onClick={() => handleRemoveItem(item.id)}
-                      isDisabled={items.length === 1}
-                    />
-                  </Flex>
+                      <Flex align="center" gap={3} w="full">
+                        <Box flex={1}>
+                          <Text fontSize="xs" color="gray.600" mb={1}>
+                            Qtd
+                          </Text>
+                          <Input
+                            type="number"
+                            min="1"
+                            value={item.qtd}
+                            onChange={(e) => handleItemChange(item.id, 'qtd', parseInt(e.target.value) || 1)}
+                            h={10}
+                            px={3}
+                            bg="white"
+                            border="none"
+                            borderRadius="lg"
+                            color="gray.900"
+                            _focus={{
+                              boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
+                              outline: 'none'
+                            }}
+                            fontSize="sm"
+                          />
+                        </Box>
+                        <Box flex={1}>
+                          <Text fontSize="xs" color="gray.600" mb={1}>
+                            Valor (R$)
+                          </Text>
+                          <Input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={item.value}
+                            onChange={(e) => handleItemChange(item.id, 'value', parseFloat(e.target.value) || 0)}
+                            h={10}
+                            px={3}
+                            bg="white"
+                            border="none"
+                            borderRadius="lg"
+                            color="gray.900"
+                            _focus={{
+                              boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
+                              outline: 'none'
+                            }}
+                            fontSize="sm"
+                          />
+                        </Box>
+                        <IconButton
+                          aria-label="Remover item"
+                          icon={<FiTrash2 />}
+                          variant="ghost"
+                          color="gray.500"
+                          _hover={{ color: 'red.500' }}
+                          mt={5}
+                          size="sm"
+                          onClick={() => handleRemoveItem(item.id)}
+                          isDisabled={items.length === 1}
+                        />
+                      </Flex>
+                    </VStack>
+                  </Box>
+                ))}
+              </VStack>
+              <Button
+                type="button"
+                onClick={handleAddItem}
+                mt={3}
+                w="full"
+                h={10}
+                border="1px dashed"
+                borderColor="gray.300"
+                borderRadius="xl"
+                bg="transparent"
+                color="gray.500"
+                fontWeight="normal"
+                fontSize="sm"
+                leftIcon={<Icon as={FiPlus} w={4} h={4} />}
+                _hover={{
+                  color: 'gray.900',
+                  borderColor: 'emerald.300'
+                }}
+              >
+                Adicionar item
+              </Button>
+
+              {/* Botão IA - aparece quando há dados suficientes */}
+              {(title.trim() || description.trim() || items.some(item => item.desc.trim())) && (
+                <Button
+                  type="button"
+                  leftIcon={<Icon fontSize="24px" as={WiStars} />}
+                  colorScheme="purple"
+                  variant="outline"
+                  onClick={handleAISuggestion}
+                  isLoading={isLoadingAI}
+                  loadingText="Calculando..."
+                  size="sm"
+                  borderRadius="lg"
+                  mt={2}
+                  w="full"
+                >
+                  {isLoadingAI ? 'Calculando...' : 'Sugerir preço com IA'}
+                </Button>
+              )}
+            </Box>
+
+            <Box w="full">
+              <Text
+                as="label"
+                htmlFor="discount"
+                display="block"
+                fontSize="sm"
+                fontWeight="medium"
+                color="gray.900"
+                mb={2}
+              >
+                Desconto <Text as="span" color="gray.500">(opcional)</Text>
+              </Text>
+              <Input
+                id="discount"
+                name="discount"
+                type="number"
+                min="0"
+                max="100"
+                placeholder="0%"
+                h={12}
+                px={4}
+                bg="gray.100"
+                border="none"
+                borderRadius="xl"
+                color="gray.900"
+                _placeholder={{ color: 'gray.500' }}
+                _hover={{ bg: 'gray.100' }}
+                _focus={{
+                  bg: 'gray.100',
+                  boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
+                  outline: 'none'
+                }}
+                fontSize="sm"
+                value={discount}
+                onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
+              />
+            </Box>
+
+            {/* Navigation */}
+            <Flex align="center" justify="space-between" w="full" mt={8} pt={6} borderTop="1px" borderColor="gray.200">
+              <Button
+                as={RouterLink}
+                to="/onboarding/create-client"
+                variant="ghost"
+                leftIcon={<Icon as={FiChevronLeft} w={4} h={4} />}
+                color="gray.600"
+                _hover={{ color: 'gray.900' }}
+              >
+                Voltar
+              </Button>
+              <Button
+                type="submit"
+                h={12}
+                px={8}
+                bg="emerald.500"
+                _hover={{ bg: 'emerald.600' }}
+                color="white"
+                fontWeight="semibold"
+                fontSize="sm"
+                borderRadius="xl"
+                boxShadow="lg"
+                rightIcon={<Icon as={FiChevronRight} w={4} h={4} />}
+              >
+                Próximo
+              </Button>
+            </Flex>
+          </VStack>
+        </Box>
+
+        {/* Lado Direito: Preview */}
+        <Box display={{ base: 'block', lg: 'block' }}>
+          <Box
+            bg="white"
+            borderRadius="2xl"
+            position={{ base: 'relative', lg: 'sticky' }}
+            top={{ base: '0', lg: '100px' }}
+            p={6}
+            boxShadow="sm"
+            border="1px"
+            borderColor="gray.200"
+          >
+            <HStack justify="space-between" mb={6}>
+              <Heading size="md" color="gray.900">Preview do Orçamento</Heading>
+              <Icon as={FiEye} color="gray.400" />
+            </HStack>
+
+            <VStack spacing={4} align="stretch">
+              {/* Cabeçalho com dados do cliente */}
+              <Box bg="emerald.50" p={4} borderRadius="lg" borderWidth="1px" borderColor="emerald.200">
+                <Text fontSize="sm" color="emerald.700" fontWeight="semibold" mb={2}>
+                  ORÇAMENTO PARA:
+                </Text>
+                <VStack align="start" spacing={1}>
+                  <Text fontWeight="bold" color="gray.900">
+                    {clientData?.name || 'Cliente do onboarding'}
+                  </Text>
+                  {clientData?.phone && (
+                    <Text fontSize="sm" color="gray.600">{clientData.phone}</Text>
+                  )}
+                  {clientData?.email && (
+                    <Text fontSize="sm" color="gray.600">{clientData.email}</Text>
+                  )}
                 </VStack>
               </Box>
-            ))}
-          </VStack>
-          <Button
-            type="button"
-            onClick={handleAddItem}
-            mt={3}
-            w="full"
-            h={10}
-            border="1px dashed"
-            borderColor="gray.300"
-            borderRadius="xl"
-            bg="transparent"
-            color="gray.500"
-            fontWeight="normal"
-            fontSize="sm"
-            leftIcon={<Icon as={FiPlus} w={4} h={4} />}
-            _hover={{ 
-              color: 'gray.900',
-              borderColor: 'emerald.300'
-            }}
-          >
-            Adicionar item
-          </Button>
 
-          {/* Botão IA - aparece quando há dados suficientes */}
-          {(title.trim() || description.trim() || items.some(item => item.desc.trim())) && (
-            <Button
-              type="button"
-              leftIcon={<Icon fontSize="24px" as={WiStars} />}
-              colorScheme="purple"
-              variant="outline"
-              onClick={handleAISuggestion}
-              isLoading={isLoadingAI}
-              loadingText="Calculando..."
-              size="sm"
-              borderRadius="lg"
-              mt={2}
-              w="full"
-            >
-              {isLoadingAI ? 'Calculando...' : 'Sugerir preço com IA'}
-            </Button>
-          )}
+              <Heading size="lg" color="gray.900">{title || 'Título do Orçamento'}</Heading>
+              <Text color="gray.600">
+                {description || 'Descrição do orçamento aparecerá aqui...'}
+              </Text>
+              <Box height="1px" bg="gray.200" />
+              {items.filter(item => item.desc.trim()).map((item) => (
+                <HStack key={item.id} justify="space-between">
+                  <VStack align="start" spacing={0}>
+                    <Text fontWeight="medium" color="gray.900">{item.desc}</Text>
+                    <Text fontSize="sm" color="gray.600">
+                      {item.qtd}x R$ {parseFloat(item.value || 0).toFixed(2)}
+                    </Text>
+                  </VStack>
+                  <Text fontWeight="bold" color="gray.900">
+                    R$ {(parseFloat(item.value || 0) * parseInt(item.qtd || 1)).toFixed(2)}
+                  </Text>
+                </HStack>
+              ))}
+              <Box height="1px" bg="gray.200" />
+              <VStack spacing={2} align="stretch">
+                <HStack justify="space-between">
+                  <Text color="gray.900">Subtotal:</Text>
+                  <Text fontWeight="medium" color="gray.900">R$ {subtotal.toFixed(2)}</Text>
+                </HStack>
+                {discount > 0 && (
+                  <HStack justify="space-between">
+                    <Text color="gray.900">Desconto ({discount}%):</Text>
+                    <Text fontWeight="medium" color="red.500">
+                      - R$ {discountAmount.toFixed(2)}
+                    </Text>
+                  </HStack>
+                )}
+                <Box height="1px" bg="gray.200" />
+                <HStack justify="space-between">
+                  <Text fontSize="xl" fontWeight="bold" color="gray.900">
+                    Total
+                  </Text>
+                  <Text fontSize="xl" fontWeight="bold" color="emerald.600">
+                    R$ {total.toFixed(2)}
+                  </Text>
+                </HStack>
+              </VStack>
+            </VStack>
+          </Box>
         </Box>
-
-        <Box w="full">
-          <Text
-            as="label"
-            htmlFor="discount"
-            display="block"
-            fontSize="sm"
-            fontWeight="medium"
-            color="gray.900"
-            mb={2}
-          >
-            Desconto <Text as="span" color="gray.500">(opcional)</Text>
-          </Text>
-          <Input
-            id="discount"
-            name="discount"
-            type="number"
-            min="0"
-            step="0.01"
-            placeholder="0"
-            h={12}
-            px={4}
-            bg="gray.100"
-            border="none"
-            borderRadius="xl"
-            color="gray.900"
-            _placeholder={{ color: 'gray.500' }}
-            _hover={{ bg: 'gray.100' }}
-            _focus={{ 
-              bg: 'gray.100',
-              boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
-              outline: 'none'
-            }}
-            fontSize="sm"
-            value={discount}
-            onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
-          />
-        </Box>
-
-        {/* Total preview */}
-        <Box
-          w="full"
-          bg="emerald.50"
-          border="1px"
-          borderColor="emerald.100"
-          borderRadius="xl"
-          p={4}
-        >
-          <Flex justify="space-between" fontSize="sm" color="gray.600" mb={2}>
-            <Text>Subtotal</Text>
-            <Text>R$ {subtotal.toFixed(2)}</Text>
-          </Flex>
-          {discountAmount > 0 && (
-            <Flex justify="space-between" fontSize="sm" color="gray.600" mb={2}>
-              <Text>Desconto</Text>
-              <Text color="red.500">- R$ {discountAmount.toFixed(2)}</Text>
-            </Flex>
-          )}
-          <Flex
-            justify="space-between"
-            fontSize="md"
-            fontWeight="semibold"
-            color="gray.900"
-            pt={2}
-            borderTop="1px"
-            borderColor="emerald.200"
-          >
-            <Text>Total</Text>
-            <Text color="emerald.600">R$ {total.toFixed(2)}</Text>
-          </Flex>
-        </Box>
-
-        {/* Navigation */}
-        <Flex align="center" justify="space-between" w="full" mt={8} pt={6} borderTop="1px" borderColor="gray.200">
-          <Button
-            as={RouterLink}
-            to="/onboarding/create-client"
-            variant="ghost"
-            leftIcon={<Icon as={FiChevronLeft} w={4} h={4} />}
-            color="gray.600"
-            _hover={{ color: 'gray.900' }}
-          >
-            Voltar
-          </Button>
-          <Button
-            type="submit"
-            h={12}
-            px={8}
-            bg="emerald.500"
-            _hover={{ bg: 'emerald.600' }}
-            color="white"
-            fontWeight="semibold"
-            fontSize="sm"
-            borderRadius="xl"
-            boxShadow="lg"
-            rightIcon={<Icon as={FiChevronRight} w={4} h={4} />}
-          >
-            Próximo
-          </Button>
-        </Flex>
-      </VStack>
+      </SimpleGrid>
     </OnboardingLayout>
   )
 }

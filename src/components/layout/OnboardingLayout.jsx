@@ -11,6 +11,7 @@ const OnboardingLayout = ({
   children,
   currentStep,
   totalSteps,
+  contentWidth,
 }) => {
   return (
     <Flex minH="100vh" bg="gray.50" direction="column">
@@ -62,7 +63,7 @@ const OnboardingLayout = ({
 
       {/* Main content */}
       <Flex flex={1} align="start" justify="center" px={4} pb={8}>
-        <Box w="full" maxW="lg">
+        <Box w="full" maxW={contentWidth || 'lg'}>
           {children}
         </Box>
       </Flex>
