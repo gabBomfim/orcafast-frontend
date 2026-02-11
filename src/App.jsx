@@ -22,6 +22,7 @@ import SendProposalPage from './pages/onboarding/SendProposalPage'
 import SettingsProfile from './pages/settings/SettingsProfile'
 import SettingsGoals from './pages/settings/SettingsGoals'
 import SettingsSubscription from './pages/settings/SettingsSubscription'
+import UsersPage from './pages/UsersPage'
 
 // Contexts
 import { OnboardingProvider } from './contexts/OnboardingContext'
@@ -57,6 +58,7 @@ function App() {
                 <Route path="/dashboard/configuracoes/perfil" element={<SettingsProfile />} />
                 <Route path="/dashboard/configuracoes/metas" element={<SettingsGoals />} />
                 <Route path="/dashboard/configuracoes/assinatura" element={<SettingsSubscription />} />
+                <Route path="/dashboard/usuarios" element={<UsersPage />} />
               </Route>
             </Routes>
           </Router>

@@ -101,7 +101,50 @@ const RegisterForm = ({ onSubmit, onGoogleLogin, onFacebookLogin, isLoading }) =
           color="gray.900"
           _placeholder={{ color: 'gray.500' }}
           _hover={{ bg: 'gray.100' }}
-          _focus={{ 
+          _focus={{
+            bg: 'gray.100',
+            boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
+            outline: 'none'
+          }}
+          fontSize="sm"
+          required
+        />
+
+        {/* Company Name field */}
+        <Input
+          type="text"
+          name="company_name"
+          placeholder="Nome da empresa"
+          h={12}
+          px={4}
+          bg="gray.100"
+          border="none"
+          borderRadius="xl"
+          color="gray.900"
+          _placeholder={{ color: 'gray.500' }}
+          _hover={{ bg: 'gray.100' }}
+          _focus={{
+            bg: 'gray.100',
+            boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
+            outline: 'none'
+          }}
+          fontSize="sm"
+          required
+        />
+
+        <Input
+          type="text"
+          name="document"
+          placeholder="CNPJ ou CPF"
+          h={12}
+          px={4}
+          bg="gray.100"
+          border="none"
+          borderRadius="xl"
+          color="gray.900"
+          _placeholder={{ color: 'gray.500' }}
+          _hover={{ bg: 'gray.100' }}
+          _focus={{
             bg: 'gray.100',
             boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
             outline: 'none'
@@ -123,7 +166,7 @@ const RegisterForm = ({ onSubmit, onGoogleLogin, onFacebookLogin, isLoading }) =
           color="gray.900"
           _placeholder={{ color: 'gray.500' }}
           _hover={{ bg: 'gray.100' }}
-          _focus={{ 
+          _focus={{
             bg: 'gray.100',
             boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
             outline: 'none'
@@ -148,7 +191,7 @@ const RegisterForm = ({ onSubmit, onGoogleLogin, onFacebookLogin, isLoading }) =
             color="gray.900"
             _placeholder={{ color: 'gray.500' }}
             _hover={{ bg: 'gray.100' }}
-            _focus={{ 
+            _focus={{
               bg: 'gray.100',
               boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
               outline: 'none'
@@ -189,7 +232,7 @@ const RegisterForm = ({ onSubmit, onGoogleLogin, onFacebookLogin, isLoading }) =
             color="gray.900"
             _placeholder={{ color: 'gray.500' }}
             _hover={{ bg: 'gray.100' }}
-            _focus={{ 
+            _focus={{
               bg: 'gray.100',
               boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
               outline: 'none'

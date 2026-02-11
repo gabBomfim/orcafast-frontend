@@ -35,6 +35,7 @@ import {
 import { WiStars } from 'react-icons/wi'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { proposalService, clientService } from '../services'
+import { useSubscription } from '../hooks/useSubscription'
 
 const CreateProposalPage = () => {
   const navigate = useNavigate()
@@ -73,9 +74,9 @@ const CreateProposalPage = () => {
     }),
     option: (provided, state) => ({
       ...provided,
-      backgroundColor: state.isSelected 
+      backgroundColor: state.isSelected
         ? '#10B981' // emerald.500
-        : state.isFocused 
+        : state.isFocused
           ? '#ECFDF5' // emerald.50
           : 'transparent',
       color: state.isSelected ? 'white' : '#111827', // gray.900
@@ -114,6 +115,21 @@ const CreateProposalPage = () => {
     loadClients()
   }, [])
 
+  // Check subscription limits
+  const { canCreateProposal } = useSubscription()
+  useEffect(() => {
+    if (!isEditMode && !canCreateProposal()) {
+      toast({
+        title: 'Limite atingido',
+        description: 'Você atingiu o limite de propostas do seu plano.',
+        status: 'warning',
+        duration: 5000,
+        isClosable: true,
+      })
+      navigate('/dashboard/propostas')
+    }
+  }, [isEditMode, canCreateProposal, navigate, toast])
+
   useEffect(() => {
     if (!isEditMode || fetching.current) return
     fetching.current = true
@@ -128,7 +144,7 @@ const CreateProposalPage = () => {
           discount: parseFloat(data.discount || 0),
           validUntil: data.valid_until ? new Date(data.valid_until).toISOString().split('T')[0] : '',
         })
-        
+
         if (data.items && data.items.length > 0) {
           setItems(data.items.map((item, index) => ({
             id: item.id || index + 1,
@@ -214,13 +230,13 @@ const CreateProposalPage = () => {
     }
 
     setIsLoadingAI(true)
-    
+
     // Simulação da IA baseada nos dados do formulário
     await new Promise(resolve => setTimeout(resolve, 2000))
-    
+
     // Lógica simples de precificação baseada nos dados
     let suggestedPrice = 500 // base
-    
+
     if (formData.title.toLowerCase().includes('website') || formData.title.toLowerCase().includes('site')) {
       suggestedPrice = 2500
     } else if (formData.title.toLowerCase().includes('logo') || formData.title.toLowerCase().includes('design')) {
@@ -228,12 +244,12 @@ const CreateProposalPage = () => {
     } else if (formData.title.toLowerCase().includes('consultoria') || formData.title.toLowerCase().includes('consultor')) {
       suggestedPrice = 1500
     }
-    
+
     // Ajustes baseados na descrição
     if (formData.description.toLowerCase().includes('complexo') || formData.description.toLowerCase().includes('avançado')) {
       suggestedPrice *= 1.5
     }
-    
+
     // Aplica no primeiro item
     if (items.length > 0) {
       handleItemChange(items[0].id, 'value', suggestedPrice)
@@ -245,7 +261,7 @@ const CreateProposalPage = () => {
         isClosable: true,
       })
     }
-    
+
     setIsLoadingAI(false)
   }
 
@@ -258,16 +274,16 @@ const CreateProposalPage = () => {
   const discountAmount = (subtotal * (formData.discount / 100))
   const total = subtotal - discountAmount
 
-  const selectedClient = Array.isArray(clients) 
+  const selectedClient = Array.isArray(clients)
     ? clients.find(c => c.id === parseInt(formData.clientId))
     : null
 
-  const clientOptions = Array.isArray(clients) 
+  const clientOptions = Array.isArray(clients)
     ? clients.map(client => ({
-        value: client.id,
-        label: `${client.name} ${client.company ? `- ${client.company}` : ''}`,
-        original: client
-      }))
+      value: client.id,
+      label: `${client.name} ${client.company ? `- ${client.company}` : ''}`,
+      original: client
+    }))
     : []
 
   const handleSubmit = async (e) => {
@@ -326,241 +342,188 @@ const CreateProposalPage = () => {
     <Flex minH="100vh" bg="gray.50" direction="column" py={8}>
       <Flex flex={1} justify="center" px={4}>
         <Box w="full" maxW="container.xl">
-      <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={8}>
-        {/* Lado Esquerdo: Formulário */}
+          <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={8}>
+            {/* Lado Esquerdo: Formulário */}
             <Box
               bg="white"
               borderRadius="2xl"
               p={8}
               boxShadow="sm"
             >
-        <VStack spacing={6} as="form" onSubmit={handleSubmit}>
+              <VStack spacing={6} as="form" onSubmit={handleSubmit}>
                 {/* Icon and title */}
                 <VStack textAlign="center" w="full">
-                <Flex
-                  w={16}
-                  h={16}
-                  bg="emerald.50"
-            borderRadius="2xl"
-                  align="center"
-                  justify="center"
-                  mx="auto"
-                  mb={4}
-                >
-                  <Icon as={FiFileText} w={8} h={8} color="emerald.500" />
-                </Flex>
-                <Heading as="h1" fontSize="2xl" fontWeight="bold" color="gray.900" mb={2}>
-                  {isEditMode ? 'Editar orçamento' : 'Criar orçamento'}
-                </Heading>
-                <Text color="gray.600" mb={6}>
-                  {isEditMode ? 'Atualize os dados do orçamento' : 'Crie um novo orçamento para seu cliente'}
-                </Text>
-              </VStack>
+                  <Flex
+                    w={16}
+                    h={16}
+                    bg="emerald.50"
+                    borderRadius="2xl"
+                    align="center"
+                    justify="center"
+                    mx="auto"
+                    mb={4}
+                  >
+                    <Icon as={FiFileText} w={8} h={8} color="emerald.500" />
+                  </Flex>
+                  <Heading as="h1" fontSize="2xl" fontWeight="bold" color="gray.900" mb={2}>
+                    {isEditMode ? 'Editar orçamento' : 'Criar orçamento'}
+                  </Heading>
+                  <Text color="gray.600" mb={6}>
+                    {isEditMode ? 'Atualize os dados do orçamento' : 'Crie um novo orçamento para seu cliente'}
+                  </Text>
+                </VStack>
 
-              {isLoadingData ? (
-                <Center py={12} w="full">
-                  <Spinner size="lg" color="emerald.500" />
-                </Center>
-              ) : (
-                <VStack spacing={6} w="full">
-                  <FormControl isRequired w="full">
-                    <FormLabel
-                      fontSize="sm"
-                      fontWeight="medium"
-                      color="gray.900"
-                    >
-                      Cliente *
-                    </FormLabel>
-                    <ReactSelect
-                      name="clientId"
-                      value={clientOptions.find(option => option.value === parseInt(formData.clientId)) || null}
-                      onChange={(option) => setFormData({ ...formData, clientId: option ? option.value : '' })}
-                      options={clientOptions}
-                      placeholder={loadingClients ? 'Carregando clientes...' : 'Selecione ou busque um cliente...'}
-                      isDisabled={loadingClients}
-                      isClearable
-                      isSearchable
-                      isLoading={loadingClients}
-                      styles={customSelectStyles}
-                      noOptionsMessage={() => 'Nenhum cliente encontrado'}
-                      loadingMessage={() => 'Carregando...'}
-                    />
-                  </FormControl>
+                {isLoadingData ? (
+                  <Center py={12} w="full">
+                    <Spinner size="lg" color="emerald.500" />
+                  </Center>
+                ) : (
+                  <VStack spacing={6} w="full">
+                    <FormControl isRequired w="full">
+                      <FormLabel
+                        fontSize="sm"
+                        fontWeight="medium"
+                        color="gray.900"
+                      >
+                        Cliente *
+                      </FormLabel>
+                      <ReactSelect
+                        name="clientId"
+                        value={clientOptions.find(option => option.value === parseInt(formData.clientId)) || null}
+                        onChange={(option) => setFormData({ ...formData, clientId: option ? option.value : '' })}
+                        options={clientOptions}
+                        placeholder={loadingClients ? 'Carregando clientes...' : 'Selecione ou busque um cliente...'}
+                        isDisabled={loadingClients}
+                        isClearable
+                        isSearchable
+                        isLoading={loadingClients}
+                        styles={customSelectStyles}
+                        noOptionsMessage={() => 'Nenhum cliente encontrado'}
+                        loadingMessage={() => 'Carregando...'}
+                      />
+                    </FormControl>
 
-                  <Box w="full">
-                    <Text
-                      as="label"
-                      htmlFor="title"
-                      display="block"
-                      fontSize="sm"
-                      fontWeight="medium"
-                      color="gray.900"
-                      mb={2}
-                    >
-                      Título do orçamento *
-                    </Text>
-                    <Input
-                      id="title"
-                      name="title"
-                      type="text"
-                      placeholder="Ex: Desenvolvimento de Website"
-                      h={12}
-                      px={4}
-                      bg="gray.100"
-                      border="none"
-                      borderRadius="xl"
-                      color="gray.900"
-                      _placeholder={{ color: 'gray.500' }}
-                      _hover={{ bg: 'gray.100' }}
-                      _focus={{ 
-                        bg: 'gray.100',
-                        boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
-                        outline: 'none'
-                      }}
-                      fontSize="sm"
-                      value={formData.title}
-                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                      required
-                    />
-                  </Box>
+                    <Box w="full">
+                      <Text
+                        as="label"
+                        htmlFor="title"
+                        display="block"
+                        fontSize="sm"
+                        fontWeight="medium"
+                        color="gray.900"
+                        mb={2}
+                      >
+                        Título do orçamento *
+                      </Text>
+                      <Input
+                        id="title"
+                        name="title"
+                        type="text"
+                        placeholder="Ex: Desenvolvimento de Website"
+                        h={12}
+                        px={4}
+                        bg="gray.100"
+                        border="none"
+                        borderRadius="xl"
+                        color="gray.900"
+                        _placeholder={{ color: 'gray.500' }}
+                        _hover={{ bg: 'gray.100' }}
+                        _focus={{
+                          bg: 'gray.100',
+                          boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
+                          outline: 'none'
+                        }}
+                        fontSize="sm"
+                        value={formData.title}
+                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                        required
+                      />
+                    </Box>
 
-                  <Box w="full">
-                    <Text
-                      as="label"
-                      htmlFor="description"
-                      display="block"
-                      fontSize="sm"
-                      fontWeight="medium"
-                      color="gray.900"
-                      mb={2}
-                    >
-                      Descrição (opcional)
-                    </Text>
-                    <Textarea
-                      id="description"
-                      name="description"
-                      placeholder="Descreva brevemente o projeto..."
-                      minH="120px"
-                      px={4}
-                      py={3}
-                      bg="gray.100"
-                      border="none"
-                      borderRadius="xl"
-                      color="gray.900"
-                      _placeholder={{ color: 'gray.500' }}
-                      _hover={{ bg: 'gray.100' }}
-                      _focus={{ 
-                        bg: 'gray.100',
-                        boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
-                        outline: 'none'
-                      }}
-                      fontSize="sm"
-                      value={formData.description}
-                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    />
-                  </Box>
+                    <Box w="full">
+                      <Text
+                        as="label"
+                        htmlFor="description"
+                        display="block"
+                        fontSize="sm"
+                        fontWeight="medium"
+                        color="gray.900"
+                        mb={2}
+                      >
+                        Descrição (opcional)
+                      </Text>
+                      <Textarea
+                        id="description"
+                        name="description"
+                        placeholder="Descreva brevemente o projeto..."
+                        minH="120px"
+                        px={4}
+                        py={3}
+                        bg="gray.100"
+                        border="none"
+                        borderRadius="xl"
+                        color="gray.900"
+                        _placeholder={{ color: 'gray.500' }}
+                        _hover={{ bg: 'gray.100' }}
+                        _focus={{
+                          bg: 'gray.100',
+                          boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
+                          outline: 'none'
+                        }}
+                        fontSize="sm"
+                        value={formData.description}
+                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      />
+                    </Box>
 
-                  <FormControl isRequired w="full">
-                    <FormLabel
-                      fontSize="sm"
-                      fontWeight="medium"
-                      color="gray.900"
-                    >
-                      Válida até *
-                    </FormLabel>
+                    <FormControl isRequired w="full">
+                      <FormLabel
+                        fontSize="sm"
+                        fontWeight="medium"
+                        color="gray.900"
+                      >
+                        Válida até *
+                      </FormLabel>
                       <Input
                         name="validUntil"
                         type="date"
                         value={formData.validUntil}
                         onChange={(e) => setFormData({ ...formData, validUntil: e.target.value })}
-                      h={12}
-                      px={4}
-                      bg="gray.100"
-                      border="none"
+                        h={12}
+                        px={4}
+                        bg="gray.100"
+                        border="none"
                         borderRadius="xl"
-                      color="gray.900"
-                      _hover={{ bg: 'gray.100' }}
-                      _focus={{ 
-                        bg: 'gray.100',
-                        boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
-                        outline: 'none'
-                      }}
-                    />
-                  </FormControl>
+                        color="gray.900"
+                        _hover={{ bg: 'gray.100' }}
+                        _focus={{
+                          bg: 'gray.100',
+                          boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
+                          outline: 'none'
+                        }}
+                      />
+                    </FormControl>
 
-                  <VStack spacing={4} w="full" align="start">
-                    <Heading as="h3" size="sm" color="gray.900">
-                    Itens do orçamento
-                  </Heading>
-                  {items.map((item, index) => (
-                    <VStack
-                      key={item.id}
-                        spacing={3}
-                      w="full"
-                      p={4}
-                        bg="white"
-                      borderRadius="xl"
-                        boxShadow="sm"
-                    >
-                        <Box w="full">
-                          <Text fontSize="sm" fontWeight="medium" color="gray.900" mb={2}>
-                            Descrição do item
-                          </Text>
-                        <Input
-                          placeholder="Ex: Criação de logo"
-                            h={12}
-                            px={4}
-                            bg="gray.100"
-                            border="none"
-                            borderRadius="xl"
-                            color="gray.900"
-                            _placeholder={{ color: 'gray.500' }}
-                            _hover={{ bg: 'gray.100' }}
-                            _focus={{ 
-                              bg: 'gray.100',
-                              boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
-                              outline: 'none'
-                            }}
-                            fontSize="sm"
-                          value={item.desc}
-                          onChange={(e) =>
-                            handleItemChange(item.id, 'desc', e.target.value)
-                          }
-                        />
-                        </Box>
-                        <HStack w="full" spacing={3}>
-                          <Box flex={1}>
+                    <VStack spacing={4} w="full" align="start">
+                      <Heading as="h3" size="sm" color="gray.900">
+                        Itens do orçamento
+                      </Heading>
+                      {items.map((item, index) => (
+                        <VStack
+                          key={item.id}
+                          spacing={3}
+                          w="full"
+                          p={4}
+                          bg="white"
+                          borderRadius="xl"
+                          boxShadow="sm"
+                        >
+                          <Box w="full">
                             <Text fontSize="sm" fontWeight="medium" color="gray.900" mb={2}>
-                              Quantidade
-                            </Text>
-                          <Input
-                            type="number"
-                              h={12}
-                              px={4}
-                              bg="gray.100"
-                              border="none"
-                              borderRadius="xl"
-                              color="gray.900"
-                              _hover={{ bg: 'gray.100' }}
-                              _focus={{ 
-                                bg: 'gray.100',
-                                boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
-                                outline: 'none'
-                              }}
-                            value={item.qtd}
-                            onChange={(e) =>
-                              handleItemChange(item.id, 'qtd', e.target.value)
-                            }
-                          />
-                          </Box>
-                          <Box flex={1}>
-                            <Text fontSize="sm" fontWeight="medium" color="gray.900" mb={2}>
-                              Valor (R$)
+                              Descrição do item
                             </Text>
                             <Input
-                              type="number"
-                              placeholder="1500.00"
-                              step="0.01"
+                              placeholder="Ex: Criação de logo"
                               h={12}
                               px={4}
                               bg="gray.100"
@@ -569,202 +532,255 @@ const CreateProposalPage = () => {
                               color="gray.900"
                               _placeholder={{ color: 'gray.500' }}
                               _hover={{ bg: 'gray.100' }}
-                              _focus={{ 
+                              _focus={{
                                 bg: 'gray.100',
                                 boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
                                 outline: 'none'
                               }}
                               fontSize="sm"
-                              value={item.value}
+                              value={item.desc}
                               onChange={(e) =>
-                                handleItemChange(item.id, 'value', e.target.value)
+                                handleItemChange(item.id, 'desc', e.target.value)
                               }
                             />
                           </Box>
-                      </HStack>
-                        {items.length > 1 && (
-                      <IconButton
-                        aria-label="Remover item"
-                        icon={<FiTrash2 />}
+                          <HStack w="full" spacing={3}>
+                            <Box flex={1}>
+                              <Text fontSize="sm" fontWeight="medium" color="gray.900" mb={2}>
+                                Quantidade
+                              </Text>
+                              <Input
+                                type="number"
+                                h={12}
+                                px={4}
+                                bg="gray.100"
+                                border="none"
+                                borderRadius="xl"
+                                color="gray.900"
+                                _hover={{ bg: 'gray.100' }}
+                                _focus={{
+                                  bg: 'gray.100',
+                                  boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
+                                  outline: 'none'
+                                }}
+                                value={item.qtd}
+                                onChange={(e) =>
+                                  handleItemChange(item.id, 'qtd', e.target.value)
+                                }
+                              />
+                            </Box>
+                            <Box flex={1}>
+                              <Text fontSize="sm" fontWeight="medium" color="gray.900" mb={2}>
+                                Valor (R$)
+                              </Text>
+                              <Input
+                                type="number"
+                                placeholder="1500.00"
+                                step="0.01"
+                                h={12}
+                                px={4}
+                                bg="gray.100"
+                                border="none"
+                                borderRadius="xl"
+                                color="gray.900"
+                                _placeholder={{ color: 'gray.500' }}
+                                _hover={{ bg: 'gray.100' }}
+                                _focus={{
+                                  bg: 'gray.100',
+                                  boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
+                                  outline: 'none'
+                                }}
+                                fontSize="sm"
+                                value={item.value}
+                                onChange={(e) =>
+                                  handleItemChange(item.id, 'value', e.target.value)
+                                }
+                              />
+                            </Box>
+                          </HStack>
+                          {items.length > 1 && (
+                            <IconButton
+                              aria-label="Remover item"
+                              icon={<FiTrash2 />}
+                              variant="ghost"
+                              colorScheme="red"
+                              size="sm"
+                              alignSelf="flex-end"
+                              onClick={() => handleRemoveItem(item.id)}
+                            />
+                          )}
+                        </VStack>
+                      ))}
+                      <Button
+                        leftIcon={<FiPlus />}
                         variant="ghost"
-                        colorScheme="red"
-                            size="sm"
-                        alignSelf="flex-end"
-                        onClick={() => handleRemoveItem(item.id)}
-                      />
-                        )}
+                        colorScheme="emerald"
+                        onClick={handleAddItem}
+                        size="sm"
+                      >
+                        Adicionar item
+                      </Button>
+
+                      {/* Botão IA - aparece quando há dados suficientes */}
+                      {(formData.title.trim() || formData.description.trim() || items.some(item => item.desc.trim())) && (
+                        <Button
+                          leftIcon={<Icon fontSize="24px" as={WiStars} />}
+                          colorScheme="purple"
+                          variant="outline"
+                          onClick={handleAISuggestion}
+                          isLoading={isLoadingAI}
+                          loadingText="Calculando..."
+                          size="sm"
+                        >
+                          {isLoadingAI ? 'Calculando...' : 'Sugerir preço com IA'}
+                        </Button>
+                      )}
                     </VStack>
-                  ))}
-                  <Button
-                    leftIcon={<FiPlus />}
-                      variant="ghost"
-                    colorScheme="emerald"
-                    onClick={handleAddItem}
-                      size="sm"
-                  >
-                    Adicionar item
-                  </Button>
-                  
-                  {/* Botão IA - aparece quando há dados suficientes */}
-                  {(formData.title.trim() || formData.description.trim() || items.some(item => item.desc.trim())) && (
-                    <Button
-                      leftIcon={<Icon fontSize="24px" as={WiStars} />}
-                      colorScheme="purple"
-                      variant="outline"
-                      onClick={handleAISuggestion}
-                      isLoading={isLoadingAI}
-                      loadingText="Calculando..."
-                      size="sm"
-                    >
-                      {isLoadingAI ? 'Calculando...' : 'Sugerir preço com IA'}
-                    </Button>
-                  )}
-                </VStack>
 
-                {/* Campo de Desconto */}
-                  <FormControl w="full">
-                  <FormLabel
-                      fontSize="sm"
-                      fontWeight="medium"
-                      color="gray.900"
-                  >
-                    Desconto (opcional)
-                  </FormLabel>
-                    <Input
-                      name="discount"
-                      type="number"
-                      min="0"
-                      max="100"
-                      placeholder="0%"
-                      h={12}
-                      px={4}
-                      bg="gray.100"
-                      border="none"
-                      borderRadius="xl"
-                      color="gray.900"
-                      _placeholder={{ color: 'gray.500' }}
-                      _hover={{ bg: 'gray.100' }}
-                      _focus={{ 
-                        bg: 'gray.100',
-                        boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
-                        outline: 'none'
-                      }}
-                      value={formData.discount}
-                      onChange={(e) => setFormData({ ...formData, discount: parseFloat(e.target.value) || 0 })}
-                    />
-                </FormControl>
+                    {/* Campo de Desconto */}
+                    <FormControl w="full">
+                      <FormLabel
+                        fontSize="sm"
+                        fontWeight="medium"
+                        color="gray.900"
+                      >
+                        Desconto (opcional)
+                      </FormLabel>
+                      <Input
+                        name="discount"
+                        type="number"
+                        min="0"
+                        max="100"
+                        placeholder="0%"
+                        h={12}
+                        px={4}
+                        bg="gray.100"
+                        border="none"
+                        borderRadius="xl"
+                        color="gray.900"
+                        _placeholder={{ color: 'gray.500' }}
+                        _hover={{ bg: 'gray.100' }}
+                        _focus={{
+                          bg: 'gray.100',
+                          boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
+                          outline: 'none'
+                        }}
+                        value={formData.discount}
+                        onChange={(e) => setFormData({ ...formData, discount: parseFloat(e.target.value) || 0 })}
+                      />
+                    </FormControl>
 
-                  {/* Navigation */}
-                  <Flex align="center" justify="space-between" w="full" mt={8} pt={6} borderTop="1px" borderColor="gray.200">
-                  <Button
-                    onClick={() => navigate('/dashboard/propostas')}
-                    variant="ghost"
-                      leftIcon={<Icon as={FiChevronLeft} w={4} h={4} />}
-                      color="gray.600"
-                      _hover={{ color: 'gray.900' }}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button
-                    type="submit"
-                      h={12}
-                      px={8}
-                      bg="emerald.500"
-                      _hover={{ bg: 'emerald.600' }}
-                      color="white"
-                      fontWeight="semibold"
-                      fontSize="sm"
-                      borderRadius="xl"
-                      boxShadow="lg"
-                      rightIcon={<Icon as={FiChevronRight} w={4} h={4} />}
-                    isLoading={isLoading}
-                    loadingText="Salvando..."
-                  >
-                    {isEditMode ? 'Atualizar Orçamento' : 'Salvar Orçamento'}
-                  </Button>
-                  </Flex>
+                    {/* Navigation */}
+                    <Flex align="center" justify="space-between" w="full" mt={8} pt={6} borderTop="1px" borderColor="gray.200">
+                      <Button
+                        onClick={() => navigate('/dashboard/propostas')}
+                        variant="ghost"
+                        leftIcon={<Icon as={FiChevronLeft} w={4} h={4} />}
+                        color="gray.600"
+                        _hover={{ color: 'gray.900' }}
+                      >
+                        Cancelar
+                      </Button>
+                      <Button
+                        type="submit"
+                        h={12}
+                        px={8}
+                        bg="emerald.500"
+                        _hover={{ bg: 'emerald.600' }}
+                        color="white"
+                        fontWeight="semibold"
+                        fontSize="sm"
+                        borderRadius="xl"
+                        boxShadow="lg"
+                        rightIcon={<Icon as={FiChevronRight} w={4} h={4} />}
+                        isLoading={isLoading}
+                        loadingText="Salvando..."
+                      >
+                        {isEditMode ? 'Atualizar Orçamento' : 'Salvar Orçamento'}
+                      </Button>
+                    </Flex>
+                  </VStack>
+                )}
               </VStack>
-              )}
-        </VStack>
             </Box>
 
-        {/* Lado Direito: Preview */}
-        <Box display={{ base: 'none', lg: 'block' }}>
+            {/* Lado Direito: Preview */}
+            <Box display={{ base: 'none', lg: 'block' }}>
               <Box
                 bg="white"
-            borderRadius="2xl"
-            position="sticky"
-            top="100px"
+                borderRadius="2xl"
+                position="sticky"
+                top="100px"
                 p={6}
                 boxShadow="sm"
-          >
+              >
                 <HStack justify="space-between" mb={6}>
                   <Heading size="md" color="gray.900">Preview do Orçamento</Heading>
-                <Icon as={FiEye} color="gray.400" />
-              </HStack>
-                
-              <VStack spacing={4} align="stretch">
-                {/* Cabeçalho da Proposta */}
-                <Box bg="emerald.50" p={4} borderRadius="lg" borderWidth="1px" borderColor="emerald.200">
-                  <Text fontSize="sm" color="emerald.700" fontWeight="semibold" mb={2}>
-                    ORÇAMENTO PARA:
-                  </Text>
-                  <VStack align="start" spacing={1}>
-                      <Text fontWeight="bold" color="gray.900">
-                      {selectedClient?.name || 'Selecione um cliente'}
+                  <Icon as={FiEye} color="gray.400" />
+                </HStack>
+
+                <VStack spacing={4} align="stretch">
+                  {/* Cabeçalho da Proposta */}
+                  <Box bg="emerald.50" p={4} borderRadius="lg" borderWidth="1px" borderColor="emerald.200">
+                    <Text fontSize="sm" color="emerald.700" fontWeight="semibold" mb={2}>
+                      ORÇAMENTO PARA:
                     </Text>
-                    {selectedClient?.phone && (
+                    <VStack align="start" spacing={1}>
+                      <Text fontWeight="bold" color="gray.900">
+                        {selectedClient?.name || 'Selecione um cliente'}
+                      </Text>
+                      {selectedClient?.phone && (
                         <Text fontSize="sm" color="gray.600">{selectedClient.phone}</Text>
-                    )}
-                    {selectedClient?.email && (
+                      )}
+                      {selectedClient?.email && (
                         <Text fontSize="sm" color="gray.600">{selectedClient.email}</Text>
-                    )}
-                  </VStack>
-                </Box>
-                
+                      )}
+                    </VStack>
+                  </Box>
+
                   <Heading size="lg" color="gray.900">{formData.title || 'Título do Orçamento'}</Heading>
                   <Text color="gray.600">
-                  {formData.description || 'Descrição do orçamento aparecerá aqui...'}
-                </Text>
+                    {formData.description || 'Descrição do orçamento aparecerá aqui...'}
+                  </Text>
                   <Box height="1px" bg="gray.200" />
-                {items.filter(item => item.desc.trim()).map((item) => (
-                  <HStack key={item.id} justify="space-between">
-                    <VStack align="start" spacing={0}>
+                  {items.filter(item => item.desc.trim()).map((item) => (
+                    <HStack key={item.id} justify="space-between">
+                      <VStack align="start" spacing={0}>
                         <Text fontWeight="medium" color="gray.900">{item.desc}</Text>
                         <Text fontSize="sm" color="gray.600">
-                        {item.qtd}x R$ {parseFloat(item.value || 0).toFixed(2)}
-                      </Text>
-                    </VStack>
+                          {item.qtd}x R$ {parseFloat(item.value || 0).toFixed(2)}
+                        </Text>
+                      </VStack>
                       <Text fontWeight="bold" color="gray.900">
-                      R$ {(parseFloat(item.value || 0) * parseInt(item.qtd || 1)).toFixed(2)}
-                    </Text>
-                  </HStack>
-                ))}
-                  <Box height="1px" bg="gray.200" />
-                <VStack spacing={2} align="stretch">
-                  <HStack justify="space-between">
-                      <Text color="gray.900">Subtotal:</Text>
-                      <Text fontWeight="medium" color="gray.900">R$ {subtotal.toFixed(2)}</Text>
-                  </HStack>
-                  {formData.discount > 0 && (
-                    <HStack justify="space-between">
-                        <Text color="gray.900">Desconto ({formData.discount}%):</Text>
-                      <Text fontWeight="medium" color="red.500">
-                        - R$ {discountAmount.toFixed(2)}
+                        R$ {(parseFloat(item.value || 0) * parseInt(item.qtd || 1)).toFixed(2)}
                       </Text>
                     </HStack>
-                  )}
+                  ))}
+                  <Box height="1px" bg="gray.200" />
+                  <VStack spacing={2} align="stretch">
+                    <HStack justify="space-between">
+                      <Text color="gray.900">Subtotal:</Text>
+                      <Text fontWeight="medium" color="gray.900">R$ {subtotal.toFixed(2)}</Text>
+                    </HStack>
+                    {formData.discount > 0 && (
+                      <HStack justify="space-between">
+                        <Text color="gray.900">Desconto ({formData.discount}%):</Text>
+                        <Text fontWeight="medium" color="red.500">
+                          - R$ {discountAmount.toFixed(2)}
+                        </Text>
+                      </HStack>
+                    )}
                     <Box height="1px" bg="gray.200" />
-                  <HStack justify="space-between">
+                    <HStack justify="space-between">
                       <Text fontSize="xl" fontWeight="bold" color="gray.900">
-                      Total
-                    </Text>
-                    <Text fontSize="xl" fontWeight="bold" color="emerald.600">
-                      R$ {total.toFixed(2)}
-                    </Text>
-                  </HStack>
+                        Total
+                      </Text>
+                      <Text fontSize="xl" fontWeight="bold" color="emerald.600">
+                        R$ {total.toFixed(2)}
+                      </Text>
+                    </HStack>
+                  </VStack>
                 </VStack>
-              </VStack>
               </Box>
             </Box>
           </SimpleGrid>

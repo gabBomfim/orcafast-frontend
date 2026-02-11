@@ -11,6 +11,7 @@ import {
   Flex,
   useDisclosure,
   Badge,
+  Tooltip,
 } from '@chakra-ui/react'
 import { Link, useLocation } from 'react-router-dom'
 import {
@@ -28,13 +29,16 @@ import {
   FiAward,
   FiChevronRight,
   FiChevronLeft,
+  FiLock,
 } from 'react-icons/fi'
 import { useAuth } from '../../hooks/useAuth'
 import { useSidebar } from '../../contexts/SidebarContext'
+import { useSubscription } from '../../hooks/useSubscription'
 
 const SidebarContent = ({ isCollapsed = false, onItemClick = () => { } }) => {
   const { logout, getCurrentUser } = useAuth()
   const { toggleCollapse } = useSidebar()
+  const { isBusiness, canSetFinancialGoals, canCustomizeBranding } = useSubscription()
   const location = useLocation()
   const user = getCurrentUser()
   const { isOpen: isSettingsOpen, onToggle: onSettingsToggle } = useDisclosure()
@@ -45,9 +49,23 @@ const SidebarContent = ({ isCollapsed = false, onItemClick = () => { } }) => {
     { icon: FiFileText, label: 'Orçamentos', path: '/dashboard/propostas' },
   ]
 
+  if (isBusiness) {
+    menuItems.push({ icon: FiUsers, label: 'Usuários', path: '/dashboard/usuarios' })
+  }
+
   const settingsSubItems = [
-    { icon: FiUser, label: 'Meu Perfil', path: '/dashboard/configuracoes/perfil' },
-    { icon: FiTarget, label: 'Metas', path: '/dashboard/configuracoes/metas' },
+    {
+      icon: FiUser,
+      label: 'Meu Perfil',
+      path: '/dashboard/configuracoes/perfil',
+      isLocked: !canCustomizeBranding
+    },
+    {
+      icon: FiTarget,
+      label: 'Metas',
+      path: '/dashboard/configuracoes/metas',
+      isLocked: !canSetFinancialGoals
+    },
     { icon: FiStar, label: 'Assinatura', path: '/dashboard/configuracoes/assinatura' },
   ]
 
@@ -296,6 +314,9 @@ const SidebarContent = ({ isCollapsed = false, onItemClick = () => { } }) => {
                       leftIconSpacing={3}
                     >
                       {item.label}
+                      {item.isLocked && (
+                        <Icon as={FiLock} ml="auto" color="gray.400" boxSize={3} />
+                      )}
                     </Button>
                   )
                 })}

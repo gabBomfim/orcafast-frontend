@@ -32,6 +32,8 @@ const LoginModal = ({ isOpen, onClose, onSuccess }) => {
     const formData = new FormData(e.target)
     const data = {
       name: formData.get('name'),
+      company_name: formData.get('company_name'),
+      document: formData.get('document'),
       email: formData.get('email'),
       password: formData.get('password'),
       password_confirmation: formData.get('password_confirmation'),
@@ -43,7 +45,7 @@ const LoginModal = ({ isOpen, onClose, onSuccess }) => {
           email: data.email,
           password: data.password,
         })
-        
+
         storage.setToken(response.data.access_token)
         storage.setUser(response.data.user)
       } else {
@@ -56,10 +58,10 @@ const LoginModal = ({ isOpen, onClose, onSuccess }) => {
         }
 
         const response = await authService.register(registerData)
-        
+
         storage.setToken(response.data.access_token)
         storage.setUser(response.data.user)
-        
+
         clearGuestData()
       }
 

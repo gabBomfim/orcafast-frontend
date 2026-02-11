@@ -15,7 +15,8 @@ import {
     SimpleGrid,
     Flex,
 } from '@chakra-ui/react'
-import { FiTarget, FiCalendar, FiSave, FiInfo } from 'react-icons/fi'
+import { FiTarget, FiCalendar, FiSave, FiInfo, FiLock } from 'react-icons/fi'
+import { useSubscription } from '../../hooks/useSubscription'
 
 const months = [
     'Janeiro',
@@ -33,6 +34,7 @@ const months = [
 ]
 
 const SettingsGoals = () => {
+    const { canSetFinancialGoals } = useSubscription()
     const [metaAnual, setMetaAnual] = useState('240000')
     const [metaMensalPadrao, setMetaMensalPadrao] = useState('20000')
     const [usarPadrao, setUsarPadrao] = useState(true)
@@ -73,253 +75,292 @@ const SettingsGoals = () => {
                 </Text>
             </Box>
 
-            {/* Annual Goal Card */}
-            <Card bg="white" shadow="sm" rounded="2xl" border="1px" borderColor="gray.200" mb={4}>
-                <CardBody p={6}>
-                    <HStack align="flex-start" spacing={4}>
-                        <Flex
-                            w="48px"
-                            h="48px"
-                            bg="green.50"
-                            rounded="xl"
-                            align="center"
-                            justify="center"
-                            flexShrink={0}
-                        >
-                            <Icon as={FiTarget} boxSize={6} color="green.500" />
-                        </Flex>
-                        <Box flex={1}>
-                            <FormControl>
-                                <FormLabel fontSize="sm" fontWeight="medium" color="gray.800" mb={1}>
-                                    Meta Anual (2025)
-                                </FormLabel>
-                                <Text fontSize="xs" color="gray.600" mb={3}>
-                                    Quanto você deseja faturar em todo o ano
-                                </Text>
-                                <HStack spacing={0}>
-                                    <Flex
-                                        align="center"
-                                        justify="center"
-                                        px={4}
-                                        h="48px"
-                                        bg="gray.50"
-                                        roundedLeft="xl"
-                                        borderY="1px"
-                                        borderLeft="1px"
-                                        borderColor="gray.200"
-                                    >
-                                        <Text fontWeight="medium" color="gray.600">
-                                            R$
-                                        </Text>
-                                    </Flex>
-                                    <Input
-                                        value={metaAnual}
-                                        onChange={(e) => setMetaAnual(e.target.value.replace(/\D/g, ''))}
-                                        placeholder="0"
-                                        bg="gray.50"
-                                        border="1px"
-                                        borderColor="gray.200"
-                                        roundedRight="xl"
-                                        roundedLeft="none"
-                                        h="48px"
-                                        fontSize="lg"
-                                        fontWeight="semibold"
-                                        _focus={{
-                                            borderColor: 'green.400',
-                                            boxShadow: '0 0 0 1px var(--chakra-colors-green-400)',
-                                        }}
-                                    />
-                                </HStack>
-                                <Text fontSize="xs" color="gray.600" mt={2}>
-                                    Equivale a R$ {formatCurrency((parseFloat(metaAnual) / 12).toString())} por mês
-                                    em média
-                                </Text>
-                            </FormControl>
-                        </Box>
-                    </HStack>
-                </CardBody>
-            </Card>
-
-            {/* Monthly Goal Card */}
-            <Card bg="white" shadow="sm" rounded="2xl" border="1px" borderColor="gray.200">
-                <CardBody p={6}>
-                    <HStack align="flex-start" spacing={4} mb={6}>
-                        <Flex
-                            w="48px"
-                            h="48px"
-                            bg="green.50"
-                            rounded="xl"
-                            align="center"
-                            justify="center"
-                            flexShrink={0}
-                        >
-                            <Icon as={FiCalendar} boxSize={6} color="green.500" />
-                        </Flex>
-                        <Box flex={1}>
-                            <FormControl>
-                                <FormLabel fontSize="sm" fontWeight="medium" color="gray.800" mb={1}>
-                                    Meta Mensal Padrão
-                                </FormLabel>
-                                <Text fontSize="xs" color="gray.600" mb={3}>
-                                    Valor base usado para cada mês
-                                </Text>
-                                <HStack spacing={0}>
-                                    <Flex
-                                        align="center"
-                                        justify="center"
-                                        px={4}
-                                        h="48px"
-                                        bg="gray.50"
-                                        roundedLeft="xl"
-                                        borderY="1px"
-                                        borderLeft="1px"
-                                        borderColor="gray.200"
-                                    >
-                                        <Text fontWeight="medium" color="gray.600">
-                                            R$
-                                        </Text>
-                                    </Flex>
-                                    <Input
-                                        value={metaMensalPadrao}
-                                        onChange={(e) =>
-                                            handleMetaMensalPadraoChange(e.target.value.replace(/\D/g, ''))
-                                        }
-                                        placeholder="0"
-                                        bg="gray.50"
-                                        border="1px"
-                                        borderColor="gray.200"
-                                        roundedRight="xl"
-                                        roundedLeft="none"
-                                        h="48px"
-                                        fontSize="lg"
-                                        fontWeight="semibold"
-                                        _focus={{
-                                            borderColor: 'green.400',
-                                            boxShadow: '0 0 0 1px var(--chakra-colors-green-400)',
-                                        }}
-                                    />
-                                </HStack>
-                            </FormControl>
-                        </Box>
-                    </HStack>
-
-                    {/* Toggle Switch */}
+            <Box position="relative">
+                {!canSetFinancialGoals && (
                     <Flex
+                        position="absolute"
+                        top={0}
+                        left={0}
+                        right={0}
+                        bottom={0}
+                        bg="whiteAlpha.600"
+                        zIndex={20}
                         align="center"
-                        justify="space-between"
-                        p={4}
-                        bg="gray.50"
-                        rounded="xl"
-                        mb={4}
+                        justify="center"
+                        borderRadius="2xl"
+                        backdropFilter="blur(3px)"
                     >
-                        <HStack spacing={3}>
-                            <Text fontSize="sm" fontWeight="medium" color="gray.800">
-                                Usar este valor para todos os meses
-                            </Text>
-                        </HStack>
-                        <Switch
-                            colorScheme="green"
-                            size="lg"
-                            isChecked={usarPadrao}
-                            onChange={(e) => setUsarPadrao(e.target.checked)}
-                        />
-                    </Flex>
-
-                    {/* Helper text or Monthly grid */}
-                    {usarPadrao ? (
-                        <Flex
-                            align="flex-start"
-                            gap={2}
-                            p={4}
-                            bg="green.50"
-                            rounded="xl"
-                        >
-                            <Icon as={FiInfo} boxSize={4} color="green.500" mt={0.5} flexShrink={0} />
-                            <Text fontSize="sm" color="gray.800">
-                                Todos os meses de 2025 terão a meta de{' '}
-                                <Text as="span" fontWeight="semibold" color="green.600">
-                                    R$ {formatCurrency(metaMensalPadrao)}
+                        <VStack spacing={4} bg="white" p={8} borderRadius="2xl" shadow="xl" border="1px" borderColor="gray.100" maxW="sm" textAlign="center">
+                            <Box p={3} bg="emerald.50" borderRadius="xl">
+                                <Icon as={FiLock} color="emerald.500" boxSize={8} />
+                            </Box>
+                            <Box>
+                                <Text fontSize="lg" fontWeight="bold" color="gray.900" mb={1}>
+                                    Metas Financeiras
                                 </Text>
-                            </Text>
-                        </Flex>
-                    ) : (
-                        <VStack spacing={3} align="stretch">
-                            <Text fontSize="sm" color="gray.600" mb={1}>
-                                Personalize a meta de cada mês individualmente:
-                            </Text>
-                            <SimpleGrid columns={{ base: 2, sm: 3 }} spacing={3}>
-                                {months.map((month) => (
-                                    <FormControl key={month}>
-                                        <FormLabel fontSize="xs" fontWeight="medium" color="gray.600" mb={1.5}>
-                                            {month}
-                                        </FormLabel>
-                                        <HStack spacing={0}>
-                                            <Flex
-                                                align="center"
-                                                justify="center"
-                                                px={3}
-                                                h="40px"
-                                                bg="gray.50"
-                                                roundedLeft="lg"
-                                                borderY="1px"
-                                                borderLeft="1px"
-                                                borderColor="gray.200"
-                                            >
-                                                <Text fontSize="xs" color="gray.600">
-                                                    R$
-                                                </Text>
-                                            </Flex>
-                                            <Input
-                                                value={metasMensais[month]}
-                                                onChange={(e) =>
-                                                    handleMetaMensalChange(month, e.target.value.replace(/\D/g, ''))
-                                                }
-                                                placeholder="0"
-                                                bg="gray.50"
-                                                border="1px"
-                                                borderColor="gray.200"
-                                                roundedRight="lg"
-                                                roundedLeft="none"
-                                                h="40px"
-                                                fontSize="sm"
-                                                fontWeight="medium"
-                                                _focus={{
-                                                    borderColor: 'green.400',
-                                                    boxShadow: '0 0 0 1px var(--chakra-colors-green-400)',
-                                                }}
-                                            />
-                                        </HStack>
-                                    </FormControl>
-                                ))}
-                            </SimpleGrid>
+                                <Text fontSize="sm" color="gray.600">
+                                    Acesse o plano Pro ou Business para definir metas de faturamento e acompanhar seu progresso.
+                                </Text>
+                            </Box>
+                            <Button
+                                w="full"
+                                colorScheme="emerald"
+                                onClick={() => window.open('https://orcafast.com.br/precos', '_blank')}
+                            >
+                                Fazer Upgrade
+                            </Button>
                         </VStack>
-                    )}
+                    </Flex>
+                )}
 
-                    {/* Save Button */}
-                    <HStack justify="flex-end" mt={8}>
-                        <Button
-                            leftIcon={<Icon as={FiSave} />}
-                            colorScheme="green"
-                            bg="green.400"
-                            color="white"
-                            size="lg"
-                            px={6}
+                {/* Annual Goal Card */}
+                <Card bg="white" shadow="sm" rounded="2xl" border="1px" borderColor="gray.200" mb={4}>
+                    <CardBody p={6}>
+                        <HStack align="flex-start" spacing={4}>
+                            <Flex
+                                w="48px"
+                                h="48px"
+                                bg="green.50"
+                                rounded="xl"
+                                align="center"
+                                justify="center"
+                                flexShrink={0}
+                            >
+                                <Icon as={FiTarget} boxSize={6} color="green.500" />
+                            </Flex>
+                            <Box flex={1}>
+                                <FormControl>
+                                    <FormLabel fontSize="sm" fontWeight="medium" color="gray.800" mb={1}>
+                                        Meta Anual (2025)
+                                    </FormLabel>
+                                    <Text fontSize="xs" color="gray.600" mb={3}>
+                                        Quanto você deseja faturar em todo o ano
+                                    </Text>
+                                    <HStack spacing={0}>
+                                        <Flex
+                                            align="center"
+                                            justify="center"
+                                            px={4}
+                                            h="48px"
+                                            bg="gray.50"
+                                            roundedLeft="xl"
+                                            borderY="1px"
+                                            borderLeft="1px"
+                                            borderColor="gray.200"
+                                        >
+                                            <Text fontWeight="medium" color="gray.600">
+                                                R$
+                                            </Text>
+                                        </Flex>
+                                        <Input
+                                            value={metaAnual}
+                                            onChange={(e) => setMetaAnual(e.target.value.replace(/\D/g, ''))}
+                                            placeholder="0"
+                                            bg="gray.50"
+                                            border="1px"
+                                            borderColor="gray.200"
+                                            roundedRight="xl"
+                                            roundedLeft="none"
+                                            h="48px"
+                                            fontSize="lg"
+                                            fontWeight="semibold"
+                                            _focus={{
+                                                borderColor: 'green.400',
+                                                boxShadow: '0 0 0 1px var(--chakra-colors-green-400)',
+                                            }}
+                                        />
+                                    </HStack>
+                                    <Text fontSize="xs" color="gray.600" mt={2}>
+                                        Equivale a R$ {formatCurrency((parseFloat(metaAnual) / 12).toString())} por mês
+                                        em média
+                                    </Text>
+                                </FormControl>
+                            </Box>
+                        </HStack>
+                    </CardBody>
+                </Card>
+
+                {/* Monthly Goal Card */}
+                <Card bg="white" shadow="sm" rounded="2xl" border="1px" borderColor="gray.200">
+                    <CardBody p={6}>
+                        <HStack align="flex-start" spacing={4} mb={6}>
+                            <Flex
+                                w="48px"
+                                h="48px"
+                                bg="green.50"
+                                rounded="xl"
+                                align="center"
+                                justify="center"
+                                flexShrink={0}
+                            >
+                                <Icon as={FiCalendar} boxSize={6} color="green.500" />
+                            </Flex>
+                            <Box flex={1}>
+                                <FormControl>
+                                    <FormLabel fontSize="sm" fontWeight="medium" color="gray.800" mb={1}>
+                                        Meta Mensal Padrão
+                                    </FormLabel>
+                                    <Text fontSize="xs" color="gray.600" mb={3}>
+                                        Valor base usado para cada mês
+                                    </Text>
+                                    <HStack spacing={0}>
+                                        <Flex
+                                            align="center"
+                                            justify="center"
+                                            px={4}
+                                            h="48px"
+                                            bg="gray.50"
+                                            roundedLeft="xl"
+                                            borderY="1px"
+                                            borderLeft="1px"
+                                            borderColor="gray.200"
+                                        >
+                                            <Text fontWeight="medium" color="gray.600">
+                                                R$
+                                            </Text>
+                                        </Flex>
+                                        <Input
+                                            value={metaMensalPadrao}
+                                            onChange={(e) =>
+                                                handleMetaMensalPadraoChange(e.target.value.replace(/\D/g, ''))
+                                            }
+                                            placeholder="0"
+                                            bg="gray.50"
+                                            border="1px"
+                                            borderColor="gray.200"
+                                            roundedRight="xl"
+                                            roundedLeft="none"
+                                            h="48px"
+                                            fontSize="lg"
+                                            fontWeight="semibold"
+                                            _focus={{
+                                                borderColor: 'green.400',
+                                                boxShadow: '0 0 0 1px var(--chakra-colors-green-400)',
+                                            }}
+                                        />
+                                    </HStack>
+                                </FormControl>
+                            </Box>
+                        </HStack>
+
+                        {/* Toggle Switch */}
+                        <Flex
+                            align="center"
+                            justify="space-between"
+                            p={4}
+                            bg="gray.50"
                             rounded="xl"
-                            fontWeight="medium"
-                            shadow="lg"
-                            _hover={{
-                                bg: 'green.500',
-                                transform: 'translateY(-2px)',
-                                shadow: 'xl',
-                            }}
-                            transition="all 0.2s"
-                            onClick={handleSave}
+                            mb={4}
                         >
-                            Salvar Metas
-                        </Button>
-                    </HStack>
-                </CardBody>
-            </Card>
+                            <HStack spacing={3}>
+                                <Text fontSize="sm" fontWeight="medium" color="gray.800">
+                                    Usar este valor para todos os meses
+                                </Text>
+                            </HStack>
+                            <Switch
+                                colorScheme="green"
+                                size="lg"
+                                isChecked={usarPadrao}
+                                onChange={(e) => setUsarPadrao(e.target.checked)}
+                            />
+                        </Flex>
+
+                        {/* Helper text or Monthly grid */}
+                        {usarPadrao ? (
+                            <Flex
+                                align="flex-start"
+                                gap={2}
+                                p={4}
+                                bg="green.50"
+                                rounded="xl"
+                            >
+                                <Icon as={FiInfo} boxSize={4} color="green.500" mt={0.5} flexShrink={0} />
+                                <Text fontSize="sm" color="gray.800">
+                                    Todos os meses de 2025 terão a meta de{' '}
+                                    <Text as="span" fontWeight="semibold" color="green.600">
+                                        R$ {formatCurrency(metaMensalPadrao)}
+                                    </Text>
+                                </Text>
+                            </Flex>
+                        ) : (
+                            <VStack spacing={3} align="stretch">
+                                <Text fontSize="sm" color="gray.600" mb={1}>
+                                    Personalize a meta de cada mês individualmente:
+                                </Text>
+                                <SimpleGrid columns={{ base: 2, sm: 3 }} spacing={3}>
+                                    {months.map((month) => (
+                                        <FormControl key={month}>
+                                            <FormLabel fontSize="xs" fontWeight="medium" color="gray.600" mb={1.5}>
+                                                {month}
+                                            </FormLabel>
+                                            <HStack spacing={0}>
+                                                <Flex
+                                                    align="center"
+                                                    justify="center"
+                                                    px={3}
+                                                    h="40px"
+                                                    bg="gray.50"
+                                                    roundedLeft="lg"
+                                                    borderY="1px"
+                                                    borderLeft="1px"
+                                                    borderColor="gray.200"
+                                                >
+                                                    <Text fontSize="xs" color="gray.600">
+                                                        R$
+                                                    </Text>
+                                                </Flex>
+                                                <Input
+                                                    value={metasMensais[month]}
+                                                    onChange={(e) =>
+                                                        handleMetaMensalChange(month, e.target.value.replace(/\D/g, ''))
+                                                    }
+                                                    placeholder="0"
+                                                    bg="gray.50"
+                                                    border="1px"
+                                                    borderColor="gray.200"
+                                                    roundedRight="lg"
+                                                    roundedLeft="none"
+                                                    h="40px"
+                                                    fontSize="sm"
+                                                    fontWeight="medium"
+                                                    _focus={{
+                                                        borderColor: 'green.400',
+                                                        boxShadow: '0 0 0 1px var(--chakra-colors-green-400)',
+                                                    }}
+                                                />
+                                            </HStack>
+                                        </FormControl>
+                                    ))}
+                                </SimpleGrid>
+                            </VStack>
+                        )}
+
+                        {/* Save Button */}
+                        <HStack justify="flex-end" mt={8}>
+                            <Button
+                                leftIcon={<Icon as={FiSave} />}
+                                colorScheme="green"
+                                bg="green.400"
+                                color="white"
+                                size="lg"
+                                px={6}
+                                rounded="xl"
+                                fontWeight="medium"
+                                shadow="lg"
+                                _hover={{
+                                    bg: 'green.500',
+                                    transform: 'translateY(-2px)',
+                                    shadow: 'xl',
+                                }}
+                                transition="all 0.2s"
+                                onClick={handleSave}
+                            >
+                                Salvar Metas
+                            </Button>
+                        </HStack>
+                    </CardBody>
+                </Card>
+            </Box>
         </Box>
     )
 }

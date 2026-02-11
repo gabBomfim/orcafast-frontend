@@ -49,6 +49,8 @@ const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [showPasswordConfirmation, setShowPasswordConfirmation] = useState(false)
   const [name, setName] = useState('')
+  const [companyName, setCompanyName] = useState('')
+  const [document, setDocument] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [passwordConfirmation, setPasswordConfirmation] = useState('')
@@ -62,6 +64,8 @@ const RegisterPage = () => {
 
     const data = {
       name,
+      company_name: companyName,
+      document,
       email,
       password,
       password_confirmation: passwordConfirmation,
@@ -69,7 +73,7 @@ const RegisterPage = () => {
 
     try {
       const response = await authService.register(data)
-      
+
       storage.setToken(response.data.access_token)
       storage.setUser(response.data.user)
 
@@ -208,7 +212,53 @@ const RegisterPage = () => {
             color="gray.900"
             _placeholder={{ color: 'gray.500' }}
             _hover={{ bg: 'gray.100' }}
-            _focus={{ 
+            _focus={{
+              bg: 'gray.100',
+              boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
+              outline: 'none'
+            }}
+            fontSize="sm"
+            required
+          />
+
+          {/* Company Name field */}
+          <Input
+            type="text"
+            value={companyName}
+            onChange={(e) => setCompanyName(e.target.value)}
+            placeholder="Nome da empresa"
+            h={12}
+            px={4}
+            bg="gray.100"
+            border="none"
+            borderRadius="xl"
+            color="gray.900"
+            _placeholder={{ color: 'gray.500' }}
+            _hover={{ bg: 'gray.100' }}
+            _focus={{
+              bg: 'gray.100',
+              boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
+              outline: 'none'
+            }}
+            fontSize="sm"
+            required
+          />
+
+          {/* Company CPF/CNPJ field */}
+          <Input
+            type="text"
+            value={document}
+            onChange={(e) => setDocument(e.target.value)}
+            placeholder="CNPJ ou CPF"
+            h={12}
+            px={4}
+            bg="gray.100"
+            border="none"
+            borderRadius="xl"
+            color="gray.900"
+            _placeholder={{ color: 'gray.500' }}
+            _hover={{ bg: 'gray.100' }}
+            _focus={{
               bg: 'gray.100',
               boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
               outline: 'none'
@@ -231,7 +281,7 @@ const RegisterPage = () => {
             color="gray.900"
             _placeholder={{ color: 'gray.500' }}
             _hover={{ bg: 'gray.100' }}
-            _focus={{ 
+            _focus={{
               bg: 'gray.100',
               boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
               outline: 'none'
@@ -257,7 +307,7 @@ const RegisterPage = () => {
               color="gray.900"
               _placeholder={{ color: 'gray.500' }}
               _hover={{ bg: 'gray.100' }}
-              _focus={{ 
+              _focus={{
                 bg: 'gray.100',
                 boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
                 outline: 'none'
@@ -299,7 +349,7 @@ const RegisterPage = () => {
               color="gray.900"
               _placeholder={{ color: 'gray.500' }}
               _hover={{ bg: 'gray.100' }}
-              _focus={{ 
+              _focus={{
                 bg: 'gray.100',
                 boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
                 outline: 'none'
