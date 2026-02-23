@@ -1,3 +1,5 @@
 export { authService } from './auth.service'
 export { clientService } from './client.service'
 export { proposalService } from './proposal.service'
+export { companyService } from './company.service'
+export { goalsService } from './goals.service'

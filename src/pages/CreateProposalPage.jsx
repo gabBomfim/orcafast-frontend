@@ -35,7 +35,6 @@ import {
 import { WiStars } from 'react-icons/wi'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { proposalService, clientService } from '../services'
-import { useSubscription } from '../hooks/useSubscription'
 
 const CreateProposalPage = () => {
   const navigate = useNavigate()
@@ -115,20 +114,6 @@ const CreateProposalPage = () => {
     loadClients()
   }, [])
 
-  // Check subscription limits
-  const { canCreateProposal } = useSubscription()
-  useEffect(() => {
-    if (!isEditMode && !canCreateProposal()) {
-      toast({
-        title: 'Limite atingido',
-        description: 'Você atingiu o limite de propostas do seu plano.',
-        status: 'warning',
-        duration: 5000,
-        isClosable: true,
-      })
-      navigate('/dashboard/propostas')
-    }
-  }, [isEditMode, canCreateProposal, navigate, toast])
 
   useEffect(() => {
     if (!isEditMode || fetching.current) return

@@ -26,7 +26,7 @@ export const proposalService = {
   },
 
   downloadPDF(id) {
-    return api.get(`proposals/${id}/download`, { responseType: 'blob' })
+    return api.get(`proposals/${id}/pdf`, { responseType: 'blob' })
   },
 
   updateStatus(id, status) {

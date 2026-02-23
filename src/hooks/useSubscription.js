@@ -1,60 +1,51 @@
+import { useMemo } from 'react'
 import { storage } from '../utils/storage'
 
+/**
+ * useSubscription
+ *
+ * Reads plan features from the authenticated user object stored in localStorage
+ * after login. The `user.company.plan.features` object is the single source of
+ * truth — the backend already validates limits server-side; this hook is purely
+ * for UI gating (show/hide, lock overlays, etc.).
+ */
 export const useSubscription = () => {
     const user = storage.getUser()
-    const plan = user?.company?.plan
-    const features = plan?.features || {}
+
+    // Memoize so referential equality is stable across re-renders
+    const plan = useMemo(() => user?.company?.plan ?? null, [user?.company?.plan?.id])
+    const features = useMemo(() => plan?.features ?? {}, [plan?.id])
 
     const isFree = plan?.slug === 'free'
     const isPro = plan?.slug === 'pro'
     const isBusiness = plan?.slug === 'business'
 
-    const getUsage = () => {
-        if (!user) return { proposals: 0, clients: 0, users: 0 }
+    /**
+     * Returns true when the user's plan allows unlimited proposals or when
+     * the backend hasn't set a cap (max_proposals === -1).
+     * For capped plans the backend enforces the real limit; here we just
+     * prevent the UI from even offering the action when max is -1 is NOT set.
+     */
+    const canCreateProposal = features.max_proposals === -1 || features.max_proposals == null
 
-        // Calculate total proposals across all clients
-        const totalProposals = user.clients?.reduce((acc, client) => {
-            return acc + (client.proposals?.length || 0)
-        }, 0) || 0
-
-        return {
-            proposals: totalProposals,
-            clients: user.clients?.length || 0,
-            // Assuming users count comes from somewhere else or just 1 for now if not populated
-            users: 1
-        }
-    }
-
-    const usage = getUsage()
-
-    const canCreateProposal = () => {
-        if (features.max_proposals === -1) return true
-        return usage.proposals < features.max_proposals
-    }
-
-    const canAddClient = () => {
-        if (features.max_clients === -1) return true
-        return usage.clients < features.max_clients
-    }
-
-    const canAddUser = () => {
-        if (features.max_users === -1) return true
-        // TODO: Implement user counting logic when available
-        return true
-    }
+    const canAddClient = features.max_clients === -1 || features.max_clients == null
 
     return {
+        // Plan metadata
         plan,
-        features,
+        planName: plan?.name ?? 'Gratuito',
+        planSlug: plan?.slug ?? 'free',
         isFree,
         isPro,
         isBusiness,
-        usage,
+
+        // Capacity flags (UI only — backend is the real enforcer)
         canCreateProposal,
         canAddClient,
-        canAddUser,
-        canCustomizeBranding: features.custom_branding,
-        canSetFinancialGoals: features.financial_goals,
-        canAccessAdvancedReports: features.advanced_reports
+
+        // Feature flags derived directly from plan.features
+        canCustomizeBranding: !!features.custom_branding,
+        canSetFinancialGoals: !!features.financial_goals,
+        canAccessAdvancedReports: !!features.advanced_reports,
     }
 }

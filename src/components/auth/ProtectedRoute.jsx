@@ -14,20 +14,18 @@ const ProtectedRoute = () => {
   const token = storage.getToken()
   const location = useLocation()
   const { isCollapsed } = useSidebar()
-  const { canCreateProposal, isFree } = useSubscription()
+  const { canCreateProposal } = useSubscription()
   const navigate = useNavigate()
   const toast = useToast()
 
   const handleCreateProposal = (e) => {
     e.preventDefault()
-    if (canCreateProposal()) {
+    if (canCreateProposal) {
       navigate('/dashboard/propostas/nova')
     } else {
       toast({
         title: 'Limite atingido',
-        description: isFree
-          ? 'Você atingiu o limite de 5 propostas do plano Gratuito. Faça um upgrade para criar mais.'
-          : 'Você atingiu o limite de propostas do seu plano.',
+        description: 'Você atingiu o limite de propostas do seu plano. Faça um upgrade para continuar.',
         status: 'warning',
         duration: 5000,
         isClosable: true,
