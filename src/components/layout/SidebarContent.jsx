@@ -38,7 +38,7 @@ import { useSubscription } from '../../hooks/useSubscription'
 const SidebarContent = ({ isCollapsed = false, onItemClick = () => { } }) => {
   const { logout, getCurrentUser } = useAuth()
   const { toggleCollapse } = useSidebar()
-  const { isBusiness, canSetFinancialGoals, canCustomizeBranding } = useSubscription()
+  const { isFree, isPro, isBusiness, canSetFinancialGoals, canCustomizeBranding } = useSubscription()
   const location = useLocation()
   const user = getCurrentUser()
   const { isOpen: isSettingsOpen, onToggle: onSettingsToggle } = useDisclosure()
@@ -49,24 +49,28 @@ const SidebarContent = ({ isCollapsed = false, onItemClick = () => { } }) => {
     { icon: FiFileText, label: 'Orçamentos', path: '/dashboard/propostas' },
   ]
 
-  if (isBusiness) {
-    menuItems.push({ icon: FiUsers, label: 'Usuários', path: '/dashboard/usuarios' })
-  }
 
   const settingsSubItems = [
     {
       icon: FiUser,
       label: 'Meu Perfil',
       path: '/dashboard/configuracoes/perfil',
-      isLocked: !canCustomizeBranding
+      isLocked: !canCustomizeBranding,
     },
     {
       icon: FiTarget,
       label: 'Metas',
       path: '/dashboard/configuracoes/metas',
-      isLocked: !canSetFinancialGoals
+      isLocked: !canSetFinancialGoals,
+    },
+    {
+      icon: FiUsers,
+      label: 'Usuários',
+      path: '/dashboard/usuarios',
+      isLocked: !isBusiness,
     },
     { icon: FiStar, label: 'Assinatura', path: '/dashboard/configuracoes/assinatura' },
+
   ]
 
   const handleLogout = () => {
@@ -164,80 +168,85 @@ const SidebarContent = ({ isCollapsed = false, onItemClick = () => { } }) => {
           </Box>
         </Collapse>
 
-        {/* Upgrade Pro Card */}
+        {/* Upgrade card — Free sees "Upgrade Pro", Pro sees "Upgrade Business", Business sees nothing */}
         <Collapse in={!isCollapsed}>
-          <Box
-            mt={1}
-            bg="transparent"
-            border="1px"
-            borderColor="emerald.400"
-            borderRadius="lg"
-            p={3}
-            cursor="pointer"
-            _hover={{
-              borderColor: 'emerald.500',
-              boxShadow: '0 2px 8px rgba(0, 217, 126, 0.15)',
-              transform: 'translateY(-1px)'
-            }}
-            transition="all 0.2s ease"
-            position="relative"
-            overflow="hidden"
-          >
-            {/* Background gradient overlay */}
+          {isFree && (
             <Box
-              position="absolute"
-              inset={0}
-              bg="linear-gradient(to right, rgba(0, 217, 126, 0.03), rgba(0, 217, 126, 0.01))"
+              mt={1}
+              bg="transparent"
+              border="1px"
+              borderColor="emerald.400"
               borderRadius="lg"
-              pointerEvents="none"
-            />
-
-            {/* Content */}
-            <HStack spacing={3} position="relative" zIndex={1}>
+              p={3}
+              as={Link}
+              to="/dashboard/configuracoes/assinatura"
+              cursor="pointer"
+              _hover={{
+                borderColor: 'emerald.500',
+                boxShadow: '0 2px 8px rgba(0, 217, 126, 0.15)',
+                transform: 'translateY(-1px)'
+              }}
+              transition="all 0.2s ease"
+              position="relative"
+              overflow="hidden"
+              display="block"
+            >
+              {/* Background gradient overlay */}
               <Box
-                w={8}
-                h={8}
-                bg="linear-gradient(135deg, #00d97e 0%, #00b368 100%)"
-                borderRadius="md"
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                flexShrink={0}
-                boxShadow="0 2px 8px rgba(0, 217, 126, 0.25)"
-              >
-                <Icon as={FiAward} color="white" boxSize={4} />
-              </Box>
-
-              <VStack spacing={0} align="flex-start" flex={1}>
-                <HStack spacing={1.5}>
-                  <Text fontSize="sm" fontWeight="bold" color="gray.800">
-                    Upgrade Pro
-                  </Text>
-                  <Badge
-                    bg="emerald.100"
-                    color="emerald.700"
-                    px={1.5}
-                    py={0.5}
-                    borderRadius="sm"
-                    fontSize="2xs"
-                    fontWeight="semibold"
-                  >
-                    Premium
-                  </Badge>
-                </HStack>
-                <Text fontSize="xs" color="gray.600">
-                  Recursos ilimitados
-                </Text>
-              </VStack>
-
-              <Icon
-                as={FiChevronRight}
-                color="emerald.500"
-                boxSize={4}
-                transition="transform 0.2s"
+                position="absolute"
+                inset={0}
+                bg="linear-gradient(to right, rgba(0, 217, 126, 0.03), rgba(0, 217, 126, 0.01))"
+                borderRadius="lg"
+                pointerEvents="none"
               />
-            </HStack>
-          </Box>
+
+              {/* Content */}
+              <HStack spacing={3} position="relative" zIndex={1}>
+                <Box
+                  w={8}
+                  h={8}
+                  bg="linear-gradient(135deg, #00d97e 0%, #00b368 100%)"
+                  borderRadius="md"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  flexShrink={0}
+                  boxShadow="0 2px 8px rgba(0, 217, 126, 0.25)"
+                >
+                  <Icon as={FiAward} color="white" boxSize={4} />
+                </Box>
+
+                <VStack spacing={0} align="flex-start" flex={1}>
+                  <HStack spacing={1.5}>
+                    <Text fontSize="sm" fontWeight="bold" color="gray.800">
+                      {isFree ? 'Upgrade Pro' : 'Upgrade Business'}
+                    </Text>
+                    <Badge
+                      bg="emerald.100"
+                      color="emerald.700"
+                      px={1.5}
+                      py={0.5}
+                      borderRadius="sm"
+                      fontSize="2xs"
+                      fontWeight="semibold"
+                    >
+                      Premium
+                    </Badge>
+                  </HStack>
+                  <Text fontSize="xs" color="gray.600">
+                    Recursos ilimitados
+                  </Text>
+                </VStack>
+
+                <Icon
+                  as={FiChevronRight}
+                  color="emerald.500"
+                  boxSize={4}
+                  transition="transform 0.2s"
+                />
+              </HStack>
+            </Box>
+          )}
         </Collapse>
       </Box>
 

@@ -35,7 +35,7 @@ import { storage } from '../utils/storage'
 const InitialDashboardPage = () => {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
-  
+
   const headingColor = useColorModeValue('gray.900', 'white')
   const subTextColor = useColorModeValue('gray.600', 'whiteAlpha.700')
   const cardBgColor = useColorModeValue('gray.50', 'whiteAlpha.100')

@@ -14,11 +14,13 @@ import {
 import { Link } from 'react-router-dom'
 import { FiZap, FiCrop, FiArrowLeft, FiLogOut, FiUser } from 'react-icons/fi'
 import { useAuth } from '../../hooks/useAuth'
+import { useSubscription } from '../../hooks/useSubscription'
 import SidebarToggle from './SidebarToggle'
 
 const Header = ({ title, showBackButton = false, rightContent }) => {
   const { logout, getCurrentUser } = useAuth()
   const user = getCurrentUser()
+  const { isFree, isPro } = useSubscription()
 
   const handleLogout = () => {
     logout()
@@ -48,7 +50,7 @@ const Header = ({ title, showBackButton = false, rightContent }) => {
         <HStack spacing={4}>
           {/* Mobile Menu Toggle */}
           <SidebarToggle />
-          
+
           {showBackButton && (
             <Button
               as={Link}
@@ -60,7 +62,7 @@ const Header = ({ title, showBackButton = false, rightContent }) => {
               Dashboard
             </Button>
           )}
-          
+
           <HStack spacing={2}>
             <Flex
               w={8}
@@ -83,14 +85,30 @@ const Header = ({ title, showBackButton = false, rightContent }) => {
         <HStack spacing={3}>
           {rightContent || (
             <>
-              <Button
-                variant="outline"
-                size="sm"
-                leftIcon={<Icon as={FiCrop} />}
-              >
-                Upgrade Pro
-              </Button>
-              
+              {/* Upgrade button — only for Free and Pro (next plan up) */}
+              {isFree && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  leftIcon={<Icon as={FiCrop} />}
+                  as={Link}
+                  to="/dashboard/configuracoes/assinatura"
+                >
+                  Upgrade Pro
+                </Button>
+              )}
+              {isPro && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  leftIcon={<Icon as={FiCrop} />}
+                  as={Link}
+                  to="/dashboard/configuracoes/assinatura"
+                >
+                  Upgrade Business
+                </Button>
+              )}
+
               {/* User Menu */}
               <Menu>
                 <MenuButton
@@ -116,7 +134,7 @@ const Header = ({ title, showBackButton = false, rightContent }) => {
                   <MenuItem icon={<Icon as={FiUser} />}>
                     Meu Perfil
                   </MenuItem>
-                  <MenuItem 
+                  <MenuItem
                     icon={<Icon as={FiLogOut} />}
                     onClick={handleLogout}
                     color="red.500"
