@@ -20,8 +20,8 @@ import {
 } from 'react-icons/fi'
 import { FaApple } from 'react-icons/fa'
 import { FcGoogle } from 'react-icons/fc'
-import { Link as RouterLink, useNavigate } from 'react-router-dom'
-import { useState } from 'react'
+import { Link as RouterLink, useNavigate, useSearchParams } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import { authService } from '../services'
 import { storage } from '../utils/storage'
 
@@ -54,6 +54,20 @@ const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false)
   const toast = useToast()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+
+  // Exibe toast se o callback do Google retornou erro
+  useEffect(() => {
+    if (searchParams.get('error') === 'google_failed') {
+      toast({
+        title: 'Falha no login com Google',
+        description: 'Não foi possível autenticar. Tente novamente ou use e-mail e senha.',
+        status: 'error',
+        duration: 6000,
+        isClosable: true,
+      })
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -88,14 +102,8 @@ const LoginPage = () => {
     }
   }
 
-  const handleSocialLogin = (provider) => {
-    toast({
-      title: `Login com ${provider}`,
-      description: 'Funcionalidade será implementada em breve',
-      status: 'info',
-      duration: 3000,
-      isClosable: true,
-    })
+  const handleGoogleLogin = () => {
+    window.location.href = import.meta.env.VITE_GOOGLE_REDIRECT_URL
   }
 
   return (
@@ -155,7 +163,7 @@ const LoginPage = () => {
             color="gray.900"
             fontSize="sm"
             leftIcon={<GoogleIcon />}
-            onClick={() => handleSocialLogin('Google')}
+            onClick={handleGoogleLogin}
           >
             Continuar com Google
           </Button>
