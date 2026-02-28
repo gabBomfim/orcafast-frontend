@@ -50,7 +50,7 @@ const ProtectedRoute = () => {
     }
     if (path === '/dashboard/propostas/nova') {
       return {
-        title: 'Nova Proposta',
+        title: 'Novo orçamento',
         showBackButton: true,
       }
     }
@@ -82,7 +82,7 @@ const ProtectedRoute = () => {
             leftIcon={<Icon as={FiPlus} />}
             variant="gradient"
           >
-            Nova Proposta
+            Novo orçamento
           </Button>
         )
       }

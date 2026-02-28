@@ -19,6 +19,14 @@ import {
   Spinner,
   Flex,
   Center,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  ModalCloseButton,
+  useDisclosure,
 } from '@chakra-ui/react'
 import ReactSelect from 'react-select'
 import {
@@ -49,6 +57,11 @@ const CreateProposalPage = () => {
   const [loadingClients, setLoadingClients] = useState(true)
   const fetching = useRef(false)
 
+  // Quick Create Client modal
+  const { isOpen: isClientModalOpen, onOpen: onClientModalOpen, onClose: onClientModalClose } = useDisclosure()
+  const [newClient, setNewClient] = useState({ name: '', email: '', phone: '', company: '' })
+  const [isSavingClient, setIsSavingClient] = useState(false)
+
   // Estilos customizados para o React Select
   const customSelectStyles = {
     control: (provided, state) => ({
@@ -73,15 +86,21 @@ const CreateProposalPage = () => {
     }),
     option: (provided, state) => ({
       ...provided,
-      backgroundColor: state.isSelected
-        ? '#10B981' // emerald.500
-        : state.isFocused
-          ? '#ECFDF5' // emerald.50
-          : 'transparent',
-      color: state.isSelected ? 'white' : '#111827', // gray.900
+      backgroundColor: state.data?.isCreate
+        // "+ Cadastrar" never gets the full emerald fill — use a soft tint
+        ? state.isFocused ? '#F0FDF4' : 'transparent'
+        : state.isSelected
+          ? '#10B981'
+          : state.isFocused
+            ? '#ECFDF5'
+            : 'transparent',
+      color: state.data?.isCreate
+        ? '#059669' // emerald.600 — always readable against white / light tint
+        : state.isSelected ? 'white' : '#111827',
       cursor: 'pointer',
+      fontWeight: state.data?.isCreate ? '600' : 'normal',
       '&:active': {
-        backgroundColor: '#10B981',
+        backgroundColor: state.data?.isCreate ? '#DCFCE7' : '#10B981',
       },
     }),
     input: (provided) => ({
@@ -175,6 +194,35 @@ const CreateProposalPage = () => {
     }
   }
 
+  // ─── Quick Create Client ──────────────────────────────────────────────────
+  const handleQuickCreateClient = async () => {
+    if (!newClient.name.trim()) {
+      toast({ title: 'Nome é obrigatório', status: 'warning', duration: 3000, isClosable: true })
+      return
+    }
+    setIsSavingClient(true)
+    try {
+      const { data } = await clientService.create(newClient)
+      // Add to local list immediately
+      setClients((prev) => [...prev, data])
+      // Auto-select the new client
+      setFormData((prev) => ({ ...prev, clientId: String(data.id) }))
+      toast({ title: `Cliente "${data.name}" cadastrado!`, status: 'success', duration: 3000, isClosable: true })
+      setNewClient({ name: '', email: '', phone: '', company: '' })
+      onClientModalClose()
+    } catch (err) {
+      toast({
+        title: 'Erro ao cadastrar cliente',
+        description: err.response?.data?.message || 'Tente novamente',
+        status: 'error',
+        duration: 4000,
+        isClosable: true,
+      })
+    } finally {
+      setIsSavingClient(false)
+    }
+  }
+
   const handleAddItem = () => {
     setItems([...items, { id: Date.now(), desc: '', qtd: 1, value: 0 }])
   }
@@ -263,13 +311,40 @@ const CreateProposalPage = () => {
     ? clients.find(c => c.id === parseInt(formData.clientId))
     : null
 
-  const clientOptions = Array.isArray(clients)
-    ? clients.map(client => ({
-      value: client.id,
-      label: `${client.name} ${client.company ? `- ${client.company}` : ''}`,
-      original: client
-    }))
-    : []
+  // Special "create" option pinned at the top of the dropdown
+  const CREATE_OPTION = { value: '__create__', label: '+ Cadastrar novo cliente', isCreate: true }
+
+  const clientOptions = [
+    CREATE_OPTION,
+    ...(Array.isArray(clients)
+      ? clients.map(client => ({
+        value: client.id,
+        label: `${client.name}${client.company ? ` — ${client.company}` : ''}`,
+        original: client,
+      }))
+      : []),
+  ]
+
+  const handleClientSelectChange = (option) => {
+    if (!option) { setFormData({ ...formData, clientId: '' }); return }
+    if (option.isCreate) { onClientModalOpen(); return }
+    setFormData({ ...formData, clientId: String(option.value) })
+  }
+
+  // Custom renderer so the "create" option stands out visually
+  const formatOptionLabel = (option) => {
+    if (option.isCreate) {
+      return (
+        <Flex align="center" gap={2} color="emerald.600" fontWeight="semibold" fontSize="sm">
+          <Box w={5} h={5} bg="emerald.50" rounded="md" display="flex" alignItems="center" justifyContent="center">
+            <FiPlus size={12} />
+          </Box>
+          Cadastrar novo cliente
+        </Flex>
+      )
+    }
+    return option.label
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -375,7 +450,7 @@ const CreateProposalPage = () => {
                       <ReactSelect
                         name="clientId"
                         value={clientOptions.find(option => option.value === parseInt(formData.clientId)) || null}
-                        onChange={(option) => setFormData({ ...formData, clientId: option ? option.value : '' })}
+                        onChange={handleClientSelectChange}
                         options={clientOptions}
                         placeholder={loadingClients ? 'Carregando clientes...' : 'Selecione ou busque um cliente...'}
                         isDisabled={loadingClients}
@@ -383,6 +458,7 @@ const CreateProposalPage = () => {
                         isSearchable
                         isLoading={loadingClients}
                         styles={customSelectStyles}
+                        formatOptionLabel={formatOptionLabel}
                         noOptionsMessage={() => 'Nenhum cliente encontrado'}
                         loadingMessage={() => 'Carregando...'}
                       />
@@ -771,6 +847,98 @@ const CreateProposalPage = () => {
           </SimpleGrid>
         </Box>
       </Flex>
+
+      {/* ── Quick Create Client Modal ───────────────────────────────────── */}
+      <Modal isOpen={isClientModalOpen} onClose={onClientModalClose} isCentered size="md">
+        <ModalOverlay backdropFilter="blur(4px)" />
+        <ModalContent borderRadius="2xl" shadow="2xl">
+          <ModalHeader fontSize="lg" fontWeight="bold" color="gray.800" pb={2}>
+            Cadastrar novo cliente
+          </ModalHeader>
+          <ModalCloseButton top={4} right={4} />
+          <ModalBody>
+            <VStack spacing={4}>
+              <FormControl isRequired>
+                <FormLabel fontSize="sm" fontWeight="medium" color="gray.700">Nome</FormLabel>
+                <Input
+                  placeholder="Nome completo"
+                  bg="gray.100"
+                  border="none"
+                  rounded="xl"
+                  h={12}
+                  value={newClient.name}
+                  onChange={(e) => setNewClient({ ...newClient, name: e.target.value })}
+                  _focus={{ boxShadow: '0 0 0 2px #10B981' }}
+                />
+              </FormControl>
+
+              <SimpleGrid columns={2} spacing={3} w="full">
+                <FormControl>
+                  <FormLabel fontSize="sm" fontWeight="medium" color="gray.700">E-mail</FormLabel>
+                  <Input
+                    type="email"
+                    placeholder="email@exemplo.com"
+                    bg="gray.100"
+                    border="none"
+                    rounded="xl"
+                    h={12}
+                    value={newClient.email}
+                    onChange={(e) => setNewClient({ ...newClient, email: e.target.value })}
+                    _focus={{ boxShadow: '0 0 0 2px #10B981' }}
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormLabel fontSize="sm" fontWeight="medium" color="gray.700">Telefone</FormLabel>
+                  <Input
+                    placeholder="(11) 99999-9999"
+                    bg="gray.100"
+                    border="none"
+                    rounded="xl"
+                    h={12}
+                    value={newClient.phone}
+                    onChange={(e) => setNewClient({ ...newClient, phone: e.target.value })}
+                    _focus={{ boxShadow: '0 0 0 2px #10B981' }}
+                  />
+                </FormControl>
+              </SimpleGrid>
+
+              <FormControl>
+                <FormLabel fontSize="sm" fontWeight="medium" color="gray.700">Empresa</FormLabel>
+                <Input
+                  placeholder="Nome da empresa (opcional)"
+                  bg="gray.100"
+                  border="none"
+                  rounded="xl"
+                  h={12}
+                  value={newClient.company}
+                  onChange={(e) => setNewClient({ ...newClient, company: e.target.value })}
+                  _focus={{ boxShadow: '0 0 0 2px #10B981' }}
+                />
+              </FormControl>
+            </VStack>
+          </ModalBody>
+
+          <ModalFooter gap={3} pt={2}>
+            <Button variant="ghost" rounded="xl" onClick={onClientModalClose} isDisabled={isSavingClient}>
+              Cancelar
+            </Button>
+            <Button
+              colorScheme="green"
+              bg="green.400"
+              color="white"
+              rounded="xl"
+              fontWeight="medium"
+              px={6}
+              _hover={{ bg: 'green.500' }}
+              onClick={handleQuickCreateClient}
+              isLoading={isSavingClient}
+              loadingText="Salvando..."
+            >
+              Salvar e selecionar
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Flex>
   )
 }

@@ -83,69 +83,73 @@ const Header = ({ title, showBackButton = false, rightContent }) => {
 
         {/* Right side */}
         <HStack spacing={3}>
-          {rightContent || (
-            <>
-              {/* Upgrade button — only for Free and Pro (next plan up) */}
-              {isFree && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  leftIcon={<Icon as={FiCrop} />}
-                  as={Link}
-                  to="/dashboard/configuracoes/assinatura"
-                >
-                  Upgrade Pro
-                </Button>
-              )}
-              {isPro && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  leftIcon={<Icon as={FiCrop} />}
-                  as={Link}
-                  to="/dashboard/configuracoes/assinatura"
-                >
-                  Upgrade Business
-                </Button>
-              )}
+          {/* Action button slot — varies by page */}
+          {rightContent}
 
-              {/* User Menu */}
-              <Menu>
-                <MenuButton
-                  as={Button}
-                  variant="ghost"
-                  size="sm"
-                  p={2}
-                  borderRadius="full"
-                >
-                  <HStack spacing={2}>
-                    <Avatar
-                      size="sm"
-                      name={user?.name}
-                      bg="emerald.500"
-                      color="white"
-                    />
-                    <Text fontSize="sm" fontWeight="medium">
-                      {user?.name?.split(' ')[0]}
-                    </Text>
-                  </HStack>
-                </MenuButton>
-                <MenuList>
-                  <MenuItem icon={<Icon as={FiUser} />}>
-                    Meu Perfil
-                  </MenuItem>
-                  <MenuItem
-                    icon={<Icon as={FiLogOut} />}
-                    onClick={handleLogout}
-                    color="red.500"
-                  >
-                    Sair
-                  </MenuItem>
-                </MenuList>
-              </Menu>
-            </>
+          {/* Upgrade button — only for Free / Pro */}
+          {!rightContent && isFree && (
+            <Button
+              variant="outline"
+              size="sm"
+              leftIcon={<Icon as={FiCrop} />}
+              as={Link}
+              to="/dashboard/configuracoes/assinatura"
+            >
+              Upgrade Pro
+            </Button>
           )}
+          {!rightContent && isPro && (
+            <Button
+              variant="outline"
+              size="sm"
+              leftIcon={<Icon as={FiCrop} />}
+              as={Link}
+              to="/dashboard/configuracoes/assinatura"
+            >
+              Upgrade Business
+            </Button>
+          )}
+
+          {/* User Menu — always visible on every page */}
+          <Menu>
+            <MenuButton
+              as={Button}
+              variant="ghost"
+              size="sm"
+              p={2}
+              borderRadius="full"
+            >
+              <HStack spacing={2}>
+                <Avatar
+                  size="sm"
+                  name={user?.name}
+                  bg="emerald.500"
+                  color="white"
+                />
+                <Text fontSize="sm" fontWeight="medium">
+                  {user?.name?.split(' ')[0]}
+                </Text>
+              </HStack>
+            </MenuButton>
+            <MenuList>
+              <MenuItem
+                as={Link}
+                to="/dashboard/configuracoes/perfil"
+                icon={<Icon as={FiUser} />}
+              >
+                Meu Perfil
+              </MenuItem>
+              <MenuItem
+                icon={<Icon as={FiLogOut} />}
+                onClick={handleLogout}
+                color="red.500"
+              >
+                Sair
+              </MenuItem>
+            </MenuList>
+          </Menu>
         </HStack>
+
       </Flex>
     </Box>
   )

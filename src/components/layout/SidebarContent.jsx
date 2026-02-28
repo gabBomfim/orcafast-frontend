@@ -70,7 +70,6 @@ const SidebarContent = ({ isCollapsed = false, onItemClick = () => { } }) => {
       isLocked: !isBusiness,
     },
     { icon: FiStar, label: 'Assinatura', path: '/dashboard/configuracoes/assinatura' },
-
   ]
 
   const handleLogout = () => {

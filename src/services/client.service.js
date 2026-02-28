@@ -1,4 +1,8 @@
 import api from '../api'
+import { storage } from '../utils/storage'
+
+// Reads company_id from the stored user so every caller gets it automatically
+const getCompanyId = () => storage.getUser()?.company?.id
 
 export const clientService = {
   list(params) {
@@ -10,11 +14,11 @@ export const clientService = {
   },
 
   create(data) {
-    return api.post('clients', data)
+    return api.post('clients', { ...data, company_id: getCompanyId() })
   },
 
   update(id, data) {
-    return api.put(`clients/${id}`, data)
+    return api.put(`clients/${id}`, { ...data, company_id: getCompanyId() })
   },
 
   delete(id) {
