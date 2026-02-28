@@ -92,20 +92,6 @@ const LoginForm = ({ onSubmit, onGoogleLogin, onFacebookLogin, isLoading }) => {
           type="email"
           name="email"
           placeholder="Email"
-          h={12}
-          px={4}
-          bg="gray.100"
-          border="none"
-          borderRadius="xl"
-          color="gray.900"
-          _placeholder={{ color: 'gray.500' }}
-          _hover={{ bg: 'gray.100' }}
-          _focus={{ 
-            bg: 'gray.100',
-            boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
-            outline: 'none'
-          }}
-          fontSize="sm"
           required
         />
 
@@ -115,21 +101,7 @@ const LoginForm = ({ onSubmit, onGoogleLogin, onFacebookLogin, isLoading }) => {
             type={showPassword ? 'text' : 'password'}
             name="password"
             placeholder="Senha"
-            h={12}
-            px={4}
             pr={12}
-            bg="gray.100"
-            border="none"
-            borderRadius="xl"
-            color="gray.900"
-            _placeholder={{ color: 'gray.500' }}
-            _hover={{ bg: 'gray.100' }}
-            _focus={{ 
-              bg: 'gray.100',
-              boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
-              outline: 'none'
-            }}
-            fontSize="sm"
             required
           />
           <InputRightElement h={12}>

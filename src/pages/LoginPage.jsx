@@ -61,7 +61,7 @@ const LoginPage = () => {
 
     try {
       const response = await authService.login({ email, password })
-      
+
       storage.setToken(response.data.access_token)
       storage.setUser(response.data.user)
 
@@ -192,20 +192,6 @@ const LoginPage = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email"
-            h={12}
-            px={4}
-            bg="gray.100"
-            border="none"
-            borderRadius="xl"
-            color="gray.900"
-            _placeholder={{ color: 'gray.500' }}
-            _hover={{ bg: 'gray.100' }}
-            _focus={{ 
-              bg: 'gray.100',
-              boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
-              outline: 'none'
-            }}
-            fontSize="sm"
             required
           />
 
@@ -216,21 +202,7 @@ const LoginPage = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Senha"
-              h={12}
-              px={4}
               pr={12}
-              bg="gray.100"
-              border="none"
-              borderRadius="xl"
-              color="gray.900"
-              _placeholder={{ color: 'gray.500' }}
-              _hover={{ bg: 'gray.100' }}
-              _focus={{ 
-                bg: 'gray.100',
-                boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
-                outline: 'none'
-              }}
-              fontSize="sm"
               required
             />
             <InputRightElement h={12}>

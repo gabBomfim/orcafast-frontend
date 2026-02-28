@@ -7,11 +7,11 @@ import {
 } from '@chakra-ui/react'
 import { FiSearch } from 'react-icons/fi'
 
-const SearchBar = ({ 
-  placeholder = "Buscar...", 
-  value, 
-  onChange, 
-  ...props 
+const SearchBar = ({
+  placeholder = "Buscar...",
+  value,
+  onChange,
+  ...props
 }) => {
   return (
     <Box
@@ -33,10 +33,7 @@ const SearchBar = ({
           value={value}
           onChange={onChange}
           border="none"
-          _focus={{
-            outline: 'none',
-            boxShadow: 'none',
-          }}
+          _focus={{ outline: 'none', boxShadow: 'none' }}
         />
       </InputGroup>
     </Box>

@@ -191,20 +191,6 @@ const CreateProposalPage = () => {
                 name="title"
                 type="text"
                 placeholder="Ex: Desenvolvimento de Website"
-                h={12}
-                px={4}
-                bg="gray.100"
-                border="none"
-                borderRadius="xl"
-                color="gray.900"
-                _placeholder={{ color: 'gray.500' }}
-                _hover={{ bg: 'gray.100' }}
-                _focus={{
-                  bg: 'gray.100',
-                  boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
-                  outline: 'none'
-                }}
-                fontSize="sm"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 required
@@ -228,20 +214,6 @@ const CreateProposalPage = () => {
                 name="description"
                 placeholder="Descreva brevemente o projeto..."
                 rows={3}
-                px={4}
-                py={3}
-                bg="gray.100"
-                border="none"
-                borderRadius="xl"
-                color="gray.900"
-                _placeholder={{ color: 'gray.500' }}
-                _hover={{ bg: 'gray.100' }}
-                _focus={{
-                  bg: 'gray.100',
-                  boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
-                  outline: 'none'
-                }}
-                fontSize="sm"
                 resize="none"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
@@ -264,19 +236,6 @@ const CreateProposalPage = () => {
                 id="validUntil"
                 name="validUntil"
                 type="date"
-                h={12}
-                px={4}
-                bg="gray.100"
-                border="none"
-                borderRadius="xl"
-                color="gray.900"
-                _hover={{ bg: 'gray.100' }}
-                _focus={{
-                  bg: 'gray.100',
-                  boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
-                  outline: 'none'
-                }}
-                fontSize="sm"
                 value={validUntil}
                 onChange={(e) => setValidUntil(e.target.value)}
               />
@@ -298,7 +257,9 @@ const CreateProposalPage = () => {
                   <Box
                     key={item.id}
                     w="full"
-                    bg="gray.100"
+                    bg="gray.50"
+                    border="1px solid"
+                    borderColor="gray.200"
                     borderRadius="xl"
                     p={4}
                   >
@@ -310,16 +271,7 @@ const CreateProposalPage = () => {
                         placeholder="Descrição do item"
                         h={10}
                         px={3}
-                        bg="white"
-                        border="none"
                         borderRadius="lg"
-                        color="gray.900"
-                        _placeholder={{ color: 'gray.500' }}
-                        _focus={{
-                          boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
-                          outline: 'none'
-                        }}
-                        fontSize="sm"
                       />
                       <Flex align="center" gap={3} w="full">
                         <Box flex={1}>
@@ -333,15 +285,7 @@ const CreateProposalPage = () => {
                             onChange={(e) => handleItemChange(item.id, 'qtd', parseInt(e.target.value) || 1)}
                             h={10}
                             px={3}
-                            bg="white"
-                            border="none"
                             borderRadius="lg"
-                            color="gray.900"
-                            _focus={{
-                              boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
-                              outline: 'none'
-                            }}
-                            fontSize="sm"
                           />
                         </Box>
                         <Box flex={1}>
@@ -356,15 +300,7 @@ const CreateProposalPage = () => {
                             onChange={(e) => handleItemChange(item.id, 'value', parseFloat(e.target.value) || 0)}
                             h={10}
                             px={3}
-                            bg="white"
-                            border="none"
                             borderRadius="lg"
-                            color="gray.900"
-                            _focus={{
-                              boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
-                              outline: 'none'
-                            }}
-                            fontSize="sm"
                           />
                         </Box>
                         <IconButton
@@ -444,20 +380,6 @@ const CreateProposalPage = () => {
                 min="0"
                 max="100"
                 placeholder="0%"
-                h={12}
-                px={4}
-                bg="gray.100"
-                border="none"
-                borderRadius="xl"
-                color="gray.900"
-                _placeholder={{ color: 'gray.500' }}
-                _hover={{ bg: 'gray.100' }}
-                _focus={{
-                  bg: 'gray.100',
-                  boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
-                  outline: 'none'
-                }}
-                fontSize="sm"
                 value={discount}
                 onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
               />

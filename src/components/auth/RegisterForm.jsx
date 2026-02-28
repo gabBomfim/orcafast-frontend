@@ -93,20 +93,6 @@ const RegisterForm = ({ onSubmit, onGoogleLogin, onFacebookLogin, isLoading }) =
           type="text"
           name="name"
           placeholder="Nome completo"
-          h={12}
-          px={4}
-          bg="gray.100"
-          border="none"
-          borderRadius="xl"
-          color="gray.900"
-          _placeholder={{ color: 'gray.500' }}
-          _hover={{ bg: 'gray.100' }}
-          _focus={{
-            bg: 'gray.100',
-            boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
-            outline: 'none'
-          }}
-          fontSize="sm"
           required
         />
 
@@ -115,20 +101,6 @@ const RegisterForm = ({ onSubmit, onGoogleLogin, onFacebookLogin, isLoading }) =
           type="text"
           name="company_name"
           placeholder="Nome da empresa"
-          h={12}
-          px={4}
-          bg="gray.100"
-          border="none"
-          borderRadius="xl"
-          color="gray.900"
-          _placeholder={{ color: 'gray.500' }}
-          _hover={{ bg: 'gray.100' }}
-          _focus={{
-            bg: 'gray.100',
-            boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
-            outline: 'none'
-          }}
-          fontSize="sm"
           required
         />
 
@@ -136,20 +108,6 @@ const RegisterForm = ({ onSubmit, onGoogleLogin, onFacebookLogin, isLoading }) =
           type="text"
           name="document"
           placeholder="CNPJ ou CPF"
-          h={12}
-          px={4}
-          bg="gray.100"
-          border="none"
-          borderRadius="xl"
-          color="gray.900"
-          _placeholder={{ color: 'gray.500' }}
-          _hover={{ bg: 'gray.100' }}
-          _focus={{
-            bg: 'gray.100',
-            boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
-            outline: 'none'
-          }}
-          fontSize="sm"
           required
         />
 
@@ -158,20 +116,6 @@ const RegisterForm = ({ onSubmit, onGoogleLogin, onFacebookLogin, isLoading }) =
           type="email"
           name="email"
           placeholder="Email"
-          h={12}
-          px={4}
-          bg="gray.100"
-          border="none"
-          borderRadius="xl"
-          color="gray.900"
-          _placeholder={{ color: 'gray.500' }}
-          _hover={{ bg: 'gray.100' }}
-          _focus={{
-            bg: 'gray.100',
-            boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
-            outline: 'none'
-          }}
-          fontSize="sm"
           required
         />
 
@@ -182,21 +126,7 @@ const RegisterForm = ({ onSubmit, onGoogleLogin, onFacebookLogin, isLoading }) =
             name="password"
             placeholder="Senha (mínimo 8 caracteres)"
             minLength={8}
-            h={12}
-            px={4}
             pr={12}
-            bg="gray.100"
-            border="none"
-            borderRadius="xl"
-            color="gray.900"
-            _placeholder={{ color: 'gray.500' }}
-            _hover={{ bg: 'gray.100' }}
-            _focus={{
-              bg: 'gray.100',
-              boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
-              outline: 'none'
-            }}
-            fontSize="sm"
             required
           />
           <InputRightElement h={12}>
@@ -223,21 +153,7 @@ const RegisterForm = ({ onSubmit, onGoogleLogin, onFacebookLogin, isLoading }) =
             name="password_confirmation"
             placeholder="Confirmar senha"
             minLength={8}
-            h={12}
-            px={4}
             pr={12}
-            bg="gray.100"
-            border="none"
-            borderRadius="xl"
-            color="gray.900"
-            _placeholder={{ color: 'gray.500' }}
-            _hover={{ bg: 'gray.100' }}
-            _focus={{
-              bg: 'gray.100',
-              boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
-              outline: 'none'
-            }}
-            fontSize="sm"
             required
           />
           <InputRightElement h={12}>

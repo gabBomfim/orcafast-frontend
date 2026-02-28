@@ -26,16 +26,16 @@ const CreateClientPage = () => {
   const handleSubmit = (e) => {
     e.preventDefault()
     const formData = new FormData(e.target)
-    
+
     const phone = formData.get('phone')
     const email = formData.get('email')
-    
+
     // Validação: pelo menos telefone ou email deve ser fornecido
     if (!phone && !email) {
       alert('Adicione pelo menos o telefone ou e-mail do cliente.')
       return
     }
-    
+
     const clientData = {
       name: formData.get('name'),
       phone: phone || null,
@@ -89,20 +89,6 @@ const CreateClientPage = () => {
             name="name"
             type="text"
             placeholder="Ex: João Silva"
-            h={12}
-            px={4}
-            bg="gray.100"
-            border="none"
-            borderRadius="xl"
-            color="gray.900"
-            _placeholder={{ color: 'gray.500' }}
-            _hover={{ bg: 'gray.100' }}
-            _focus={{ 
-              bg: 'gray.100',
-              boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
-              outline: 'none'
-            }}
-            fontSize="sm"
             required
           />
         </Box>
@@ -125,20 +111,6 @@ const CreateClientPage = () => {
               name="phone"
               type="tel"
               placeholder="(11) 99999-9999"
-              h={12}
-              px={4}
-              bg="gray.100"
-              border="none"
-              borderRadius="xl"
-              color="gray.900"
-              _placeholder={{ color: 'gray.500' }}
-              _hover={{ bg: 'gray.100' }}
-              _focus={{ 
-                bg: 'gray.100',
-                boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
-                outline: 'none'
-              }}
-              fontSize="sm"
               required
               onChange={(e) => {
                 let value = e.target.value.replace(/\D/g, '')
@@ -172,20 +144,6 @@ const CreateClientPage = () => {
               name="email"
               type="email"
               placeholder="cliente@email.com"
-              h={12}
-              px={4}
-              bg="gray.100"
-              border="none"
-              borderRadius="xl"
-              color="gray.900"
-              _placeholder={{ color: 'gray.500' }}
-              _hover={{ bg: 'gray.100' }}
-              _focus={{ 
-                bg: 'gray.100',
-                boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
-                outline: 'none'
-              }}
-              fontSize="sm"
             />
           </Box>
         </SimpleGrid>

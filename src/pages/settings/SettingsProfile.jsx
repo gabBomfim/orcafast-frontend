@@ -308,20 +308,22 @@ const SettingsProfile = () => {
                                     Nome da Empresa (Fantasia)
                                 </FormLabel>
                                 <HStack spacing={0}>
-                                    <Center w="48px" h="48px" bg="gray.50" roundedLeft="xl" borderY="1px" borderLeft="1px" borderColor="gray.200">
+                                    <Center w="48px" h="48px" bg="white" roundedLeft="xl"
+                                        sx={{ border: '1.5px solid #E2E8F0', borderRight: 'none' }}
+                                    >
                                         <Icon as={FiBriefcase} boxSize={5} color="gray.500" />
                                     </Center>
                                     <Input
                                         value={formData.name}
                                         onChange={(e) => handleInputChange('name', e.target.value)}
                                         placeholder="Ex: Studio Design"
-                                        bg="gray.50"
-                                        border="1px"
-                                        borderColor="gray.200"
+                                        bg="white"
                                         roundedRight="xl"
                                         roundedLeft="none"
                                         h="48px"
-                                        _focus={{ borderColor: 'green.400', boxShadow: '0 0 0 1px var(--chakra-colors-green-400)' }}
+                                        sx={{ border: '1.5px solid #E2E8F0' }}
+                                        _focus={{ borderColor: 'emerald.500', boxShadow: '0 0 0 2px #00d97e' }}
+                                        _hover={{ borderColor: 'gray.300' }}
                                     />
                                 </HStack>
                             </FormControl>
@@ -333,20 +335,22 @@ const SettingsProfile = () => {
                                     <Text as="span" fontWeight="normal" color="gray.500">(opcional)</Text>
                                 </FormLabel>
                                 <HStack spacing={0}>
-                                    <Center w="48px" h="48px" bg="gray.50" roundedLeft="xl" borderY="1px" borderLeft="1px" borderColor="gray.200">
+                                    <Center w="48px" h="48px" bg="white" roundedLeft="xl"
+                                        sx={{ border: '1.5px solid #E2E8F0', borderRight: 'none' }}
+                                    >
                                         <Icon as={FiUser} boxSize={5} color="gray.500" />
                                     </Center>
                                     <Input
                                         value={formData.document}
                                         onChange={(e) => handleInputChange('document', e.target.value)}
                                         placeholder="Ex: 12.345.678/0001-99"
-                                        bg="gray.50"
-                                        border="1px"
-                                        borderColor="gray.200"
+                                        bg="white"
                                         roundedRight="xl"
                                         roundedLeft="none"
                                         h="48px"
-                                        _focus={{ borderColor: 'green.400', boxShadow: '0 0 0 1px var(--chakra-colors-green-400)' }}
+                                        sx={{ border: '1.5px solid #E2E8F0' }}
+                                        _focus={{ borderColor: 'emerald.500', boxShadow: '0 0 0 2px #00d97e' }}
+                                        _hover={{ borderColor: 'gray.300' }}
                                     />
                                 </HStack>
                             </FormControl>
@@ -358,20 +362,22 @@ const SettingsProfile = () => {
                                     <Text as="span" fontWeight="normal" color="gray.500">(opcional)</Text>
                                 </FormLabel>
                                 <HStack spacing={0}>
-                                    <Center w="48px" h="48px" bg="gray.50" roundedLeft="xl" borderY="1px" borderLeft="1px" borderColor="gray.200">
+                                    <Center w="48px" h="48px" bg="white" roundedLeft="xl"
+                                        sx={{ border: '1.5px solid #E2E8F0', borderRight: 'none' }}
+                                    >
                                         <Icon as={FiKey} boxSize={5} color="gray.500" />
                                     </Center>
                                     <Input
                                         value={formData.pix_key}
                                         onChange={(e) => handleInputChange('pix_key', e.target.value)}
                                         placeholder="CPF, CNPJ, e-mail ou chave aleatória"
-                                        bg="gray.50"
-                                        border="1px"
-                                        borderColor="gray.200"
+                                        bg="white"
                                         roundedRight="xl"
                                         roundedLeft="none"
                                         h="48px"
-                                        _focus={{ borderColor: 'green.400', boxShadow: '0 0 0 1px var(--chakra-colors-green-400)' }}
+                                        sx={{ border: '1.5px solid #E2E8F0' }}
+                                        _focus={{ borderColor: 'emerald.500', boxShadow: '0 0 0 2px #00d97e' }}
+                                        _hover={{ borderColor: 'gray.300' }}
                                     />
                                 </HStack>
                                 <FormHelperText fontSize="xs" color="gray.500" mt={1.5}>
@@ -385,20 +391,22 @@ const SettingsProfile = () => {
                                     Telefone / WhatsApp
                                 </FormLabel>
                                 <HStack spacing={0}>
-                                    <Center w="48px" h="48px" bg="gray.50" roundedLeft="xl" borderY="1px" borderLeft="1px" borderColor="gray.200">
+                                    <Center w="48px" h="48px" bg="white" roundedLeft="xl"
+                                        sx={{ border: '1.5px solid #E2E8F0', borderRight: 'none' }}
+                                    >
                                         <Icon as={FiPhone} boxSize={5} color="gray.500" />
                                     </Center>
                                     <Input
                                         value={formData.phone}
                                         onChange={(e) => handleInputChange('phone', e.target.value)}
                                         placeholder="(11) 99999-9999"
-                                        bg="gray.50"
-                                        border="1px"
-                                        borderColor="gray.200"
+                                        bg="white"
                                         roundedRight="xl"
                                         roundedLeft="none"
                                         h="48px"
-                                        _focus={{ borderColor: 'green.400', boxShadow: '0 0 0 1px var(--chakra-colors-green-400)' }}
+                                        sx={{ border: '1.5px solid #E2E8F0' }}
+                                        _focus={{ borderColor: 'emerald.500', boxShadow: '0 0 0 2px #00d97e' }}
+                                        _hover={{ borderColor: 'gray.300' }}
                                     />
                                 </HStack>
                             </FormControl>
@@ -412,13 +420,8 @@ const SettingsProfile = () => {
                                     value={formData.default_proposal_terms}
                                     onChange={(e) => handleInputChange('default_proposal_terms', e.target.value)}
                                     placeholder="Ex: Pagamento: 50% na aprovação e 50% na conclusão. Aceitamos Pix/Cartão. Orçamento válido por 15 dias."
-                                    bg="gray.50"
-                                    border="1px"
-                                    borderColor="gray.200"
-                                    rounded="xl"
                                     minH="120px"
                                     resize="vertical"
-                                    _focus={{ borderColor: 'green.400', boxShadow: '0 0 0 1px var(--chakra-colors-green-400)' }}
                                 />
                                 <FormHelperText fontSize="xs" color="gray.500" mt={1.5}>
                                     Este texto será exibido automaticamente no rodapé de todos os seus orçamentos.

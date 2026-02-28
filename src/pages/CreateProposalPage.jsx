@@ -66,14 +66,15 @@ const CreateProposalPage = () => {
   const customSelectStyles = {
     control: (provided, state) => ({
       ...provided,
-      backgroundColor: '#F3F4F6', // gray.100
-      borderColor: 'transparent',
+      backgroundColor: 'white',
+      borderColor: state.isFocused ? '#00d97e' : '#E5E7EB', // gray.200 at rest, emerald on focus
+      borderWidth: '1.5px',
       borderRadius: '0.75rem', // xl
       padding: '0.3rem',
       minHeight: '48px',
-      boxShadow: state.isFocused ? '0 0 0 2px #10B981' : 'none',
+      boxShadow: state.isFocused ? '0 0 0 2px #00d97e' : 'none',
       '&:hover': {
-        backgroundColor: '#F3F4F6',
+        borderColor: '#D1D5DB', // gray.300
       },
     }),
     menu: (provided) => ({
@@ -87,7 +88,6 @@ const CreateProposalPage = () => {
     option: (provided, state) => ({
       ...provided,
       backgroundColor: state.data?.isCreate
-        // "+ Cadastrar" never gets the full emerald fill — use a soft tint
         ? state.isFocused ? '#F0FDF4' : 'transparent'
         : state.isSelected
           ? '#10B981'
@@ -95,7 +95,7 @@ const CreateProposalPage = () => {
             ? '#ECFDF5'
             : 'transparent',
       color: state.data?.isCreate
-        ? '#059669' // emerald.600 — always readable against white / light tint
+        ? '#059669'
         : state.isSelected ? 'white' : '#111827',
       cursor: 'pointer',
       fontWeight: state.data?.isCreate ? '600' : 'normal',
@@ -481,20 +481,6 @@ const CreateProposalPage = () => {
                         name="title"
                         type="text"
                         placeholder="Ex: Desenvolvimento de Website"
-                        h={12}
-                        px={4}
-                        bg="gray.100"
-                        border="none"
-                        borderRadius="xl"
-                        color="gray.900"
-                        _placeholder={{ color: 'gray.500' }}
-                        _hover={{ bg: 'gray.100' }}
-                        _focus={{
-                          bg: 'gray.100',
-                          boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
-                          outline: 'none'
-                        }}
-                        fontSize="sm"
                         value={formData.title}
                         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                         required
@@ -518,20 +504,6 @@ const CreateProposalPage = () => {
                         name="description"
                         placeholder="Descreva brevemente o projeto..."
                         minH="120px"
-                        px={4}
-                        py={3}
-                        bg="gray.100"
-                        border="none"
-                        borderRadius="xl"
-                        color="gray.900"
-                        _placeholder={{ color: 'gray.500' }}
-                        _hover={{ bg: 'gray.100' }}
-                        _focus={{
-                          bg: 'gray.100',
-                          boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
-                          outline: 'none'
-                        }}
-                        fontSize="sm"
                         value={formData.description}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                       />
@@ -550,18 +522,6 @@ const CreateProposalPage = () => {
                         type="date"
                         value={formData.validUntil}
                         onChange={(e) => setFormData({ ...formData, validUntil: e.target.value })}
-                        h={12}
-                        px={4}
-                        bg="gray.100"
-                        border="none"
-                        borderRadius="xl"
-                        color="gray.900"
-                        _hover={{ bg: 'gray.100' }}
-                        _focus={{
-                          bg: 'gray.100',
-                          boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
-                          outline: 'none'
-                        }}
                       />
                     </FormControl>
 
@@ -585,20 +545,6 @@ const CreateProposalPage = () => {
                             </Text>
                             <Input
                               placeholder="Ex: Criação de logo"
-                              h={12}
-                              px={4}
-                              bg="gray.100"
-                              border="none"
-                              borderRadius="xl"
-                              color="gray.900"
-                              _placeholder={{ color: 'gray.500' }}
-                              _hover={{ bg: 'gray.100' }}
-                              _focus={{
-                                bg: 'gray.100',
-                                boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
-                                outline: 'none'
-                              }}
-                              fontSize="sm"
                               value={item.desc}
                               onChange={(e) =>
                                 handleItemChange(item.id, 'desc', e.target.value)
@@ -612,18 +558,6 @@ const CreateProposalPage = () => {
                               </Text>
                               <Input
                                 type="number"
-                                h={12}
-                                px={4}
-                                bg="gray.100"
-                                border="none"
-                                borderRadius="xl"
-                                color="gray.900"
-                                _hover={{ bg: 'gray.100' }}
-                                _focus={{
-                                  bg: 'gray.100',
-                                  boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
-                                  outline: 'none'
-                                }}
                                 value={item.qtd}
                                 onChange={(e) =>
                                   handleItemChange(item.id, 'qtd', e.target.value)
@@ -638,20 +572,6 @@ const CreateProposalPage = () => {
                                 type="number"
                                 placeholder="1500.00"
                                 step="0.01"
-                                h={12}
-                                px={4}
-                                bg="gray.100"
-                                border="none"
-                                borderRadius="xl"
-                                color="gray.900"
-                                _placeholder={{ color: 'gray.500' }}
-                                _hover={{ bg: 'gray.100' }}
-                                _focus={{
-                                  bg: 'gray.100',
-                                  boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
-                                  outline: 'none'
-                                }}
-                                fontSize="sm"
                                 value={item.value}
                                 onChange={(e) =>
                                   handleItemChange(item.id, 'value', e.target.value)
@@ -713,19 +633,6 @@ const CreateProposalPage = () => {
                         min="0"
                         max="100"
                         placeholder="0%"
-                        h={12}
-                        px={4}
-                        bg="gray.100"
-                        border="none"
-                        borderRadius="xl"
-                        color="gray.900"
-                        _placeholder={{ color: 'gray.500' }}
-                        _hover={{ bg: 'gray.100' }}
-                        _focus={{
-                          bg: 'gray.100',
-                          boxShadow: '0 0 0 2px var(--chakra-colors-emerald-500)',
-                          outline: 'none'
-                        }}
                         value={formData.discount}
                         onChange={(e) => setFormData({ ...formData, discount: parseFloat(e.target.value) || 0 })}
                       />

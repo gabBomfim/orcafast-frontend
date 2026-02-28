@@ -201,13 +201,45 @@ const components = {
     }
   },
   Input: {
+    defaultProps: {
+      variant: 'app',
+    },
     variants: {
+      // ── Standard app input ──────────────────────────────────────────────
+      // bg: white | border: gray.200 | rounded-xl | h=12 | emerald focus ring
+      app: {
+        field: {
+          bg: 'white',
+          border: '1.5px solid',
+          borderColor: 'gray.200',
+          borderRadius: 'xl',
+          color: 'gray.900',
+          height: '48px',
+          px: 4,
+          fontSize: 'sm',
+          _placeholder: { color: 'gray.400' },
+          _hover: { borderColor: 'gray.300' },
+          _focus: {
+            bg: 'white',
+            borderColor: 'emerald.500',
+            outline: 'none',
+            boxShadow: '0 0 0 2px #00d97e',
+          },
+          _invalid: {
+            borderColor: 'red.500',
+            boxShadow: '0 0 0 2px #E53E3E',
+          },
+          _disabled: {
+            opacity: 0.5,
+            cursor: 'not-allowed',
+            bg: 'gray.50',
+          },
+        },
+      },
       outline: {
         field: {
           borderColor: 'gray.200',
-          _hover: {
-            borderColor: 'gray.300',
-          },
+          _hover: { borderColor: 'gray.300' },
           _focus: {
             borderColor: 'primary.500',
             boxShadow: '0 0 0 1px rgba(0, 217, 126, 0.3)',
@@ -219,22 +251,64 @@ const components = {
           bg: 'white',
           color: 'gray.900',
           borderColor: 'gray.300',
-          _hover: {
-            borderColor: 'gray.400',
-            bg: 'white',
-          },
+          _hover: { borderColor: 'gray.400', bg: 'white' },
           _focus: {
             borderColor: 'emerald.500',
             boxShadow: '0 0 0 1px var(--chakra-colors-emerald-500)',
             bg: 'white',
             color: 'gray.900',
           },
-          _active: {
+          _active: { bg: 'white', color: 'gray.900' },
+          _placeholder: { color: 'gray.500' },
+        },
+      },
+    },
+  },
+  Textarea: {
+    defaultProps: {
+      variant: 'app',
+    },
+    variants: {
+      app: {
+        bg: 'white',
+        border: '1.5px solid',
+        borderColor: 'gray.200',
+        borderRadius: 'xl',
+        color: 'gray.900',
+        fontSize: 'sm',
+        px: 4,
+        py: 3,
+        _placeholder: { color: 'gray.400' },
+        _hover: { borderColor: 'gray.300' },
+        _focus: {
+          bg: 'white',
+          borderColor: 'emerald.500',
+          outline: 'none',
+          boxShadow: '0 0 0 2px #00d97e',
+        },
+      },
+    },
+  },
+  Select: {
+    defaultProps: {
+      variant: 'app',
+    },
+    variants: {
+      app: {
+        field: {
+          bg: 'white',
+          border: '1.5px solid',
+          borderColor: 'gray.200',
+          borderRadius: 'xl',
+          color: 'gray.900',
+          height: '48px',
+          fontSize: 'sm',
+          _hover: { borderColor: 'gray.300' },
+          _focus: {
             bg: 'white',
-            color: 'gray.900',
-          },
-          _placeholder: {
-            color: 'gray.500',
+            borderColor: 'emerald.500',
+            outline: 'none',
+            boxShadow: '0 0 0 2px #00d97e',
           },
         },
       },

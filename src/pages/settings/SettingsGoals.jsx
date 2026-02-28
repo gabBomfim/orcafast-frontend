@@ -259,23 +259,25 @@ const SettingsGoals = () => {
                                         Quanto você deseja faturar em todo o ano
                                     </Text>
                                     <HStack spacing={0}>
-                                        <Flex align="center" justify="center" px={4} h="48px" bg="gray.50"
-                                            roundedLeft="xl" borderY="1px" borderLeft="1px" borderColor="gray.200">
+                                        <Flex align="center" justify="center" px={4} h="48px" bg="white"
+                                            roundedLeft="xl"
+                                            sx={{ border: '1.5px solid #E2E8F0', borderRight: 'none' }}
+                                        >
                                             <Text fontWeight="medium" color="gray.600">R$</Text>
                                         </Flex>
                                         <Input
                                             value={metaAnual}
                                             onChange={(e) => setMetaAnual(e.target.value.replace(/\D/g, ''))}
                                             placeholder="0"
-                                            bg="gray.50"
-                                            border="1px"
-                                            borderColor="gray.200"
+                                            bg="white"
                                             roundedRight="xl"
                                             roundedLeft="none"
                                             h="48px"
                                             fontSize="lg"
                                             fontWeight="semibold"
-                                            _focus={{ borderColor: 'green.400', boxShadow: '0 0 0 1px var(--chakra-colors-green-400)' }}
+                                            sx={{ border: '1.5px solid #E2E8F0' }}
+                                            _focus={{ borderColor: 'emerald.500', boxShadow: '0 0 0 2px #00d97e' }}
+                                            _hover={{ borderColor: 'gray.300' }}
                                         />
                                     </HStack>
                                     <Text fontSize="xs" color="gray.600" mt={2}>
@@ -303,23 +305,25 @@ const SettingsGoals = () => {
                                         Valor base usado para cada mês
                                     </Text>
                                     <HStack spacing={0}>
-                                        <Flex align="center" justify="center" px={4} h="48px" bg="gray.50"
-                                            roundedLeft="xl" borderY="1px" borderLeft="1px" borderColor="gray.200">
+                                        <Flex align="center" justify="center" px={4} h="48px" bg="white"
+                                            roundedLeft="xl"
+                                            sx={{ border: '1.5px solid #E2E8F0', borderRight: 'none' }}
+                                        >
                                             <Text fontWeight="medium" color="gray.600">R$</Text>
                                         </Flex>
                                         <Input
                                             value={metaMensalPadrao}
                                             onChange={(e) => handleMetaMensalPadraoChange(e.target.value)}
                                             placeholder="0"
-                                            bg="gray.50"
-                                            border="1px"
-                                            borderColor="gray.200"
+                                            bg="white"
                                             roundedRight="xl"
                                             roundedLeft="none"
                                             h="48px"
                                             fontSize="lg"
                                             fontWeight="semibold"
-                                            _focus={{ borderColor: 'green.400', boxShadow: '0 0 0 1px var(--chakra-colors-green-400)' }}
+                                            sx={{ border: '1.5px solid #E2E8F0' }}
+                                            _focus={{ borderColor: 'emerald.500', boxShadow: '0 0 0 2px #00d97e' }}
+                                            _hover={{ borderColor: 'gray.300' }}
                                         />
                                     </HStack>
                                 </FormControl>
@@ -362,23 +366,25 @@ const SettingsGoals = () => {
                                                 {month}
                                             </FormLabel>
                                             <HStack spacing={0}>
-                                                <Flex align="center" justify="center" px={3} h="40px" bg="gray.50"
-                                                    roundedLeft="lg" borderY="1px" borderLeft="1px" borderColor="gray.200">
+                                                <Flex align="center" justify="center" px={3} h="40px" bg="white"
+                                                    roundedLeft="lg"
+                                                    sx={{ border: '1.5px solid #E2E8F0', borderRight: 'none' }}
+                                                >
                                                     <Text fontSize="xs" color="gray.600">R$</Text>
                                                 </Flex>
                                                 <Input
                                                     value={metasMensais[idx]}
                                                     onChange={(e) => handleMetaMensalChange(idx, e.target.value)}
                                                     placeholder="0"
-                                                    bg="gray.50"
-                                                    border="1px"
-                                                    borderColor="gray.200"
+                                                    bg="white"
                                                     roundedRight="lg"
                                                     roundedLeft="none"
                                                     h="40px"
                                                     fontSize="sm"
                                                     fontWeight="medium"
-                                                    _focus={{ borderColor: 'green.400', boxShadow: '0 0 0 1px var(--chakra-colors-green-400)' }}
+                                                    sx={{ border: '1.5px solid #E2E8F0' }}
+                                                    _focus={{ borderColor: 'emerald.500', boxShadow: '0 0 0 2px #00d97e' }}
+                                                    _hover={{ borderColor: 'gray.300' }}
                                                 />
                                             </HStack>
                                         </FormControl>
