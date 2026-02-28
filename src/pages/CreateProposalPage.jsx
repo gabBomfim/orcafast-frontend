@@ -43,6 +43,7 @@ import {
 import { WiStars } from 'react-icons/wi'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { proposalService, clientService } from '../services'
+import { storage } from '../utils/storage'
 
 const CreateProposalPage = () => {
   const navigate = useNavigate()
@@ -90,17 +91,22 @@ const CreateProposalPage = () => {
       backgroundColor: state.data?.isCreate
         ? state.isFocused ? '#F0FDF4' : 'transparent'
         : state.isSelected
-          ? '#10B981'
+          ? '#00d97e'
           : state.isFocused
             ? '#ECFDF5'
             : 'transparent',
       color: state.data?.isCreate
         ? '#059669'
-        : state.isSelected ? 'white' : '#111827',
+        : state.isSelected
+          ? 'white'
+          : state.isFocused
+            ? '#059669'
+            : '#374151',
       cursor: 'pointer',
-      fontWeight: state.data?.isCreate ? '600' : 'normal',
+      fontWeight: state.data?.isCreate ? '600' : state.isSelected ? '600' : 'normal',
       '&:active': {
-        backgroundColor: state.data?.isCreate ? '#DCFCE7' : '#10B981',
+        backgroundColor: state.data?.isCreate ? '#DCFCE7' : '#00d97e',
+        color: state.data?.isCreate ? '#059669' : 'white',
       },
     }),
     input: (provided) => ({
@@ -121,12 +127,12 @@ const CreateProposalPage = () => {
     clientId: searchParams.get('client') || '',
     title: '',
     description: '',
-    discount: 0,
+    discount: '',
     validUntil: '',
   })
 
   const [items, setItems] = useState([
-    { id: 1, desc: '', qtd: 1, value: 0 },
+    { id: 1, desc: '', qtd: 1, value: '' },
   ])
 
   useEffect(() => {
@@ -154,7 +160,7 @@ const CreateProposalPage = () => {
             id: item.id || index + 1,
             desc: item.description || '',
             qtd: item.quantity || 1,
-            value: parseFloat(item.unit_price || item.unitPrice || 0),
+            value: String(parseFloat(item.unit_price || item.unitPrice || 0) || ''),
           })))
         }
       } catch (error) {
@@ -224,7 +230,7 @@ const CreateProposalPage = () => {
   }
 
   const handleAddItem = () => {
-    setItems([...items, { id: Date.now(), desc: '', qtd: 1, value: 0 }])
+    setItems([...items, { id: Date.now(), desc: '', qtd: 1, value: '' }])
   }
 
   const handleRemoveItem = (id) => {
@@ -299,12 +305,13 @@ const CreateProposalPage = () => {
   }
 
   const subtotal = items.reduce((acc, item) => {
-    const value = parseFloat(item.value) || 0
+    const value = parseFloat(String(item.value).replace(',', '.')) || 0
     const qtd = parseInt(item.qtd, 10) || 0
     return acc + value * qtd
   }, 0)
 
-  const discountAmount = (subtotal * (formData.discount / 100))
+  const discountPct = parseFloat(String(formData.discount).replace(',', '.')) || 0
+  const discountAmount = subtotal * (discountPct / 100)
   const total = subtotal - discountAmount
 
   const selectedClient = Array.isArray(clients)
@@ -351,16 +358,18 @@ const CreateProposalPage = () => {
     setIsLoading(true)
 
     try {
+      const user = storage.getUser()
       const dataToSend = {
+        company_id: user?.company_id,
         client_id: parseInt(formData.clientId),
         title: formData.title,
         description: formData.description,
-        discount: parseFloat(formData.discount),
+        discount: parseFloat(String(formData.discount).replace(',', '.')) || 0,
         valid_until: formData.validUntil,
         items: items.map(item => ({
           description: item.desc,
           quantity: parseInt(item.qtd, 10),
-          unit_price: parseFloat(item.value) || 0
+          unit_price: parseFloat(String(item.value).replace(',', '.')) || 0
         }))
       }
 
@@ -445,7 +454,7 @@ const CreateProposalPage = () => {
                         fontWeight="medium"
                         color="gray.900"
                       >
-                        Cliente *
+                        Cliente
                       </FormLabel>
                       <ReactSelect
                         name="clientId"
@@ -474,7 +483,7 @@ const CreateProposalPage = () => {
                         color="gray.900"
                         mb={2}
                       >
-                        Título do orçamento *
+                        Título do orçamento
                       </Text>
                       <Input
                         id="title"
@@ -515,7 +524,7 @@ const CreateProposalPage = () => {
                         fontWeight="medium"
                         color="gray.900"
                       >
-                        Válida até *
+                        Válida até
                       </FormLabel>
                       <Input
                         name="validUntil"
@@ -573,6 +582,7 @@ const CreateProposalPage = () => {
                                 placeholder="1500.00"
                                 step="0.01"
                                 value={item.value}
+                                onFocus={(e) => { if (e.target.value === '0') handleItemChange(item.id, 'value', '') }}
                                 onChange={(e) =>
                                   handleItemChange(item.id, 'value', e.target.value)
                                 }
@@ -632,9 +642,11 @@ const CreateProposalPage = () => {
                         type="number"
                         min="0"
                         max="100"
-                        placeholder="0%"
+                        placeholder="0"
                         value={formData.discount}
-                        onChange={(e) => setFormData({ ...formData, discount: parseFloat(e.target.value) || 0 })}
+                        onFocus={(e) => { if (e.target.value === '0' || e.target.value === 0) setFormData({ ...formData, discount: '' }) }}
+                        onBlur={(e) => { if (e.target.value === '') setFormData({ ...formData, discount: '' }) }}
+                        onChange={(e) => setFormData({ ...formData, discount: e.target.value })}
                       />
                     </FormControl>
 
@@ -711,40 +723,43 @@ const CreateProposalPage = () => {
                     {formData.description || 'Descrição do orçamento aparecerá aqui...'}
                   </Text>
                   <Box height="1px" bg="gray.200" />
-                  {items.filter(item => item.desc.trim()).map((item) => (
-                    <HStack key={item.id} justify="space-between">
-                      <VStack align="start" spacing={0}>
-                        <Text fontWeight="medium" color="gray.900">{item.desc}</Text>
-                        <Text fontSize="sm" color="gray.600">
-                          {item.qtd}x R$ {parseFloat(item.value || 0).toFixed(2)}
+                  {items.filter(item => item.desc.trim()).map((item) => {
+                    const v = parseFloat(String(item.value).replace(',', '.')) || 0
+                    const q = parseInt(item.qtd || 1)
+                    const fmt = (n) => n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                    return (
+                      <HStack key={item.id} justify="space-between">
+                        <VStack align="start" spacing={0}>
+                          <Text fontWeight="medium" color="gray.900">{item.desc}</Text>
+                          <Text fontSize="sm" color="gray.600">
+                            {q}x R$ {fmt(v)}
+                          </Text>
+                        </VStack>
+                        <Text fontWeight="bold" color="gray.900">
+                          R$ {fmt(v * q)}
                         </Text>
-                      </VStack>
-                      <Text fontWeight="bold" color="gray.900">
-                        R$ {(parseFloat(item.value || 0) * parseInt(item.qtd || 1)).toFixed(2)}
-                      </Text>
-                    </HStack>
-                  ))}
+                      </HStack>
+                    )
+                  })}
                   <Box height="1px" bg="gray.200" />
                   <VStack spacing={2} align="stretch">
                     <HStack justify="space-between">
                       <Text color="gray.900">Subtotal:</Text>
-                      <Text fontWeight="medium" color="gray.900">R$ {subtotal.toFixed(2)}</Text>
+                      <Text fontWeight="medium" color="gray.900">R$ {subtotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Text>
                     </HStack>
-                    {formData.discount > 0 && (
+                    {discountPct > 0 && (
                       <HStack justify="space-between">
-                        <Text color="gray.900">Desconto ({formData.discount}%):</Text>
+                        <Text color="gray.900">Desconto ({discountPct}%):</Text>
                         <Text fontWeight="medium" color="red.500">
-                          - R$ {discountAmount.toFixed(2)}
+                          - R$ {discountAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </Text>
                       </HStack>
                     )}
                     <Box height="1px" bg="gray.200" />
                     <HStack justify="space-between">
-                      <Text fontSize="xl" fontWeight="bold" color="gray.900">
-                        Total
-                      </Text>
+                      <Text fontSize="xl" fontWeight="bold" color="gray.900">Total</Text>
                       <Text fontSize="xl" fontWeight="bold" color="emerald.600">
-                        R$ {total.toFixed(2)}
+                        R$ {total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </Text>
                     </HStack>
                   </VStack>
@@ -769,13 +784,8 @@ const CreateProposalPage = () => {
                 <FormLabel fontSize="sm" fontWeight="medium" color="gray.700">Nome</FormLabel>
                 <Input
                   placeholder="Nome completo"
-                  bg="gray.100"
-                  border="none"
-                  rounded="xl"
-                  h={12}
                   value={newClient.name}
                   onChange={(e) => setNewClient({ ...newClient, name: e.target.value })}
-                  _focus={{ boxShadow: '0 0 0 2px #10B981' }}
                 />
               </FormControl>
 
@@ -785,26 +795,16 @@ const CreateProposalPage = () => {
                   <Input
                     type="email"
                     placeholder="email@exemplo.com"
-                    bg="gray.100"
-                    border="none"
-                    rounded="xl"
-                    h={12}
                     value={newClient.email}
                     onChange={(e) => setNewClient({ ...newClient, email: e.target.value })}
-                    _focus={{ boxShadow: '0 0 0 2px #10B981' }}
                   />
                 </FormControl>
                 <FormControl>
                   <FormLabel fontSize="sm" fontWeight="medium" color="gray.700">Telefone</FormLabel>
                   <Input
                     placeholder="(11) 99999-9999"
-                    bg="gray.100"
-                    border="none"
-                    rounded="xl"
-                    h={12}
                     value={newClient.phone}
                     onChange={(e) => setNewClient({ ...newClient, phone: e.target.value })}
-                    _focus={{ boxShadow: '0 0 0 2px #10B981' }}
                   />
                 </FormControl>
               </SimpleGrid>
@@ -813,13 +813,8 @@ const CreateProposalPage = () => {
                 <FormLabel fontSize="sm" fontWeight="medium" color="gray.700">Empresa</FormLabel>
                 <Input
                   placeholder="Nome da empresa (opcional)"
-                  bg="gray.100"
-                  border="none"
-                  rounded="xl"
-                  h={12}
                   value={newClient.company}
                   onChange={(e) => setNewClient({ ...newClient, company: e.target.value })}
-                  _focus={{ boxShadow: '0 0 0 2px #10B981' }}
                 />
               </FormControl>
             </VStack>

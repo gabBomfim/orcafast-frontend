@@ -13,7 +13,7 @@ All colors are defined in `src/theme/index.js`.
 | `emerald.500` | `#00d97e` | Brand primary, focus rings, CTAs |
 | `emerald.600` | `#00b368` | Hover state for brand buttons |
 | `gray.50` | `#f8fafc` | Page background |
-| `gray.100` | `#f1f5f9` | Input background (standard) |
+| `gray.100` | `#f1f5f9` | Dividers, light chip/icon backgrounds |
 | `gray.200` | `#e2e8f0` | Borders, dividers |
 | `gray.400` | `#94a3b8` | Placeholder text |
 | `gray.500` | `#64748b` | Secondary text / icons |
@@ -147,29 +147,61 @@ The `app` variant is the default — matches Input in style.
 
 ---
 
-## 4. Select (native `<Select>`)
+## 4. Select Dropdowns
 
-The `app` variant is the default.
+> **Rule:** Always use `ReactSelect` (react-select library), never native Chakra `<Select>`. Native selects use OS-level dropdowns that can't be styled to match the design system.
+
+### Standard select
 
 ```jsx
-<Select value={value} onChange={(e) => setValue(e.target.value)}>
-  <option value="a">Option A</option>
-</Select>
+import ReactSelect from 'react-select'
+import { appSelectStyles } from '../theme/selectStyles'
+
+<ReactSelect
+  styles={appSelectStyles}
+  value={options.find(o => o.value === value)}
+  onChange={(opt) => setValue(opt?.value)}
+  options={[
+    { value: 'all', label: 'Todo o período' },
+    { value: '7days', label: 'Últimos 7 dias' },
+  ]}
+  isSearchable={false}
+/>
 ```
+
+**Shared style tokens** (`src/theme/selectStyles.js`):
+- `backgroundColor: white`, `borderColor: #E5E7EB` (gray.200) at rest
+- `borderWidth: 1.5px`, `borderRadius: 0.75rem`
+- Focus: `borderColor: #00d97e`, `boxShadow: '0 0 0 2px #00d97e'`
+- Options: `#ECFDF5` on hover, `#10B981` when selected
+
+### Compact selector (e.g., year picker)
+
+Spread `appSelectStyles` and override `control` to reduce height:
+
+```jsx
+<ReactSelect
+  styles={{
+    ...appSelectStyles,
+    control: (p, s) => ({
+      ...appSelectStyles.control(p, s),
+      minHeight: '36px',
+      maxWidth: '120px',
+    }),
+  }}
+  ...
+/>
+```
+
+### Special option (e.g., "+ Cadastrar")
+
+Add `isCreate: true` to the option, check `state.data?.isCreate` in the `option` style — see `customSelectStyles` in `CreateProposalPage.jsx`.
 
 ---
 
 ## 5. ReactSelect (react-select library)
 
-Used in `CreateProposalPage`. Uses `customSelectStyles` object defined in-component.  
-The `option` style checks `state.data?.isCreate` to give the "+ Cadastrar" option a different look.
-
-**Standard values to match the `app` input:**
-- `backgroundColor: 'white'`
-- `borderColor: state.isFocused ? '#00d97e' : '#E5E7EB'` (gray.200 at rest)
-- `borderWidth: '1.5px'`
-- `boxShadow: state.isFocused ? '0 0 0 2px #00d97e' : 'none'`
-- `'&:hover': { borderColor: '#D1D5DB' }` (gray.300)
+See section 4 above. The `customSelectStyles` in `CreateProposalPage.jsx` extends the shared `appSelectStyles` with `isCreate` option support ("+ Cadastrar novo cliente").
 
 ---
 

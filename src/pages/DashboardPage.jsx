@@ -8,21 +8,19 @@ import {
   Flex,
   Card,
   CardBody,
-  Menu,
-  MenuButton,
-  Button,
-  MenuList,
-  MenuItem,
   Spinner,
   Input,
   Collapse,
   useToast,
+  FormControl,
+  FormErrorMessage,
 } from '@chakra-ui/react'
+import ReactSelect from 'react-select'
+import { appSelectStyles } from '../theme/selectStyles'
 import {
   FiTrendingUp,
   FiTarget,
   FiBarChart,
-  FiChevronDown,
 } from 'react-icons/fi'
 
 import Container from '../components/layout/Container'
@@ -57,6 +55,7 @@ const DashboardPage = () => {
 
   const [selectedPeriod, setSelectedPeriod] = useState('this-month')
   const [customDates, setCustomDates] = useState({ begin_date: '', end_date: '' })
+  const [dateError, setDateError] = useState('')
 
   const [stats, setStats] = useState(EMPTY_STATS)
   const [isLoading, setIsLoading] = useState(true)
@@ -153,61 +152,68 @@ const DashboardPage = () => {
           </Box>
 
           {/* Period Filter */}
-          <Menu>
-            <MenuButton
-              as={Button}
-              rightIcon={<Icon as={FiChevronDown} />}
-              variant="outline"
-              size="sm"
-              borderRadius="xl"
-              px={4}
-              py={2.5}
-              fontSize="sm"
-              fontWeight="medium"
+          <Box w={{ base: 'full', sm: '200px' }}>
+            <ReactSelect
+              styles={{
+                ...appSelectStyles,
+                control: (p, s) => ({
+                  ...appSelectStyles.control(p, s),
+                  minHeight: '38px',
+                }),
+              }}
+              value={PERIOD_OPTIONS.find((p) => p.value === selectedPeriod)}
+              onChange={(opt) => setSelectedPeriod(opt?.value || 'this-month')}
+              options={PERIOD_OPTIONS}
+              isSearchable={false}
               isDisabled={isLoading}
-            >
-              {PERIOD_OPTIONS.find((p) => p.value === selectedPeriod)?.label}
-            </MenuButton>
-            <MenuList borderRadius="xl" py={1}>
-              {PERIOD_OPTIONS.map((option) => (
-                <MenuItem
-                  key={option.value}
-                  onClick={() => setSelectedPeriod(option.value)}
-                  bg={selectedPeriod === option.value ? 'emerald.50' : 'transparent'}
-                  color={selectedPeriod === option.value ? 'emerald.600' : 'gray.900'}
-                  fontWeight={selectedPeriod === option.value ? 'medium' : 'normal'}
-                  _hover={{ bg: 'gray.50' }}
-                >
-                  {option.label}
-                </MenuItem>
-              ))}
-            </MenuList>
-          </Menu>
+              menuPortalTarget={document.body}
+              menuPosition="fixed"
+            />
+          </Box>
         </Flex>
 
         {/* Custom date inputs */}
         <Collapse in={selectedPeriod === 'custom'} animateOpacity>
-          <HStack spacing={3} p={4} bg="white" rounded="2xl" border="1px" borderColor="gray.200" shadow="sm">
-            <Box flex={1}>
+          <HStack spacing={3} p={4} bg="white" rounded="2xl" border="1px" borderColor={dateError ? 'red.300' : 'gray.200'} shadow="sm" align="flex-start">
+            <FormControl flex={1}>
               <Text fontSize="xs" fontWeight="medium" color="gray.600" mb={1}>Data início</Text>
               <Input
                 type="date"
                 size="sm"
                 rounded="lg"
                 value={customDates.begin_date}
-                onChange={(e) => setCustomDates((prev) => ({ ...prev, begin_date: e.target.value }))}
+                max={customDates.end_date || undefined}
+                onChange={(e) => {
+                  const newStart = e.target.value
+                  if (customDates.end_date && newStart > customDates.end_date) {
+                    setDateError('Data inicial não pode ser maior que a data final')
+                  } else {
+                    setDateError('')
+                  }
+                  setCustomDates((prev) => ({ ...prev, begin_date: newStart }))
+                }}
               />
-            </Box>
-            <Box flex={1}>
+            </FormControl>
+            <FormControl flex={1} isInvalid={!!dateError}>
               <Text fontSize="xs" fontWeight="medium" color="gray.600" mb={1}>Data fim</Text>
               <Input
                 type="date"
                 size="sm"
                 rounded="lg"
                 value={customDates.end_date}
-                onChange={(e) => setCustomDates((prev) => ({ ...prev, end_date: e.target.value }))}
+                min={customDates.begin_date || undefined}
+                onChange={(e) => {
+                  const newEnd = e.target.value
+                  if (customDates.begin_date && newEnd < customDates.begin_date) {
+                    setDateError('Data final não pode ser menor que a data inicial')
+                  } else {
+                    setDateError('')
+                  }
+                  setCustomDates((prev) => ({ ...prev, end_date: newEnd }))
+                }}
               />
-            </Box>
+              {dateError && <FormErrorMessage fontSize="xs">{dateError}</FormErrorMessage>}
+            </FormControl>
           </HStack>
         </Collapse>
 

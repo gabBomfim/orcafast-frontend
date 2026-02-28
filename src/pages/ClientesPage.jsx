@@ -24,13 +24,15 @@ import {
   AlertDialogContent,
   AlertDialogOverlay,
   Input,
-  Select,
   FormControl,
   FormLabel,
+  FormErrorMessage,
   InputGroup,
   InputLeftElement,
   Stack,
 } from '@chakra-ui/react'
+import ReactSelect from 'react-select'
+import { appSelectStyles } from '../theme/selectStyles'
 import { Link } from 'react-router-dom'
 import {
   FiUsers,
@@ -66,6 +68,7 @@ const ClientesPage = () => {
   // Date Filters
   const [datePreset, setDatePreset] = useState('all')
   const [dateRange, setDateRange] = useState({ start: '', end: '' })
+  const [dateError, setDateError] = useState('')
 
   const [pagination, setPagination] = useState({
     currentPage: 1,
@@ -118,8 +121,8 @@ const ClientesPage = () => {
 
   // Date filters
   useEffect(() => {
-    fetchClients(1)
-  }, [dateRange.start, dateRange.end])
+    if (!dateError) fetchClients(1)
+  }, [dateRange.start, dateRange.end, dateError])
 
   // Initial load
   useEffect(() => {
@@ -281,31 +284,64 @@ const ClientesPage = () => {
 
             <FormControl flex={1}>
               <FormLabel>Período</FormLabel>
-              <Select value={datePreset} onChange={(e) => handleDatePresetChange(e.target.value)}>
-                <option value="all">Todo o período</option>
-                <option value="7days">Últimos 7 dias</option>
-                <option value="30days">Últimos 30 dias</option>
-                <option value="thisMonth">Este mês</option>
-                <option value="custom">Personalizado</option>
-              </Select>
+              <ReactSelect
+                styles={appSelectStyles}
+                value={[
+                  { value: 'all', label: 'Todo o período' },
+                  { value: '7days', label: 'Últimos 7 dias' },
+                  { value: '30days', label: 'Últimos 30 dias' },
+                  { value: 'thisMonth', label: 'Este mês' },
+                  { value: 'custom', label: 'Personalizado' },
+                ].find(o => o.value === datePreset)}
+                onChange={(opt) => handleDatePresetChange(opt?.value || 'all')}
+                options={[
+                  { value: 'all', label: 'Todo o período' },
+                  { value: '7days', label: 'Últimos 7 dias' },
+                  { value: '30days', label: 'Últimos 30 dias' },
+                  { value: 'thisMonth', label: 'Este mês' },
+                  { value: 'custom', label: 'Personalizado' },
+                ]}
+                isSearchable={false}
+                menuPortalTarget={document.body}
+                menuPosition="fixed"
+              />
             </FormControl>
 
             {(datePreset === 'custom') && (
               <>
-                <FormControl w={{ base: 'full', lg: 'auto' }}>
+                <FormControl w={{ base: 'full', lg: 'auto' }} isInvalid={!!dateError}>
                   <FormLabel>De</FormLabel>
                   <Input
                     type="date"
                     value={dateRange.start}
-                    onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
+                    max={dateRange.end || undefined}
+                    onChange={(e) => {
+                      const newStart = e.target.value
+                      if (dateRange.end && newStart > dateRange.end) {
+                        setDateError('Data inicial não pode ser maior que a data final')
+                      } else {
+                        setDateError('')
+                      }
+                      setDateRange({ ...dateRange, start: newStart })
+                    }}
                   />
+                  {dateError && <FormErrorMessage fontSize="xs">{dateError}</FormErrorMessage>}
                 </FormControl>
-                <FormControl w={{ base: 'full', lg: 'auto' }}>
+                <FormControl w={{ base: 'full', lg: 'auto' }} isInvalid={!!dateError}>
                   <FormLabel>Até</FormLabel>
                   <Input
                     type="date"
                     value={dateRange.end}
-                    onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
+                    min={dateRange.start || undefined}
+                    onChange={(e) => {
+                      const newEnd = e.target.value
+                      if (dateRange.start && newEnd < dateRange.start) {
+                        setDateError('Data final não pode ser menor que a data inicial')
+                      } else {
+                        setDateError('')
+                      }
+                      setDateRange({ ...dateRange, end: newEnd })
+                    }}
                   />
                 </FormControl>
               </>

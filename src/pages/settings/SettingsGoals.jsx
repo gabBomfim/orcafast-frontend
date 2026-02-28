@@ -15,9 +15,10 @@ import {
     SimpleGrid,
     Flex,
     Spinner,
-    Select,
     useToast,
 } from '@chakra-ui/react'
+import ReactSelect from 'react-select'
+import { appSelectStyles } from '../../theme/selectStyles'
 import { FiTarget, FiCalendar, FiSave, FiInfo, FiLock } from 'react-icons/fi'
 import { useSubscription } from '../../hooks/useSubscription'
 import { goalsService } from '../../services'
@@ -191,20 +192,29 @@ const SettingsGoals = () => {
                 </Box>
 
                 {/* Year selector */}
-                <Select
-                    value={year}
-                    onChange={(e) => setYear(Number(e.target.value))}
-                    w="120px"
-                    size="sm"
-                    rounded="lg"
-                    borderColor="gray.200"
-                    bg="white"
-                    fontWeight="medium"
-                >
-                    {YEAR_OPTIONS.map((y) => (
-                        <option key={y} value={y}>{y}</option>
-                    ))}
-                </Select>
+                <ReactSelect
+                    styles={{
+                        ...appSelectStyles,
+                        control: (provided, state) => ({
+                            ...appSelectStyles.control(provided, state),
+                            minHeight: '36px',
+                            maxWidth: '120px',
+                        }),
+                        valueContainer: (provided) => ({
+                            ...provided,
+                            padding: '0 8px',
+                        }),
+                        dropdownIndicator: (provided) => ({
+                            ...provided,
+                            padding: '4px',
+                        }),
+                    }}
+                    value={{ value: year, label: String(year) }}
+                    onChange={(opt) => setYear(opt.value)}
+                    options={YEAR_OPTIONS.map((y) => ({ value: y, label: String(y) }))}
+                    isSearchable={false}
+                    menuPlacement="auto"
+                />
             </HStack>
 
             <Box position="relative">
