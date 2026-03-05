@@ -77,13 +77,6 @@ const RegisterPage = () => {
       storage.setToken(response.data.access_token)
       storage.setUser(response.data.user)
 
-      toast({
-        title: 'Conta criada com sucesso!',
-        description: 'Redirecionando para o dashboard...',
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      })
 
       navigate('/dashboard')
     } catch (error) {
@@ -100,14 +93,8 @@ const RegisterPage = () => {
     }
   }
 
-  const handleSocialLogin = (provider) => {
-    toast({
-      title: `Login com ${provider}`,
-      description: 'Funcionalidade será implementada em breve',
-      status: 'info',
-      duration: 3000,
-      isClosable: true,
-    })
+  const handleGoogleLogin = () => {
+    window.location.href = import.meta.env.VITE_GOOGLE_REDIRECT_URL
   }
 
   return (

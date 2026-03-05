@@ -79,14 +79,6 @@ const LoginPage = () => {
       storage.setToken(response.data.access_token)
       storage.setUser(response.data.user)
 
-      toast({
-        title: 'Login realizado!',
-        description: 'Redirecionando para o dashboard...',
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      })
-
       navigate('/dashboard')
     } catch (error) {
       const message = error.response?.data?.message || 'Erro ao fazer login'

@@ -91,13 +91,7 @@ const LoginModal = ({ isOpen, onClose, onSuccess }) => {
   }
 
   const handleGoogleLogin = () => {
-    toast({
-      title: 'Login com Google',
-      description: 'Funcionalidade será implementada em breve',
-      status: 'info',
-      duration: 3000,
-      isClosable: true,
-    })
+    window.location.href = import.meta.env.VITE_GOOGLE_REDIRECT_URL
   }
 
   const handleAppleLogin = () => {

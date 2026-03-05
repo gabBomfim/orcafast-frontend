@@ -37,12 +37,6 @@ const GoogleCallbackPage = () => {
             })
             .then((user) => {
                 storage.setUser(user)
-                toast({
-                    title: `Bem-vindo, ${user.name?.split(' ')[0] || 'usuário'}!`,
-                    status: 'success',
-                    duration: 3000,
-                    isClosable: true,
-                })
                 navigate('/dashboard')
             })
             .catch(() => {
