@@ -47,7 +47,7 @@ const HomePage = () => {
             </div>
             <span className="logo-text">OrçaFast</span>
           </div>
-          
+
           {/* Desktop Menu */}
           <div className="nav-menu">
             <a href="#recursos" className="nav-link">Recursos</a>
@@ -65,7 +65,7 @@ const HomePage = () => {
           </div>
 
           {/* Mobile Menu Button */}
-          <button 
+          <button
             className="mobile-menu-btn"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
@@ -79,10 +79,17 @@ const HomePage = () => {
             <a href="#recursos" className="mobile-link">Recursos</a>
             <a href="#como-funciona" className="mobile-link">Como funciona</a>
             <a href="#precos" className="mobile-link">Preços</a>
-            <Link 
+            <Link
+              to="/login"
+              className="mobile-link"
+              style={{ textDecoration: 'none' }}
+            >
+              Entrar
+            </Link>
+            <Link
               to="/onboarding/create-client"
               className="nav-btn-primary"
-              style={{ textDecoration: 'none', width: '100%', justifyContent: 'center', marginTop: '1rem' }}
+              style={{ textDecoration: 'none', width: '100%', justifyContent: 'center', marginTop: '0.5rem' }}
             >
               Começar grátis
             </Link>
@@ -108,15 +115,15 @@ const HomePage = () => {
                 Orça rápido,
                 <span className="hero-title-accent"> fecha fácil</span>
               </h1>
-              
+
               <p className="hero-subtitle">
-                A plataforma mais simples para criar, enviar e acompanhar orçamentos profissionais. 
+                A plataforma mais simples para criar, enviar e acompanhar orçamentos profissionais.
                 Sem enrolação, sem complexidade.
               </p>
             </div>
 
             <div className="hero-cta">
-              <Link 
+              <Link
                 to="/onboarding/create-client"
                 className="cta-primary"
                 style={{ textDecoration: 'none' }}
@@ -381,7 +388,7 @@ const HomePage = () => {
                 <li><FiCheck className="feature-check" /> Rastreamento simples</li>
                 <li><FiCheck className="feature-check" /> Suporte por email</li>
               </ul>
-              <Link 
+              <Link
                 to="/onboarding/create-client"
                 className="pricing-btn"
                 style={{ textDecoration: 'none' }}
@@ -408,7 +415,7 @@ const HomePage = () => {
                 <li><FiCheck className="feature-check" /> Marca personalizada</li>
                 <li><FiCheck className="feature-check" /> Suporte prioritário</li>
               </ul>
-              <Link 
+              <Link
                 to="/onboarding/create-client"
                 className="pricing-btn-primary"
                 style={{ textDecoration: 'none' }}
@@ -449,7 +456,7 @@ const HomePage = () => {
           <p className="cta-subtitle">
             Junte-se a mais de 1.000 profissionais que já usam o OrçaFast para fechar mais negócios
           </p>
-          <Link 
+          <Link
             to="/onboarding/create-client"
             className="cta-btn-final"
             style={{ textDecoration: 'none' }}
@@ -479,14 +486,14 @@ const HomePage = () => {
             </div>
             <p className="footer-tagline">Orçamentos profissionais em minutos</p>
           </div>
-          
+
           <div className="footer-links">
             <a href="#" className="footer-link">Termos de uso</a>
             <a href="#" className="footer-link">Privacidade</a>
             <a href="#" className="footer-link">Suporte</a>
           </div>
         </div>
-        
+
         <div className="footer-bottom">
           <p>© 2025 OrçaFast. Todos os direitos reservados.</p>
         </div>
