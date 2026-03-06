@@ -4,30 +4,33 @@ import { storage } from '../utils/storage'
 /**
  * useSubscription
  *
- * Reads plan features from the authenticated user object stored in localStorage
- * after login. The `user.company.plan.features` object is the single source of
- * truth — the backend already validates limits server-side; this hook is purely
- * for UI gating (show/hide, lock overlays, etc.).
+ * Source of truth priority:
+ *   1. `storage.getSubscription()` — written by SettingsSubscription after calling /api/subscription
+ *   2. `user.company.plan`         — written at login time (may be absent / stale)
+ *
+ * The backend is the real enforcer; this hook is purely for UI gating.
  */
 export const useSubscription = () => {
     const user = storage.getUser()
 
-    // Memoize so referential equality is stable across re-renders
-    const plan = useMemo(() => user?.company?.plan ?? null, [user?.company?.plan?.id])
+    // Live subscription data wins over login-time snapshot
+    const savedSubscription = storage.getSubscription()
+
+    const plan = useMemo(() => {
+        if (savedSubscription?.plan) return savedSubscription.plan
+        return user?.company?.plan ?? null
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [savedSubscription?.plan?.id, user?.company?.plan?.id])
+
     const features = useMemo(() => plan?.features ?? {}, [plan?.id])
 
-    const isFree = plan?.slug === 'free'
+    // When plan is null/undefined, treat as free (no active subscription)
+    const isFree = !plan || plan?.slug === 'free'
     const isPro = plan?.slug === 'pro'
     const isBusiness = plan?.slug === 'business'
+    const isPaid = isPro || isBusiness
 
-    /**
-     * Returns true when the user's plan allows unlimited proposals or when
-     * the backend hasn't set a cap (max_proposals === -1).
-     * For capped plans the backend enforces the real limit; here we just
-     * prevent the UI from even offering the action when max is -1 is NOT set.
-     */
     const canCreateProposal = features.max_proposals === -1 || features.max_proposals == null
-
     const canAddClient = features.max_clients === -1 || features.max_clients == null
 
     return {
@@ -38,6 +41,7 @@ export const useSubscription = () => {
         isFree,
         isPro,
         isBusiness,
+        isPaid,
 
         // Capacity flags (UI only — backend is the real enforcer)
         canCreateProposal,

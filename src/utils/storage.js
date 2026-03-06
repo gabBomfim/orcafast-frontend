@@ -24,8 +24,22 @@ export const storage = {
     localStorage.removeItem('user')
   },
 
+  getSubscription() {
+    const data = localStorage.getItem('subscription')
+    return data ? JSON.parse(data) : null
+  },
+
+  setSubscription(data) {
+    localStorage.setItem('subscription', JSON.stringify(data))
+  },
+
+  removeSubscription() {
+    localStorage.removeItem('subscription')
+  },
+
   clear() {
     this.removeToken()
     this.removeUser()
+    this.removeSubscription()
   }
 }

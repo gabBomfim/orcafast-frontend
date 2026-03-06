@@ -14,18 +14,28 @@ import {
   useToast,
   FormControl,
   FormErrorMessage,
+  Button,
 } from '@chakra-ui/react'
+import { Link } from 'react-router-dom'
 import ReactSelect from 'react-select'
 import { appSelectStyles } from '../theme/selectStyles'
 import {
   FiTrendingUp,
   FiTarget,
   FiBarChart,
+  FiPlus,
+  FiStar,
+  FiZap,
+  FiLock,
+  FiFileText,
+  FiArrowRight,
 } from 'react-icons/fi'
 
 import Container from '../components/layout/Container'
 import { dashboardService } from '../services'
 import { useAuth } from '../hooks/useAuth'
+import { useSubscription } from '../hooks/useSubscription'
+
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -51,6 +61,7 @@ const EMPTY_STATS = {
 const DashboardPage = () => {
   const { getCurrentUser } = useAuth()
   const user = getCurrentUser()
+  const { isFree } = useSubscription()
   const toast = useToast()
 
   const [selectedPeriod, setSelectedPeriod] = useState('this-month')
@@ -239,12 +250,49 @@ const DashboardPage = () => {
                     <Text fontSize="sm" fontWeight="medium" color="gray.600" mb={1}>
                       Faturamento Aprovado
                     </Text>
-                    <Text fontSize="3xl" fontWeight="bold" color="emerald.500" mt={1}>
-                      R$ {fmt(revenue)}
-                    </Text>
-                    <Text fontSize="xs" color="gray.500" mt={2}>
-                      Baseado em propostas aprovadas neste período
-                    </Text>
+                    {totalSent > 0 ? (
+                      <>
+                        <Text fontSize="3xl" fontWeight="bold" color="emerald.500" mt={1}>
+                          R$ {fmt(revenue)}
+                        </Text>
+                        <Text fontSize="xs" color="gray.500" mt={2}>
+                          Baseado em propostas aprovadas neste período
+                        </Text>
+                      </>
+                    ) : (
+                      <Box mt={3}>
+                        <Text fontSize="3xl" fontWeight="bold" color="gray.300">R$ 0,00</Text>
+                        <Box mt={4} p={4} bg="emerald.50" rounded="xl" border="1px" borderColor="emerald.100">
+                          <Flex align="start" gap={3}>
+                            <Box w={10} h={10} bg="emerald.100" rounded="lg" display="flex" alignItems="center" justifyContent="center" flexShrink={0}>
+                              <Icon as={FiFileText} w={5} h={5} color="emerald.600" />
+                            </Box>
+                            <Box flex={1}>
+                              <Text fontSize="sm" fontWeight="medium" color="gray.900">Comece a faturar agora</Text>
+                              <Text fontSize="xs" color="gray.500" mt={1}>
+                                Crie seu primeiro orçamento e acompanhe seu faturamento em tempo real.
+                              </Text>
+                              <Button
+                                as={Link}
+                                to="/dashboard/propostas/nova"
+                                mt={3}
+                                size="sm"
+                                bg="emerald.600"
+                                color="white"
+                                _hover={{ bg: 'emerald.700' }}
+                                rounded="lg"
+                                shadow="sm"
+                                fontWeight="medium"
+                              >
+                                <Icon as={FiZap} w={4} h={4} mr={1.5} />
+                                Criar primeiro orçamento
+                                <Icon as={FiArrowRight} w={4} h={4} ml={1.5} />
+                              </Button>
+                            </Box>
+                          </Flex>
+                        </Box>
+                      </Box>
+                    )}
                   </Box>
                 </Flex>
               </CardBody>
@@ -262,60 +310,120 @@ const DashboardPage = () => {
                     <Text fontSize="sm" fontWeight="medium" color="gray.600" mb={1}>
                       {getMetaTitle()}
                     </Text>
-                    <Text fontSize="sm" color="gray.900" mt={2}>
-                      Sua meta:{' '}
-                      <Text as="span" fontWeight="semibold">
-                        R$ {fmt(target)}
-                      </Text>
-                    </Text>
 
-                    {/* Progress bar */}
-                    <Box mt={3}>
-                      <Box h={3} bg="gray.100" borderRadius="full" overflow="hidden">
-                        <Box
-                          h="full"
-                          borderRadius="full"
-                          bg={progress >= 100 ? 'green.500' : 'emerald.500'}
-                          transition="all 0.5s"
-                          width={`${progress}%`}
-                        />
-                      </Box>
-                      <Flex justify="space-between" align="center" mt={2}>
-                        <Text fontSize="xs" color="gray.500">
-                          {Math.round(progress)}% concluído
-                        </Text>
-                        <Text fontSize="xs" fontWeight="medium"
-                          color={progress >= 100 ? 'green.500' : 'emerald.500'}>
-                          R$ {fmt(revenue)}
-                        </Text>
-                      </Flex>
-                    </Box>
-
-                    {/* Motivational text */}
-                    {remaining > 0 ? (
-                      <Box mt={3} bg="emerald.50" px={3} py={2} borderRadius="lg">
-                        <Text fontSize="sm" color="gray.900">
-                          Faltam apenas{' '}
-                          <Text as="span" fontWeight="semibold" color="emerald.600">
-                            R$ {fmt(remaining)}
-                          </Text>{' '}
-                          para bater a meta!
-                        </Text>
+                    {!target || target <= 0 ? (
+                      // EMPTY STATE
+                      <Box mt={4} textAlign="center" py={6}>
+                        {isFree ? (
+                          <>
+                            <Flex w={16} h={16} bg="orange.100" rounded="2xl" align="center" justify="center" mx="auto" mb={4}>
+                              <Icon as={FiLock} w={8} h={8} color="orange.600" />
+                            </Flex>
+                            <Text fontSize="md" fontWeight="semibold" color="gray.900">Metas Financeiras</Text>
+                            <Text fontSize="sm" color="gray.500" mt={2} maxW="xs" mx="auto">
+                              Defina objetivos mensais e anuais para acompanhar o crescimento do seu negócio.
+                            </Text>
+                            <Button
+                              as={Link}
+                              to="/dashboard/configuracoes/assinatura"
+                              variant="outline"
+                              size="sm"
+                              mt={4}
+                              fontWeight="medium"
+                              rounded="lg"
+                              borderColor="orange.300"
+                              color="orange.700"
+                              _hover={{ bg: 'orange.50' }}
+                            >
+                              <Icon as={FiStar} w={4} h={4} mr={1.5} />
+                              Fazer Upgrade para o Pro
+                            </Button>
+                          </>
+                        ) : (
+                          <>
+                            <Flex w={16} h={16} bg="emerald.50" rounded="2xl" align="center" justify="center" mx="auto" mb={4}>
+                              <Icon as={FiTarget} w={8} h={8} color="emerald.500" />
+                            </Flex>
+                            <Text fontSize="md" fontWeight="semibold" color="gray.900">Configure sua meta</Text>
+                            <Text fontSize="sm" color="gray.500" mt={2} maxW="xs" mx="auto">
+                              Defina quanto deseja faturar este mês para acompanhar seu progresso.
+                            </Text>
+                            <Button
+                              as={Link}
+                              to="/dashboard/configuracoes/metas"
+                              size="sm"
+                              mt={4}
+                              bg="emerald.500"
+                              color="white"
+                              _hover={{ bg: 'emerald.600' }}
+                              fontWeight="medium"
+                              rounded="lg"
+                            >
+                              Definir meta mensal
+                              <Icon as={FiArrowRight} w={4} h={4} ml={1.5} />
+                            </Button>
+                          </>
+                        )}
                       </Box>
                     ) : (
-                      <Box mt={3} bg="green.50" px={3} py={2} borderRadius="lg">
-                        <Text fontSize="sm" color="gray.900">
-                          <Text as="span" fontWeight="semibold" color="green.600">Parabéns!</Text>{' '}
-                          Você bateu a meta!
+                      // FILLED STATE
+                      <>
+                        <Text fontSize="sm" color="gray.900" mt={2}>
+                          Sua meta:{' '}
+                          <Text as="span" fontWeight="semibold">
+                            R$ {fmt(target)}
+                          </Text>
                         </Text>
-                      </Box>
+
+                        {/* Progress bar */}
+                        <Box mt={3}>
+                          <Box h={3} bg="gray.100" borderRadius="full" overflow="hidden">
+                            <Box
+                              h="full"
+                              borderRadius="full"
+                              bg={progress >= 100 ? 'green.500' : 'emerald.500'}
+                              transition="all 0.5s"
+                              width={`${progress}%`}
+                            />
+                          </Box>
+                          <Flex justify="space-between" align="center" mt={2}>
+                            <Text fontSize="xs" color="gray.500">
+                              {Math.round(progress)}% concluído
+                            </Text>
+                            <Text fontSize="xs" fontWeight="medium"
+                              color={progress >= 100 ? 'green.500' : 'emerald.500'}>
+                              R$ {fmt(revenue)}
+                            </Text>
+                          </Flex>
+                        </Box>
+
+                        {/* Motivational text */}
+                        {remaining > 0 ? (
+                          <Box mt={3} bg="emerald.50" px={3} py={2} borderRadius="lg">
+                            <Text fontSize="sm" color="gray.900">
+                              Faltam apenas{' '}
+                              <Text as="span" fontWeight="semibold" color="emerald.600">
+                                R$ {fmt(remaining)}
+                              </Text>{' '}
+                              para bater a meta!
+                            </Text>
+                          </Box>
+                        ) : (
+                          <Box mt={3} bg="green.50" px={3} py={2} borderRadius="lg">
+                            <Text fontSize="sm" color="gray.900">
+                              <Text as="span" fontWeight="semibold" color="green.600">Parabéns!</Text>{' '}
+                              Você bateu a meta!
+                            </Text>
+                          </Box>
+                        )}
+                      </>
                     )}
                   </Box>
                 </Flex>
               </CardBody>
 
-              {/* Annual Vision Footer */}
-              {!isYearlyView && (
+              {/* Annual Vision Footer - ONLY SHOW IF TARGET > 0 */}
+              {target > 0 && !isYearlyView && (
                 <Box px={6} py={4} bg="gray.50" borderTop="1px" borderColor="gray.200">
                   <Flex align="center" gap={2}>
                     <Icon as={FiTrendingUp} w={4} h={4} color="gray.500" />
@@ -345,45 +453,74 @@ const DashboardPage = () => {
                       Eficiência dos Orçamentos
                     </Text>
 
-                    <VStack spacing={4} align="stretch">
-                      {funnelData.map((item) => (
-                        <Box key={item.label}>
-                          <Flex justify="space-between" align="center" mb={1.5}>
-                            <Text fontSize="sm" color="gray.900">{item.label}</Text>
-                            <Text fontSize="sm" fontWeight="semibold" color="gray.900">{item.value}</Text>
-                          </Flex>
-                          <Box h={8} bg="gray.100" borderRadius="lg" overflow="hidden" position="relative">
-                            <Box
-                              h="full"
-                              bg={item.color}
-                              borderRadius="lg"
-                              transition="all 0.5s"
-                              width={`${item.percentage}%`}
-                              display="flex"
-                              alignItems="center"
-                              justifyContent="flex-end"
-                              pr={3}
-                            >
-                              {item.percentage >= 30 && (
-                                <Text fontSize="xs" fontWeight="medium" color="white">
-                                  {item.percentage}%
-                                </Text>
-                              )}
+                    {totalSent > 0 ? (
+                      <>
+                        <VStack spacing={4} align="stretch">
+                          {funnelData.map((item) => (
+                            <Box key={item.label}>
+                              <Flex justify="space-between" align="center" mb={1.5}>
+                                <Text fontSize="sm" color="gray.900">{item.label}</Text>
+                                <Text fontSize="sm" fontWeight="semibold" color="gray.900">{item.value}</Text>
+                              </Flex>
+                              <Box h={8} bg="gray.100" borderRadius="lg" overflow="hidden" position="relative">
+                                <Box
+                                  h="full"
+                                  bg={item.color}
+                                  borderRadius="lg"
+                                  transition="all 0.5s"
+                                  width={`${item.percentage}%`}
+                                  display="flex"
+                                  alignItems="center"
+                                  justifyContent="flex-end"
+                                  pr={3}
+                                >
+                                  {item.percentage >= 30 && (
+                                    <Text fontSize="xs" fontWeight="medium" color="white">
+                                      {item.percentage}%
+                                    </Text>
+                                  )}
+                                </Box>
+                              </Box>
                             </Box>
-                          </Box>
-                        </Box>
-                      ))}
-                    </VStack>
+                          ))}
+                        </VStack>
 
-                    {/* Conversion rate */}
-                    <Box mt={4} pt={4} borderTop="1px" borderColor="gray.200">
-                      <Flex justify="space-between" align="center">
-                        <Text fontSize="sm" color="gray.600">Taxa de conversão</Text>
-                        <Text fontSize="lg" fontWeight="bold" color="emerald.500">
-                          {Math.round(proposals.conversion_rate ?? 0)}%
+                        {/* Conversion rate */}
+                        <Box mt={4} pt={4} borderTop="1px" borderColor="gray.200">
+                          <Flex justify="space-between" align="center">
+                            <Text fontSize="sm" color="gray.600">Taxa de conversão</Text>
+                            <Text fontSize="lg" fontWeight="bold" color="emerald.500">
+                              {Math.round(proposals.conversion_rate ?? 0)}%
+                            </Text>
+                          </Flex>
+                        </Box>
+                      </>
+                    ) : (
+                      // EMPTY FUNNEL STATE
+                      <Box mt={4} textAlign="center" py={6}>
+                        <Flex w={16} h={16} bg="gray.100" rounded="2xl" align="center" justify="center" mx="auto" mb={4}>
+                          <Icon as={FiBarChart} w={8} h={8} color="gray.400" />
+                        </Flex>
+                        <Text fontSize="md" fontWeight="semibold" color="gray.900">Sem dados ainda</Text>
+                        <Text fontSize="sm" color="gray.500" mt={2} maxW="xs" mx="auto">
+                          Envie orçamentos para ver suas métricas de conversão e eficiência.
                         </Text>
-                      </Flex>
-                    </Box>
+                        <Flex align="center" justify="center" gap={6} mt={6}>
+                          <Flex align="center" gap={1.5}>
+                            <Box w={2.5} h={2.5} rounded="full" bg="gray.400" />
+                            <Text fontSize="xs" color="gray.500">Enviados</Text>
+                          </Flex>
+                          <Flex align="center" gap={1.5}>
+                            <Box w={2.5} h={2.5} rounded="full" bg="blue.400" />
+                            <Text fontSize="xs" color="gray.500">Visualizados</Text>
+                          </Flex>
+                          <Flex align="center" gap={1.5}>
+                            <Box w={2.5} h={2.5} rounded="full" bg="emerald.500" />
+                            <Text fontSize="xs" color="gray.500">Aprovados</Text>
+                          </Flex>
+                        </Flex>
+                      </Box>
+                    )}
                   </Box>
                 </Flex>
               </CardBody>

@@ -2,7 +2,10 @@ import api from '../api'
 import { storage } from '../utils/storage'
 
 // Reads company_id from the stored user so every caller gets it automatically
-const getCompanyId = () => storage.getUser()?.company?.id
+const getCompanyId = () => {
+  const user = storage.getUser()
+  return user?.company_id || user?.company?.id
+}
 
 export const clientService = {
   list(params) {
