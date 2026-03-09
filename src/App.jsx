@@ -9,6 +9,8 @@ import PropostasPage from './pages/PropostasPage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import GoogleCallbackPage from './pages/auth/GoogleCallbackPage'
+import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
+import ResetPasswordPage from './pages/auth/ResetPasswordPage'
 import InitialDashboardPage from './pages/InitialDashboardPage'
 import CreateClientPage from './pages/CreateClientPage'
 import CreateProposalPage from './pages/CreateProposalPage'
@@ -40,6 +42,8 @@ function App() {
               {/* Public Routes */}
               <Route path="/" element={<HomePage />} />
               <Route path="/login" element={<LoginPage />} />
+              <Route path="/esqueci-senha" element={<ForgotPasswordPage />} />
+              <Route path="/redefinir-senha" element={<ResetPasswordPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/auth/callback" element={<GoogleCallbackPage />} />
               <Route path="/onboarding/create-client" element={<OnboardingCreateClientPage />} />

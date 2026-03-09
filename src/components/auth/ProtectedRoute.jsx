@@ -1,4 +1,4 @@
-import { Navigate, Outlet, useLocation } from 'react-router-dom'
+import { Navigate, Outlet, useLocation, useSearchParams } from 'react-router-dom'
 import { storage } from '../../utils/storage'
 import { Box, Button, Icon } from '@chakra-ui/react'
 import { Link } from 'react-router-dom'
@@ -8,15 +8,91 @@ import Header from '../layout/Header'
 import Sidebar from '../layout/Sidebar'
 import { useSidebar } from '../../contexts/SidebarContext'
 import { useSubscription } from '../../hooks/useSubscription'
-import { useToast } from '@chakra-ui/react'
+import { useToast, Spinner, Center, useDisclosure } from '@chakra-ui/react'
+import { subscriptionService } from '../../services'
+import { useState, useEffect } from 'react'
+import WelcomePlanModal from '../ui/WelcomePlanModal'
 
 const ProtectedRoute = () => {
   const token = storage.getToken()
   const location = useLocation()
   const { isCollapsed } = useSidebar()
-  const { canCreateProposal } = useSubscription()
+  const { canCreateProposal, subscribed, onTrial } = useSubscription()
   const navigate = useNavigate()
   const toast = useToast()
+
+  const [isCheckingSub, setIsCheckingSub] = useState(true)
+  const [subDataRefreshed, setSubDataRefreshed] = useState(false)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const { isOpen: isWelcomeOpen, onOpen: onWelcomeOpen, onClose: onWelcomeClose } = useDisclosure()
+  const [welcomePlanSlug, setWelcomePlanSlug] = useState('pro')
+
+  useEffect(() => {
+    const checkSubscription = async () => {
+      // If we already have subscription data, don't block the render
+      if (storage.getSubscription()) {
+        setIsCheckingSub(false)
+        return
+      }
+
+      try {
+        const { data } = await subscriptionService.getStatus()
+        storage.setSubscription(data)
+        setSubDataRefreshed(prev => !prev) // trigger re-render so useSubscription pulls new data
+      } catch (e) {
+        // failed to fetch, proceed with fallback
+      } finally {
+        setIsCheckingSub(false)
+      }
+    }
+
+    if (token) {
+      checkSubscription()
+    } else {
+      setIsCheckingSub(false)
+    }
+  }, [token])
+
+  useEffect(() => {
+    const success = searchParams.get('success')
+    const canceled = searchParams.get('canceled')
+    if (success === '1' || success === 'true') {
+      setSearchParams({})
+    } else if (canceled === '1' || canceled === 'true') {
+      toast({
+        title: 'Ação cancelada',
+        description: 'O processo de configuração do plano foi interrompido.',
+        status: 'info',
+        duration: 6000,
+        isClosable: true,
+      })
+      setSearchParams({})
+    }
+  }, [searchParams, setSearchParams, toast])
+
+  useEffect(() => {
+    const pendingSlug = sessionStorage.getItem('show_welcome')
+    const swapSuccess = sessionStorage.getItem('swap_success')
+
+    if (!isCheckingSub) {
+      if (swapSuccess === 'true') {
+        sessionStorage.removeItem('swap_success')
+        toast({
+          title: 'Plano atualizado!',
+          description: 'A diferença foi cobrada proporcionalmente no seu cartão.',
+          status: 'success',
+          duration: 6000,
+          isClosable: true,
+        })
+      }
+
+      if (pendingSlug) {
+        sessionStorage.removeItem('show_welcome')
+        setWelcomePlanSlug(pendingSlug)
+        onWelcomeOpen()
+      }
+    }
+  }, [isCheckingSub, onWelcomeOpen, toast])
 
   const handleCreateProposal = (e) => {
     e.preventDefault()
@@ -33,8 +109,27 @@ const ProtectedRoute = () => {
     }
   }
 
+  if (isCheckingSub) {
+    return (
+      <Center h="100vh" bg="gray.50">
+        <Spinner size="xl" color="emerald.500" thickness="3px" />
+      </Center>
+    )
+  }
+
   if (!token) {
     return <Navigate to="/login" replace />
+  }
+
+  // Global guard: force unsubscribed AND not-on-trial users to subscription page
+  const hasAccess = subscribed || onTrial
+  if (!hasAccess) {
+    const allowedPaths = [
+      '/dashboard/configuracoes/assinatura'
+    ]
+    if (!allowedPaths.includes(location.pathname)) {
+      return <Navigate to="/dashboard/configuracoes/assinatura" replace />
+    }
   }
 
   // Determina o título e configurações baseado na rota
@@ -122,6 +217,11 @@ const ProtectedRoute = () => {
         w="100%"
       >
         <Outlet />
+        <WelcomePlanModal
+          isOpen={isWelcomeOpen}
+          onClose={onWelcomeClose}
+          planSlug={welcomePlanSlug}
+        />
       </Box>
     </Box>
   )

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from 'react'
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react'
 
 const OnboardingContext = createContext()
 
@@ -11,10 +11,19 @@ export const useOnboarding = () => {
 }
 
 export const OnboardingProvider = ({ children }) => {
-  const [guestData, setGuestData] = useState({
-    client: null,
-    proposal: null
+  const [guestData, setGuestData] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem('orcafast_onboarding_data')
+      if (saved) return JSON.parse(saved)
+    } catch (e) {
+      console.error('Failed to parse onboarding data', e)
+    }
+    return { client: null, proposal: null }
   })
+
+  useEffect(() => {
+    sessionStorage.setItem('orcafast_onboarding_data', JSON.stringify(guestData))
+  }, [guestData])
 
   const updateClientData = useCallback((clientData) => {
     setGuestData(prev => ({
@@ -35,6 +44,7 @@ export const OnboardingProvider = ({ children }) => {
       client: null,
       proposal: null
     })
+    sessionStorage.removeItem('orcafast_onboarding_data')
   }, [])
 
   const getGuestDataForAPI = useCallback(() => {

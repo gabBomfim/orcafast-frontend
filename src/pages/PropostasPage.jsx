@@ -123,78 +123,40 @@ const PropostasPage = () => {
   const [loadingAction, setLoadingAction] = useState({})
   const { isOpen, onOpen, onClose } = useDisclosure()
   const cancelRef = useRef()
-  const toast = useToast()
-
+  const [refreshTrigger, setRefreshTrigger] = useState(0)
 
   // Debounce search term to avoid excessive API calls
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm)
-  const debounceTimerRef = useRef(null)
 
   useEffect(() => {
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current)
-    }
-    debounceTimerRef.current = setTimeout(() => {
+    const timer = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm)
     }, 500)
-    return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current)
-      }
-    }
+
+    return () => clearTimeout(timer)
   }, [searchTerm])
 
   // Single consolidated effect to handle all data fetching
   // This prevents multiple simultaneous API calls
+  // 1. Fetch Proposals (List)
   useEffect(() => {
     let isCancelled = false
 
-    const loadData = async () => {
+    const loadProposals = async () => {
+      setIsLoading(true)
       try {
-        // Fetch both proposals and status counts in parallel
-        const [proposalsData, countsData] = await Promise.all([
-          // Fetch proposals
-          (async () => {
-            const params = {
-              page: 1,
-              search: debouncedSearchTerm || undefined,
-              status: statusFilter === 'all' ? undefined : REVERSE_STATUS_MAP[statusFilter],
-              beginDate: dateRange.start || undefined,
-              endDate: dateRange.end || undefined
-            }
-            const { data } = await proposalService.list(params)
-            return data
-          })(),
-          // Fetch status counts
-          (async () => {
-            const baseParams = {
-              page: 1,
-              search: debouncedSearchTerm || undefined,
-              beginDate: dateRange.start || undefined,
-              endDate: dateRange.end || undefined
-            }
-            const [allRes, approvedRes, viewedRes, sentRes, draftRes] = await Promise.all([
-              proposalService.list({ ...baseParams }),
-              proposalService.list({ ...baseParams, status: 4 }),
-              proposalService.list({ ...baseParams, status: 3 }),
-              proposalService.list({ ...baseParams, status: 2 }),
-              proposalService.list({ ...baseParams, status: 1 }),
-            ])
-            return {
-              all: allRes.data.total,
-              approved: approvedRes.data.total,
-              viewed: viewedRes.data.total,
-              sent: sentRes.data.total,
-              draft: draftRes.data.total,
-            }
-          })()
-        ])
+        const params = {
+          page: pagination.currentPage,
+          search: debouncedSearchTerm || undefined,
+          status: statusFilter === 'all' ? undefined : REVERSE_STATUS_MAP[statusFilter],
+          beginDate: dateRange.start || undefined,
+          endDate: dateRange.end || undefined
+        }
 
+        const { data } = await proposalService.list(params)
         if (isCancelled) return
 
-        // Update proposals
-        setIsLoading(true)
-        const normalizedProposals = proposalsData.data.map((proposal) => {
+        const normalizedProposals = data.data.map((proposal) => {
           const rawStatus = proposal.status
           let normalizedStatus = 'draft'
 
@@ -227,29 +189,62 @@ const PropostasPage = () => {
 
         setProposals(normalizedProposals)
         setPagination({
-          currentPage: proposalsData.current_page,
-          lastPage: proposalsData.last_page,
-          total: proposalsData.total,
+          currentPage: data.current_page,
+          lastPage: data.last_page,
+          total: data.total,
         })
-        setStatusCounts(countsData)
         setError(null)
       } catch (err) {
-        if (!isCancelled) {
-          setError('Não foi possível carregar os orçamentos. Tente novamente mais tarde.')
-        }
+        if (!isCancelled) setError('Não foi possível carregar os orçamentos.')
       } finally {
-        if (!isCancelled) {
-          setIsLoading(false)
-        }
+        if (!isCancelled) setIsLoading(false)
       }
     }
 
-    if (!dateError) loadData()
+    if (!dateError) loadProposals()
 
-    return () => {
-      isCancelled = true
+    return () => { isCancelled = true }
+  }, [debouncedSearchTerm, statusFilter, dateRange.start, dateRange.end, dateError, pagination.currentPage, refreshTrigger])
+
+  // 2. Fetch Status Counts separately (Runs less frequently)
+  useEffect(() => {
+    let isCancelled = false
+
+    const loadCounts = async () => {
+      try {
+        const baseParams = {
+          page: 1,
+          search: debouncedSearchTerm || undefined,
+          beginDate: dateRange.start || undefined,
+          endDate: dateRange.end || undefined
+        }
+
+        const [approvedRes, viewedRes, sentRes, draftRes, rejectedRes] = await Promise.all([
+          proposalService.list({ ...baseParams, status: 4 }),
+          proposalService.list({ ...baseParams, status: 3 }),
+          proposalService.list({ ...baseParams, status: 2 }),
+          proposalService.list({ ...baseParams, status: 1 }),
+          proposalService.list({ ...baseParams, status: 5 }), // Include rejected stats
+        ])
+
+        if (isCancelled) return
+
+        setStatusCounts({
+          all: approvedRes.data.total + viewedRes.data.total + sentRes.data.total + draftRes.data.total + rejectedRes.data.total,
+          approved: approvedRes.data.total,
+          viewed: viewedRes.data.total,
+          sent: sentRes.data.total,
+          draft: draftRes.data.total,
+        })
+      } catch (err) {
+        // Silently fail counts so it doesn't break UI
+      }
     }
-  }, [debouncedSearchTerm, statusFilter, dateRange.start, dateRange.end, dateError])
+
+    if (!dateError) loadCounts()
+
+    return () => { isCancelled = true }
+  }, [debouncedSearchTerm, dateRange.start, dateRange.end, dateError, refreshTrigger])
 
   const handleDatePresetChange = (preset) => {
     setDatePreset(preset)
@@ -287,73 +282,10 @@ const PropostasPage = () => {
   }
 
   // Helper function to reload data after actions
-  const reloadData = useCallback(async () => {
-    try {
-      const params = {
-        page: pagination.currentPage,
-        search: debouncedSearchTerm || undefined,
-        status: statusFilter === 'all' ? undefined : REVERSE_STATUS_MAP[statusFilter],
-        beginDate: dateRange.start || undefined,
-        endDate: dateRange.end || undefined
-      }
-      const baseParams = {
-        page: 1,
-        search: debouncedSearchTerm || undefined,
-        beginDate: dateRange.start || undefined,
-        endDate: dateRange.end || undefined
-      }
-
-      const [proposalsRes, allRes, approvedRes, viewedRes, sentRes, draftRes] = await Promise.all([
-        proposalService.list(params),
-        proposalService.list({ ...baseParams }),
-        proposalService.list({ ...baseParams, status: 4 }),
-        proposalService.list({ ...baseParams, status: 3 }),
-        proposalService.list({ ...baseParams, status: 2 }),
-        proposalService.list({ ...baseParams, status: 1 }),
-      ])
-
-      const normalizedProposals = proposalsRes.data.data.map((proposal) => {
-        const rawStatus = proposal.status
-        let normalizedStatus = 'draft'
-        if (rawStatus !== null && rawStatus !== undefined) {
-          if (typeof rawStatus === 'number') {
-            normalizedStatus = STATUS_MAP[rawStatus] ?? normalizedStatus
-          } else {
-            const parsedStatus = Number(rawStatus)
-            normalizedStatus = Number.isNaN(parsedStatus)
-              ? String(rawStatus).toLowerCase()
-              : STATUS_MAP[parsedStatus] ?? String(rawStatus).toLowerCase()
-          }
-        }
-        return {
-          ...proposal,
-          client: proposal.client?.name ?? proposal.client_name ?? proposal.client ?? 'Cliente não informado',
-          service: proposal.service ?? proposal.title ?? 'Serviço não informado',
-          value: Number(proposal.value ?? proposal.total_value ?? 0),
-          status: normalizedStatus,
-          createdAt: proposal.createdAt ?? proposal.created_at ?? null,
-          viewedAt: proposal.viewedAt ?? proposal.viewed_at ?? null,
-          validUntil: proposal.validUntil ?? proposal.valid_until ?? null,
-        }
-      })
-
-      setProposals(normalizedProposals)
-      setPagination({
-        currentPage: proposalsRes.data.current_page,
-        lastPage: proposalsRes.data.last_page,
-        total: proposalsRes.data.total,
-      })
-      setStatusCounts({
-        all: allRes.data.total,
-        approved: approvedRes.data.total,
-        viewed: viewedRes.data.total,
-        sent: sentRes.data.total,
-        draft: draftRes.data.total,
-      })
-    } catch (err) {
-      console.error('Error reloading data:', err)
-    }
-  }, [pagination.currentPage, debouncedSearchTerm, statusFilter, dateRange.start, dateRange.end])
+  const reloadData = useCallback(() => {
+    // Triggers the effects gracefully instead of duplicating APIs
+    setRefreshTrigger(prev => prev + 1)
+  }, [])
 
   const executeAction = async () => {
     if (!selectedProposal) return
@@ -401,62 +333,8 @@ const PropostasPage = () => {
     }
   }
 
-  const handlePageChange = async (page) => {
-    setIsLoading(true)
-    setError(null)
-
-    try {
-      const params = {
-        page,
-        search: debouncedSearchTerm || undefined,
-        status: statusFilter === 'all' ? undefined : REVERSE_STATUS_MAP[statusFilter],
-        beginDate: dateRange.start || undefined,
-        endDate: dateRange.end || undefined
-      }
-
-      const { data } = await proposalService.list(params)
-      const normalizedProposals = data.data.map((proposal) => {
-        const rawStatus = proposal.status
-        let normalizedStatus = 'draft'
-
-        if (rawStatus !== null && rawStatus !== undefined) {
-          if (typeof rawStatus === 'number') {
-            normalizedStatus = STATUS_MAP[rawStatus] ?? normalizedStatus
-          } else {
-            const parsedStatus = Number(rawStatus)
-            normalizedStatus = Number.isNaN(parsedStatus)
-              ? String(rawStatus).toLowerCase()
-              : STATUS_MAP[parsedStatus] ?? String(rawStatus).toLowerCase()
-          }
-        }
-
-        return {
-          ...proposal,
-          client:
-            proposal.client?.name ??
-            proposal.client_name ??
-            proposal.client ??
-            'Cliente não informado',
-          service: proposal.service ?? proposal.title ?? 'Serviço não informado',
-          value: Number(proposal.value ?? proposal.total_value ?? 0),
-          status: normalizedStatus,
-          createdAt: proposal.createdAt ?? proposal.created_at ?? null,
-          viewedAt: proposal.viewedAt ?? proposal.viewed_at ?? null,
-          validUntil: proposal.validUntil ?? proposal.valid_until ?? null,
-        }
-      })
-
-      setProposals(normalizedProposals)
-      setPagination({
-        currentPage: data.current_page,
-        lastPage: data.last_page,
-        total: data.total,
-      })
-    } catch (err) {
-      setError('Não foi possível carregar os orçamentos. Tente novamente mais tarde.')
-    } finally {
-      setIsLoading(false)
-    }
+  const handlePageChange = (page) => {
+    setPagination(prev => ({ ...prev, currentPage: page }))
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 

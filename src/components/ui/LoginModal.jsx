@@ -14,7 +14,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import LoginForm from '../auth/LoginForm'
 import RegisterForm from '../auth/RegisterForm'
-import { authService } from '../../services'
+import { authService, subscriptionService } from '../../services'
 import { useOnboarding } from '../../contexts/OnboardingContext'
 import { storage } from '../../utils/storage'
 
@@ -62,12 +62,30 @@ const LoginModal = ({ isOpen, onClose, onSuccess }) => {
         storage.setToken(response.data.access_token)
         storage.setUser(response.data.user)
 
-        clearGuestData()
+        let createdProposalId = null
+        if (response.data.user?.clients?.length > 0) {
+          const clients = response.data.user.clients
+          const lastClient = clients[clients.length - 1]
+          if (lastClient.proposals?.length > 0) {
+            const lastProposal = lastClient.proposals[lastClient.proposals.length - 1]
+            createdProposalId = lastProposal.id
+
+            const subtotal = lastProposal.items?.reduce((acc, item) => acc + (item.quantity * item.unit_price), 0) || 0
+            sessionStorage.setItem('pending_proposal_success', JSON.stringify({
+              proposalId: createdProposalId,
+              proposalData: {
+                clientName: lastClient.name,
+                title: lastProposal.title,
+                totalValue: subtotal - (lastProposal.discount || 0)
+              }
+            }))
+          }
+        }
       }
 
       toast({
         title: isLoginMode ? 'Login realizado!' : 'Conta criada com sucesso!',
-        description: 'Redirecionando para o dashboard...',
+        description: isLoginMode ? 'Redirecionando para o dashboard...' : 'Você está a 1 passo de enviar sua proposta 🚀',
         status: 'success',
         duration: 3000,
         isClosable: true,
@@ -75,6 +93,32 @@ const LoginModal = ({ isOpen, onClose, onSuccess }) => {
 
       onClose()
       if (onSuccess) onSuccess()
+
+      // Redirect to Stripe if registering
+      if (!isLoginMode) {
+        try {
+          const successUrl = `${window.location.origin}/dashboard/propostas/sucesso`
+          sessionStorage.setItem('show_welcome', 'pro')
+
+          const { data: checkoutData } = await subscriptionService.checkout('pro', successUrl)
+
+          if (checkoutData?.checkout_url) {
+            window.location.href = checkoutData.checkout_url
+            return
+          }
+        } catch (err) {
+          console.error('Erro ao iniciar checkout:', err)
+          toast({
+            title: 'Aviso',
+            description: 'Não foi possível iniciar o teste grátis automaticamente. Você será redirecionado.',
+            status: 'warning',
+            duration: 4000,
+            isClosable: true,
+          })
+        }
+      }
+
+      // Default redirect if it's just a login or Stripe failed
       navigate('/initial-dashboard')
     } catch (error) {
       const message = error.response?.data?.message || 'Erro ao processar requisição'

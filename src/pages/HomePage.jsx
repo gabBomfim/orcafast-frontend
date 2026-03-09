@@ -60,7 +60,7 @@ const HomePage = () => {
               Entrar
             </Link>
             <Link to="/onboarding/create-client" className="nav-btn-primary" style={{ textDecoration: 'none' }}>
-              Começar grátis
+              Teste grátis
             </Link>
           </div>
 
@@ -91,7 +91,7 @@ const HomePage = () => {
               className="nav-btn-primary"
               style={{ textDecoration: 'none', width: '100%', justifyContent: 'center', marginTop: '0.5rem' }}
             >
-              Começar grátis
+              Teste grátis
             </Link>
           </div>
         )}
@@ -128,7 +128,7 @@ const HomePage = () => {
                 className="cta-primary"
                 style={{ textDecoration: 'none' }}
               >
-                Começar grátis
+                Começar teste grátis
                 <FiArrowRight />
               </Link>
               <button className="cta-secondary">
@@ -139,7 +139,7 @@ const HomePage = () => {
             <div className="hero-trust">
               <div className="trust-item">
                 <FiCheck className="trust-icon" />
-                <span>Grátis para sempre</span>
+                <span>Teste grátis de 7 dias</span>
               </div>
               <div className="trust-item">
                 <FiCheck className="trust-icon" />
@@ -373,31 +373,6 @@ const HomePage = () => {
         </div>
 
         <div className="pricing-container">
-          <Card className="pricing-card">
-            <CardContent className="pricing-content">
-              <h3 className="pricing-plan">Gratuito</h3>
-              <p className="pricing-description">Perfeito para começar</p>
-              <div className="pricing-price">
-                <span className="price-currency">R$</span>
-                <span className="price-amount">0</span>
-                <span className="price-period">/mês</span>
-              </div>
-              <ul className="pricing-features">
-                <li><FiCheck className="feature-check" /> Até 5 propostas/mês</li>
-                <li><FiCheck className="feature-check" /> Templates básicos</li>
-                <li><FiCheck className="feature-check" /> Rastreamento simples</li>
-                <li><FiCheck className="feature-check" /> Suporte por email</li>
-              </ul>
-              <Link
-                to="/onboarding/create-client"
-                className="pricing-btn"
-                style={{ textDecoration: 'none' }}
-              >
-                Começar grátis
-              </Link>
-            </CardContent>
-          </Card>
-
           <Card className="pricing-card pricing-card-popular">
             <Badge className="popular-badge">MAIS POPULAR</Badge>
             <CardContent className="pricing-content">
@@ -461,7 +436,7 @@ const HomePage = () => {
             className="cta-btn-final"
             style={{ textDecoration: 'none' }}
           >
-            Começar grátis agora
+            Começar teste grátis agora
             <FiArrowRight />
           </Link>
           <div className="cta-trust">

@@ -18,11 +18,18 @@ export const useSubscription = () => {
 
     const plan = useMemo(() => {
         if (savedSubscription?.plan) return savedSubscription.plan
-        return user?.company?.plan ?? null
+        return user?.plan ?? user?.company?.plan ?? null
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [savedSubscription?.plan?.id, user?.company?.plan?.id])
+    }, [savedSubscription?.plan?.id, user?.plan?.id, user?.company?.plan?.id])
 
     const features = useMemo(() => plan?.features ?? {}, [plan?.id])
+
+    // Extract new subscription flags based on Trial com Cartão changes
+    // Fallback order: API explicit -> Root User Payload -> Nested Company Payload
+    const subscribed = savedSubscription?.subscribed ?? user?.subscribed ?? user?.company?.subscribed ?? false
+    const onTrial = savedSubscription?.on_trial ?? user?.on_trial ?? user?.company?.on_trial ?? false
+    const trialEndsAt = savedSubscription?.trial_ends_at ?? user?.trial_ends_at ?? user?.company?.trial_ends_at ?? null
+    const cancelled = savedSubscription?.cancelled ?? user?.cancelled ?? user?.company?.cancelled ?? false
 
     // When plan is null/undefined, treat as free (no active subscription)
     const isFree = !plan || plan?.slug === 'free'
@@ -42,6 +49,12 @@ export const useSubscription = () => {
         isPro,
         isBusiness,
         isPaid,
+
+        // Status flags for Trial com Cartão
+        subscribed,
+        onTrial,
+        trialEndsAt,
+        cancelled,
 
         // Capacity flags (UI only — backend is the real enforcer)
         canCreateProposal,

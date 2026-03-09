@@ -35,15 +35,15 @@ const CreateProposalPage = () => {
 
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
-  const [discount, setDiscount] = useState(0)
+  const [discount, setDiscount] = useState('')
   const [validUntil, setValidUntil] = useState('')
   const [items, setItems] = useState([
-    { id: 1, desc: '', qtd: 1, value: 0 },
+    { id: 1, desc: '', qtd: 1, value: '' },
   ])
   const [isLoadingAI, setIsLoadingAI] = useState(false)
 
   const handleAddItem = () => {
-    setItems([...items, { id: Date.now(), desc: '', qtd: 1, value: 0 }])
+    setItems([...items, { id: Date.now(), desc: '', qtd: 1, value: '' }])
   }
 
   const handleRemoveItem = (id) => {
@@ -70,12 +70,13 @@ const CreateProposalPage = () => {
   }
 
   const subtotal = items.reduce((acc, item) => {
-    const value = parseFloat(item.value) || 0
+    const value = parseFloat(String(item.value).replace(',', '.')) || 0
     const qtd = parseInt(item.qtd, 10) || 0
     return acc + value * qtd
   }, 0)
 
-  const discountAmount = (subtotal * (discount / 100))
+  const discountPct = parseFloat(String(discount).replace(',', '.')) || 0
+  const discountAmount = (subtotal * (discountPct / 100))
   const total = subtotal - discountAmount
 
   const handleAISuggestion = async () => {
@@ -133,11 +134,11 @@ const CreateProposalPage = () => {
       title,
       description,
       validUntil,
-      discount,
+      discount: discountPct,
       items: items.map(item => ({
         description: item.desc,
         quantity: parseInt(item.qtd, 10),
-        unit_price: parseFloat(item.value) || 0
+        unit_price: parseFloat(String(item.value).replace(',', '.')) || 0
       }))
     }
 
@@ -268,10 +269,11 @@ const CreateProposalPage = () => {
                         type="text"
                         value={item.desc}
                         onChange={(e) => handleItemChange(item.id, 'desc', e.target.value)}
-                        placeholder="Descrição do item"
+                        placeholder="Ex: Mão de obra"
                         h={10}
                         px={3}
                         borderRadius="lg"
+                        required
                       />
                       <Flex align="center" gap={3} w="full">
                         <Box flex={1}>
@@ -294,10 +296,11 @@ const CreateProposalPage = () => {
                           </Text>
                           <Input
                             type="number"
-                            min="0"
+                            placeholder="1500.00"
                             step="0.01"
                             value={item.value}
-                            onChange={(e) => handleItemChange(item.id, 'value', parseFloat(e.target.value) || 0)}
+                            onFocus={(e) => { if (e.target.value === '0') handleItemChange(item.id, 'value', '') }}
+                            onChange={(e) => handleItemChange(item.id, 'value', e.target.value)}
                             h={10}
                             px={3}
                             borderRadius="lg"
@@ -379,9 +382,11 @@ const CreateProposalPage = () => {
                 type="number"
                 min="0"
                 max="100"
-                placeholder="0%"
+                placeholder="0"
                 value={discount}
-                onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
+                onFocus={(e) => { if (e.target.value === '0' || e.target.value === 0) setDiscount('') }}
+                onBlur={(e) => { if (e.target.value === '') setDiscount('') }}
+                onChange={(e) => setDiscount(e.target.value)}
               />
             </Box>
 
@@ -457,30 +462,35 @@ const CreateProposalPage = () => {
                 {description || 'Descrição do orçamento aparecerá aqui...'}
               </Text>
               <Box height="1px" bg="gray.200" />
-              {items.filter(item => item.desc.trim()).map((item) => (
-                <HStack key={item.id} justify="space-between">
-                  <VStack align="start" spacing={0}>
-                    <Text fontWeight="medium" color="gray.900">{item.desc}</Text>
-                    <Text fontSize="sm" color="gray.600">
-                      {item.qtd}x R$ {parseFloat(item.value || 0).toFixed(2)}
+              {items.filter(item => item.desc.trim()).map((item) => {
+                const v = parseFloat(String(item.value).replace(',', '.')) || 0
+                const q = parseInt(item.qtd || 1)
+                const fmt = (n) => n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                return (
+                  <HStack key={item.id} justify="space-between">
+                    <VStack align="start" spacing={0}>
+                      <Text fontWeight="medium" color="gray.900">{item.desc}</Text>
+                      <Text fontSize="sm" color="gray.600">
+                        {q}x R$ {fmt(v)}
+                      </Text>
+                    </VStack>
+                    <Text fontWeight="bold" color="gray.900">
+                      R$ {fmt(v * q)}
                     </Text>
-                  </VStack>
-                  <Text fontWeight="bold" color="gray.900">
-                    R$ {(parseFloat(item.value || 0) * parseInt(item.qtd || 1)).toFixed(2)}
-                  </Text>
-                </HStack>
-              ))}
+                  </HStack>
+                )
+              })}
               <Box height="1px" bg="gray.200" />
               <VStack spacing={2} align="stretch">
                 <HStack justify="space-between">
                   <Text color="gray.900">Subtotal:</Text>
-                  <Text fontWeight="medium" color="gray.900">R$ {subtotal.toFixed(2)}</Text>
+                  <Text fontWeight="medium" color="gray.900">R$ {subtotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Text>
                 </HStack>
-                {discount > 0 && (
+                {discountPct > 0 && (
                   <HStack justify="space-between">
-                    <Text color="gray.900">Desconto ({discount}%):</Text>
+                    <Text color="gray.900">Desconto ({discountPct}%):</Text>
                     <Text fontWeight="medium" color="red.500">
-                      - R$ {discountAmount.toFixed(2)}
+                      - R$ {discountAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </Text>
                   </HStack>
                 )}
@@ -490,7 +500,7 @@ const CreateProposalPage = () => {
                     Total
                   </Text>
                   <Text fontSize="xl" fontWeight="bold" color="emerald.600">
-                    R$ {total.toFixed(2)}
+                    R$ {total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </Text>
                 </HStack>
               </VStack>

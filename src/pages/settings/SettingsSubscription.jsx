@@ -37,194 +37,6 @@ import {
 import { useSubscription } from '../../hooks/useSubscription'
 import { subscriptionService } from '../../services'
 import { storage } from '../../utils/storage'
-
-// ─── Plan feature map for welcome modal ─────────────────────────────────────────
-
-const PLAN_WELCOME = {
-    pro: {
-        badge: 'PRO',
-        badgeColor: 'yellow',
-        title: 'Bem-vindo ao Profissional!',
-        subtitle: 'Você desbloqueou ferramentas que vão transformar sua gestão de negócios.',
-        features: [
-            { icon: FiZap, text: 'Orçamentos sem marca d\'água' },
-            { icon: FiStar, text: 'Metas financeiras ilimitadas' },
-            { icon: FiLock, text: 'Backup automático dos dados' },
-            { icon: FiMessageCircle, text: 'Suporte prioritário por WhatsApp' },
-        ],
-        cta: 'Definir minhas metas agora',
-        ctaPath: '/dashboard/configuracoes/metas',
-        prompt: 'Comece agora definindo suas metas financeiras. Com o plano PRO você pode criar metas ilimitadas e acompanhar o crescimento do seu negócio em tempo real.',
-    },
-    business: {
-        badge: 'BUSINESS',
-        badgeColor: 'purple',
-        title: 'Bem-vindo ao Business!',
-        subtitle: 'Sua operação está pronta para crescer. Todos os recursos estão liberados.',
-        features: [
-            { icon: FiTrendingUp, text: 'Múltiplos usuários na mesma conta' },
-            { icon: FiStar, text: 'Relatórios avançados e exportação' },
-            { icon: FiLock, text: 'SLA de suporte empresarial' },
-            { icon: FiMessageCircle, text: 'Onboarding dedicado' },
-        ],
-        cta: 'Acessar relatórios avançados',
-        ctaPath: '/dashboard',
-        prompt: 'Comece agora configurando sua equipe e explorando os relatórios avançados. Escale sua operação com total controle.',
-    },
-}
-
-const AUTO_CLOSE_SECONDS = 12
-
-// ─── WelcomePlanModal ──────────────────────────────────────────────────────────
-
-const WelcomePlanModal = ({ isOpen, onClose, planSlug }) => {
-    const navigate = useNavigate()
-    const config = PLAN_WELCOME[planSlug] ?? PLAN_WELCOME.pro
-
-    const handleCta = () => {
-        onClose()
-        navigate(config.ctaPath)
-    }
-
-    return (
-        <Modal
-            isOpen={isOpen}
-            onClose={onClose}
-            isCentered
-            size="md"
-            motionPreset="slideInBottom"
-        >
-            <ModalOverlay bg="blackAlpha.500" backdropFilter="blur(4px)" />
-            <ModalContent borderRadius="2xl" overflow="hidden" shadow="2xl" mx={4}>
-                <ModalBody p={0}>
-                    {/* Header gradient band */}
-                    <Box
-                        bg="linear-gradient(135deg, rgba(0,217,126,0.08) 0%, rgba(0,179,104,0.12) 100%)"
-                        borderBottom="1px"
-                        borderColor="green.100"
-                        p={7}
-                        textAlign="center"
-                    >
-                        {/* Trophy icon */}
-                        <Flex
-                            w={16} h={16}
-                            bg="white"
-                            shadow="md"
-                            border="2px"
-                            borderColor="green.200"
-                            rounded="2xl"
-                            align="center"
-                            justify="center"
-                            mx="auto"
-                            mb={4}
-                        >
-                            <Icon as={FiAward} boxSize={8} color="green.500" />
-                        </Flex>
-
-                        <Badge
-                            colorScheme={config.badgeColor}
-                            fontSize="xs"
-                            fontWeight="bold"
-                            px={3} py={1}
-                            borderRadius="full"
-                            mb={3}
-                        >
-                            PLANO {config.badge} ATIVO
-                        </Badge>
-
-                        <Text fontSize="xl" fontWeight="bold" color="gray.900" lineHeight="1.3">
-                            {config.title}
-                        </Text>
-                        <Text fontSize="sm" color="gray.600" mt={2} maxW="280px" mx="auto">
-                            {config.subtitle}
-                        </Text>
-                    </Box>
-
-                    {/* Features + CTA */}
-                    <Box p={6}>
-                        {/* Features grid */}
-                        <VStack spacing={2} mb={5}>
-                            {config.features.map((f, idx) => (
-                                <HStack
-                                    key={idx}
-                                    w="full"
-                                    p={3}
-                                    bg="gray.50"
-                                    rounded="xl"
-                                    spacing={3}
-                                >
-                                    <Flex
-                                        w={8} h={8}
-                                        bg="green.50"
-                                        rounded="lg"
-                                        align="center"
-                                        justify="center"
-                                        flexShrink={0}
-                                    >
-                                        <Icon as={f.icon} boxSize={4} color="green.500" />
-                                    </Flex>
-                                    <Text fontSize="sm" fontWeight="medium" color="gray.700" flex={1}>
-                                        {f.text}
-                                    </Text>
-                                    <Icon as={FiCheck} boxSize={4} color="green.500" />
-                                </HStack>
-                            ))}
-                        </VStack>
-
-                        {/* Prompt */}
-                        <Box
-                            p={4}
-                            bg="green.50"
-                            rounded="xl"
-                            border="1px"
-                            borderColor="green.100"
-                            mb={5}
-                        >
-                            <HStack align="flex-start" spacing={3}>
-                                <Icon as={FiTarget} boxSize={4} color="green.600" mt={0.5} flexShrink={0} />
-                                <Text fontSize="sm" color="green.800" lineHeight="1.6">
-                                    {config.prompt}
-                                </Text>
-                            </HStack>
-                        </Box>
-
-                        {/* Actions */}
-                        <VStack spacing={2}>
-                            <Button
-                                w="full"
-                                h={12}
-                                bg="green.500"
-                                color="white"
-                                rightIcon={<Icon as={FiArrowRight} />}
-                                borderRadius="xl"
-                                fontWeight="semibold"
-                                fontSize="md"
-                                px={6}
-                                _hover={{ bg: 'green.600', transform: 'translateY(-1px)', shadow: 'md' }}
-                                transition="all 0.2s"
-                                onClick={handleCta}
-                            >
-                                {config.cta}
-                            </Button>
-                            <Button
-                                w="full"
-                                h={10}
-                                variant="ghost"
-                                color="gray.500"
-                                fontSize="sm"
-                                borderRadius="xl"
-                                onClick={onClose}
-                            >
-                                Fechar
-                            </Button>
-                        </VStack>
-                    </Box>
-                </ModalBody>
-            </ModalContent>
-        </Modal>
-    )
-}
-
 const FREE_TO_PRO_BENEFITS = [
     { icon: FiZap, text: 'Remova a marca d\'água dos orçamentos' },
     { icon: FiStar, text: 'Metas financeiras ilimitadas e personalizadas' },
@@ -249,7 +61,7 @@ const PLAN_DISPLAY = {
 
 // ─── UpgradeCTA ────────────────────────────────────────────────────────────────
 
-const UpgradeCTA = ({ benefits, title, subtitle, price, buttonLabel, onCheckout, isLoading }) => (
+const UpgradeCTA = ({ benefits, title, subtitle, price, buttonLabel, onCheckout, isLoading, bottomText }) => (
     <Card
         bg="linear-gradient(to bottom right, rgba(0, 217, 126, 0.05), rgba(0, 217, 126, 0.1), rgba(0, 217, 126, 0.05))"
         rounded="2xl"
@@ -281,7 +93,7 @@ const UpgradeCTA = ({ benefits, title, subtitle, price, buttonLabel, onCheckout,
                     <Text fontSize="3xl" fontWeight="bold" color="gray.800">R$ {price}</Text>
                     <Text color="gray.600">/mês</Text>
                 </HStack>
-                <Text fontSize="xs" color="gray.600">Cancele quando quiser, sem multa</Text>
+                <Text fontSize="xs" color="gray.600" textAlign="center">{bottomText || "Cancele quando quiser, sem multa"}</Text>
             </VStack>
 
             <Button
@@ -404,22 +216,20 @@ const ActiveSubscriptionCard = ({ subscription, onPortal, onCancel, onResume, is
 // ─── Main component ───────────────────────────────────────────────────────────
 
 const SettingsSubscription = () => {
-    const { planSlug, planName, isFree, isPro, isPaid } = useSubscription()
-    const display = PLAN_DISPLAY[planSlug] ?? PLAN_DISPLAY.free
+    const { planSlug, planName, isPro, isPaid, subscribed, onTrial, trialEndsAt } = useSubscription()
+    // Defaults to pro display if they are not Free and not Business, ensures styling doesn't break
+    const display = PLAN_DISPLAY[planSlug] ?? PLAN_DISPLAY.pro
     const toast = useToast()
 
     const [subscription, setSubscription] = useState(null)
     const [isLoadingStatus, setIsLoadingStatus] = useState(true)
     const [actionLoading, setActionLoading] = useState(null)
-    const [welcomePlanSlug, setWelcomePlanSlug] = useState(null)
     const [searchParams, setSearchParams] = useSearchParams()
 
     // Upgrade confirmation modal (for direct swaps)
     const { isOpen: isUpgradeOpen, onOpen: onUpgradeOpen, onClose: onUpgradeClose } = useDisclosure()
     const [pendingUpgradePlan, setPendingUpgradePlan] = useState(null)
 
-    // Welcome modal
-    const { isOpen: isWelcomeOpen, onOpen: onWelcomeOpen, onClose: onWelcomeClose } = useDisclosure()
     // Cancel confirmation dialog
     const { isOpen: isCancelOpen, onOpen: onCancelOpen, onClose: onCancelClose } = useDisclosure()
     const cancelRef = useRef()
@@ -433,16 +243,25 @@ const SettingsSubscription = () => {
 
             // Persiste o plano no localStorage para o useSubscription lê-lo em todo o app
             const previous = storage.getSubscription()
-            const previousSlug = previous?.plan?.slug || 'free'
             const newSlug = data.plan?.slug || 'free'
+            const newSubscribed = data.subscribed ?? false
 
             storage.setSubscription(data)
 
-            // Quando o plano mudou, salva flag no sessionStorage e recarrega para
-            // propagar o novo plano no Header/Sidebar via useSubscription
-            if (previousSlug !== newSlug && newSlug !== 'free') {
-                sessionStorage.setItem('show_welcome', newSlug)
-                window.location.reload()
+            // Verifica se ocorreu uma mudança que justifique exibir o modal de Boas Vindas
+            // Só validamos se já existia um histórico (previous) na navegação atual
+            if (previous) {
+                const previousSlug = previous.plan?.slug || 'free'
+                const previousSubscribed = previous.subscribed ?? false
+
+                const changedPlan = previousSlug !== newSlug && newSlug !== 'free'
+                const justSubscribed = !previousSubscribed && newSubscribed
+
+                // Só exibe o modal de boas vindas se a assinatura atual estiver ATIVA
+                if (newSubscribed && (changedPlan || justSubscribed)) {
+                    sessionStorage.setItem('show_welcome', newSlug)
+                    window.location.reload()
+                }
             }
         } catch {
             // Not subscribed or error — subscription remains null
@@ -460,9 +279,6 @@ const SettingsSubscription = () => {
 
         if (success === '1' || success === 'true') {
             setSearchParams({})
-            // Show welcome modal once loadStatus resolves and we know the plan slug
-            // We set a flag so the modal fires after subscription data is loaded
-            setWelcomePlanSlug('pending')
         } else if (canceled === '1' || canceled === 'true') {
             toast({
                 title: 'Pagamento não concluído',
@@ -475,29 +291,6 @@ const SettingsSubscription = () => {
         }
     }, [searchParams, setSearchParams, toast])
 
-    // Open welcome modal once subscription data is loaded after a successful payment
-    useEffect(() => {
-        const pendingSlug = sessionStorage.getItem('show_welcome')
-        const swapSuccess = sessionStorage.getItem('swap_success')
-
-        // Show correct toast if it was a direct swap
-        if (swapSuccess === 'true') {
-            sessionStorage.removeItem('swap_success')
-            toast({
-                title: 'Plano atualizado!',
-                description: 'A diferença foi cobrada proporcionalmente no seu cartão.',
-                status: 'success',
-                duration: 6000,
-                isClosable: true,
-            })
-        }
-
-        if (pendingSlug && !isLoadingStatus) {
-            sessionStorage.removeItem('show_welcome') // clear so it only fires once
-            setWelcomePlanSlug(pendingSlug)
-            onWelcomeOpen()
-        }
-    }, [isLoadingStatus, onWelcomeOpen, toast])
 
     // ── Checkout / Upgrade ───────────────────────────────────────────────────────
 
@@ -613,7 +406,8 @@ const SettingsSubscription = () => {
     }
 
     // ── Render ───────────────────────────────────────────────────────────────────
-    const isPaidPlan = !isFree
+    const isActiveSubscription = subscribed || onTrial
+    const isPaidPlan = isActiveSubscription && isPaid
 
     return (
         <Box maxW="2xl" mx="auto" p={6}>
@@ -625,7 +419,24 @@ const SettingsSubscription = () => {
                 </Text>
             </Box>
 
-            {/* Current Plan Card */}
+            {/* Trial Alert Box */}
+            {!isLoadingStatus && subscribed && onTrial && trialEndsAt && (
+                <Box mb={4} p={4} bg="blue.50" rounded="xl" border="1px" borderColor="blue.200">
+                    <HStack spacing={3} align="flex-start">
+                        <Icon as={FiAlertCircle} boxSize={5} color="blue.500" mt={0.5} />
+                        <Box>
+                            <Text fontSize="sm" fontWeight="semibold" color="blue.900">
+                                Você está no período de testes.
+                            </Text>
+                            <Text fontSize="sm" color="blue.700" mt={1}>
+                                Seu cartão será cobrado em <strong>{new Date(trialEndsAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}</strong>.
+                            </Text>
+                        </Box>
+                    </HStack>
+                </Box>
+            )}
+
+            {/* Current Plan Card (showing even if unsubscribed since they technically have the plan mapped to them) */}
             <Card bg="white" shadow="sm" rounded="2xl" border="1px" borderColor="gray.200" mb={4}>
                 <CardBody p={6}>
                     <HStack spacing={4}>
@@ -651,6 +462,11 @@ const SettingsSubscription = () => {
                                 >
                                     {display.label}
                                 </Badge>
+                                {!isActiveSubscription && (
+                                    <Badge colorScheme="red" variant="subtle" px={2} py={0.5} rounded="full" fontSize="xs">
+                                        Inativo
+                                    </Badge>
+                                )}
                             </HStack>
                             <Text fontSize="lg" fontWeight="semibold" color="gray.800">
                                 Você está no plano {planName}
@@ -667,21 +483,22 @@ const SettingsSubscription = () => {
                 </Center>
             )}
 
-            {/* Free → upgrade to Pro */}
-            {!isLoadingStatus && isFree && (
+            {/* Unsubscribed user -> Needs to subscribe to PRO to start Trial */}
+            {!isLoadingStatus && !isActiveSubscription && (
                 <UpgradeCTA
                     benefits={FREE_TO_PRO_BENEFITS}
-                    title="Desbloqueie todo o potencial"
-                    subtitle="Faça upgrade para o Pro e leve seu negócio para o próximo nível"
+                    title="Comece seu teste de 7 dias"
+                    subtitle="Desbloqueie todo o potencial do OrçaFast para o seu negócio. Você não será cobrado hoje."
                     price="29"
-                    buttonLabel="Fazer Upgrade para PRO"
+                    buttonLabel="Começar teste de 7 dias"
+                    bottomText="Cancele a qualquer momento antes de 7 dias e nada será cobrado."
                     isLoading={actionLoading === 'checkout-pro'}
                     onCheckout={() => handleCheckout('pro')}
                 />
             )}
 
-            {/* Pro → upgrade to Business */}
-            {!isLoadingStatus && isPro && (
+            {/* Pro IS Subscribed → Can upgrade to Business */}
+            {!isLoadingStatus && isPro && isActiveSubscription && (
                 <>
                     <UpgradeCTA
                         benefits={PRO_TO_BUSINESS_BENEFITS}
@@ -704,8 +521,8 @@ const SettingsSubscription = () => {
                 </>
             )}
 
-            {/* Business: top plan + billing management */}
-            {!isLoadingStatus && isPaid && !isPro && (
+            {/* Business (Has active subscription): Top plan + billing management */}
+            {!isLoadingStatus && isPaidPlan && !isPro && isActiveSubscription && (
                 <ActiveSubscriptionCard
                     subscription={subscription}
                     onPortal={handlePortal}
@@ -738,12 +555,6 @@ const SettingsSubscription = () => {
                 </AlertDialogOverlay>
             </AlertDialog>
 
-            {/* Welcome modal — shown after successful plan upgrade */}
-            <WelcomePlanModal
-                isOpen={isWelcomeOpen}
-                onClose={onWelcomeClose}
-                planSlug={welcomePlanSlug}
-            />
 
             {/* Upgrade confirmation modal */}
             <Modal isOpen={isUpgradeOpen} onClose={onUpgradeClose} isCentered motionPreset="slideInBottom">

@@ -38,15 +38,17 @@ import { useSubscription } from '../../hooks/useSubscription'
 const SidebarContent = ({ isCollapsed = false, onItemClick = () => { } }) => {
   const { logout, getCurrentUser } = useAuth()
   const { toggleCollapse } = useSidebar()
-  const { isFree, isPro, isBusiness, canSetFinancialGoals, canCustomizeBranding } = useSubscription()
+  const { isFree, isPro, isBusiness, canSetFinancialGoals, canCustomizeBranding, subscribed, onTrial } = useSubscription()
   const location = useLocation()
   const user = getCurrentUser()
   const { isOpen: isSettingsOpen, onToggle: onSettingsToggle } = useDisclosure()
 
+  const hasAccess = subscribed || onTrial
+
   const menuItems = [
-    { icon: FiHome, label: 'Início', path: '/dashboard' },
-    { icon: FiUsers, label: 'Clientes', path: '/dashboard/clientes' },
-    { icon: FiFileText, label: 'Orçamentos', path: '/dashboard/propostas' },
+    { icon: FiHome, label: 'Início', path: '/dashboard', isLocked: !hasAccess },
+    { icon: FiUsers, label: 'Clientes', path: '/dashboard/clientes', isLocked: !hasAccess },
+    { icon: FiFileText, label: 'Orçamentos', path: '/dashboard/propostas', isLocked: !hasAccess },
   ]
 
 
@@ -55,21 +57,21 @@ const SidebarContent = ({ isCollapsed = false, onItemClick = () => { } }) => {
       icon: FiUser,
       label: 'Meu Perfil',
       path: '/dashboard/configuracoes/perfil',
-      isLocked: !canCustomizeBranding,
+      isLocked: !hasAccess || !canCustomizeBranding,
     },
     {
       icon: FiTarget,
       label: 'Metas',
       path: '/dashboard/configuracoes/metas',
-      isLocked: !canSetFinancialGoals,
+      isLocked: !hasAccess || !canSetFinancialGoals,
     },
     {
       icon: FiUsers,
       label: 'Usuários',
       path: '/dashboard/usuarios',
-      isLocked: !isBusiness,
+      isLocked: !subscribed || !isBusiness,
     },
-    { icon: FiStar, label: 'Assinatura', path: '/dashboard/configuracoes/assinatura' },
+    { icon: FiStar, label: 'Assinatura', path: '/dashboard/configuracoes/assinatura', isLocked: false },
   ]
 
   const handleLogout = () => {
@@ -115,7 +117,12 @@ const SidebarContent = ({ isCollapsed = false, onItemClick = () => { } }) => {
         leftIconSpacing={isCollapsed ? 0 : 3}
         minW={isCollapsed ? '60px' : 'auto'}
       >
-        {!isCollapsed && item.label}
+        {!isCollapsed && (
+          <Flex w="full" align="center">
+            <Text as="span">{item.label}</Text>
+            {item.isLocked && <Icon as={FiLock} ml="auto" color="gray.400" boxSize={3} />}
+          </Flex>
+        )}
       </Button>
 
       {/* Active indicator */}

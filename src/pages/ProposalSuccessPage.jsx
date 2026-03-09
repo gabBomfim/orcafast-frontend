@@ -40,25 +40,31 @@ const ProposalSuccessPage = () => {
   const successBg = useColorModeValue('green.50', 'green.900')
   const successColor = useColorModeValue('green.600', 'green.300')
 
-  const { proposalId, proposalData, isEdit } = location.state || {}
+  const [initialData] = useState(() => {
+    return location.state || JSON.parse(sessionStorage.getItem('pending_proposal_success') || '{}')
+  })
+
+  const { proposalId, proposalData, isEdit } = initialData
 
   useEffect(() => {
     // Redireciona se não houver dados
     if (!proposalId || !proposalData) {
       navigate('/dashboard/propostas')
+    } else {
+      sessionStorage.removeItem('pending_proposal_success')
     }
   }, [proposalId, proposalData, navigate])
 
   const handleWhatsAppShare = async () => {
     setIsSendingWhatsApp(true)
-    
+
     try {
       // Atualiza o status do orçamento para "enviado" (status 2)
       await proposalService.updateStatus(proposalId, 2)
-      
+
       // Constrói a URL pública do orçamento (será ajustada quando o backend fornecer o UUID)
       const proposalUrl = `${window.location.origin}/proposta/${proposalId}`
-      
+
       // Mensagem personalizada
       const message = `Olá ${proposalData.clientName}!
 
@@ -70,13 +76,13 @@ Visualize os detalhes completos aqui:
 ${proposalUrl}
 
 Qualquer dúvida, estou à disposição!`
-      
+
       // URL do WhatsApp Web (sem número específico - permite escolher o contato)
       const whatsappUrl = `https://web.whatsapp.com/send?text=${encodeURIComponent(message)}`
-      
+
       // Abre em nova guia
       window.open(whatsappUrl, '_blank')
-      
+
       toast({
         title: 'Orçamento marcado como enviado',
         description: 'Selecione o contato no WhatsApp para enviar.',
@@ -101,7 +107,7 @@ Qualquer dúvida, estou à disposição!`
     setIsDownloading(true)
     try {
       const response = await proposalService.downloadPDF(proposalId)
-      
+
       // Cria blob e faz download
       const blob = new Blob([response.data], { type: 'application/pdf' })
       const url = window.URL.createObjectURL(blob)

@@ -61,8 +61,18 @@ const EMPTY_STATS = {
 const DashboardPage = () => {
   const { getCurrentUser } = useAuth()
   const user = getCurrentUser()
-  const { isFree } = useSubscription()
+  const { isFree, onTrial, trialEndsAt } = useSubscription()
   const toast = useToast()
+
+  const getDaysRemaining = (endDateStr) => {
+    if (!endDateStr) return 0
+    const end = new Date(endDateStr)
+    const now = new Date()
+    const diffTime = end - now
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    return diffDays > 0 ? diffDays : 0
+  }
+  const trialDaysLeft = getDaysRemaining(trialEndsAt)
 
   const [selectedPeriod, setSelectedPeriod] = useState('this-month')
   const [customDates, setCustomDates] = useState({ begin_date: '', end_date: '' })

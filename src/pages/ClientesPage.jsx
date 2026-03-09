@@ -111,23 +111,16 @@ const ClientesPage = () => {
     }
   }
 
-  // Debounce search
+  // Debounce search and consolidate filters
   useEffect(() => {
     const timer = setTimeout(() => {
-      fetchClients(1)
+      if (!dateError) {
+        fetchClients(1)
+      }
     }, 500)
+
     return () => clearTimeout(timer)
-  }, [searchTerm])
-
-  // Date filters
-  useEffect(() => {
-    if (!dateError) fetchClients(1)
-  }, [dateRange.start, dateRange.end, dateError])
-
-  // Initial load
-  useEffect(() => {
-    fetchClients(1)
-  }, [])
+  }, [searchTerm, dateRange.start, dateRange.end, dateError])
 
   const handleDatePresetChange = (preset) => {
     setDatePreset(preset)

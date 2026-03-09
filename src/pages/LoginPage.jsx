@@ -226,7 +226,7 @@ const LoginPage = () => {
           <Flex w="full" justify="flex-end">
             <ChakraLink
               as={RouterLink}
-              to="/recuperar-senha"
+              to="/esqueci-senha"
               fontSize="sm"
               color="emerald.600"
               _hover={{ textDecoration: 'underline' }}

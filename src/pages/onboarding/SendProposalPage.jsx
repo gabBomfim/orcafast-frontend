@@ -21,12 +21,15 @@ import { Link as RouterLink, useNavigate } from 'react-router-dom'
 import OnboardingLayout from '../../components/layout/OnboardingLayout'
 import LoginModal from '../../components/ui/LoginModal'
 import { useOnboarding } from '../../contexts/OnboardingContext'
+import { storage } from '../../utils/storage'
 
 const SendProposalPage = () => {
   const navigate = useNavigate()
   const { isOpen: isLoginModalOpen, onOpen: onLoginModalOpen, onClose: onLoginModalClose } = useDisclosure()
   const { guestData } = useOnboarding()
   const [linkCopied, setLinkCopied] = useState(false)
+
+  const isAuthenticated = !!storage.getToken()
 
   const clientData = guestData.client || {
     name: 'Cliente',
@@ -46,6 +49,11 @@ const SendProposalPage = () => {
   const total = subtotal - (proposalData.discount || 0)
 
   const handleSend = (method) => {
+    if (isAuthenticated) {
+      navigate('/dashboard/propostas')
+      return
+    }
+
     if (method === 'link') {
       setLinkCopied(true)
       setTimeout(() => setLinkCopied(false), 2000)
@@ -164,7 +172,7 @@ const SendProposalPage = () => {
         <Flex align="center" justify="space-between" w="full" mt={8} pt={6} borderTop="1px" borderColor="gray.200">
           <Button
             as={RouterLink}
-            to="/onboarding/create-proposal"
+            to={isAuthenticated ? "/dashboard/propostas" : "/onboarding/create-proposal"}
             variant="ghost"
             leftIcon={<Icon as={FiChevronLeft} w={4} h={4} />}
             color="gray.600"
