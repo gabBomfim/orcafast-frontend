@@ -13,6 +13,8 @@ import {
 import {
   FiEye,
   FiEyeOff,
+  FiCheckCircle,
+  FiXCircle,
 } from 'react-icons/fi'
 import { FaApple } from 'react-icons/fa'
 import { useState } from 'react'
@@ -42,6 +44,19 @@ const GoogleIcon = () => (
 const RegisterForm = ({ onSubmit, onGoogleLogin, onFacebookLogin, isLoading }) => {
   const [showPassword, setShowPassword] = useState(false)
   const [showPasswordConfirmation, setShowPasswordConfirmation] = useState(false)
+  const [password, setPassword] = useState('')
+  const [passwordConfirmation, setPasswordConfirmation] = useState('')
+
+  // Password strength indicator
+  const getPasswordStrength = () => {
+    if (password.length === 0) return { label: '', color: '', width: '0%' }
+    if (password.length < 6) return { label: 'Fraca', color: 'red.500', width: '33%' }
+    if (password.length < 10) return { label: 'Média', color: 'amber.500', width: '66%' }
+    return { label: 'Forte', color: 'emerald.500', width: '100%' }
+  }
+
+  const strength = getPasswordStrength()
+  const passwordsMatch = password && passwordConfirmation && password === passwordConfirmation
 
   return (
     <VStack spacing={6} w="full">
@@ -120,58 +135,120 @@ const RegisterForm = ({ onSubmit, onGoogleLogin, onFacebookLogin, isLoading }) =
         />
 
         {/* Password field */}
-        <InputGroup size="lg">
-          <Input
-            type={showPassword ? 'text' : 'password'}
-            name="password"
-            placeholder="Senha (mínimo 8 caracteres)"
-            minLength={8}
-            pr={12}
-            required
-          />
-          <InputRightElement h={12}>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowPassword(!showPassword)}
-              _hover={{ bg: 'transparent' }}
-            >
-              <Icon
-                as={showPassword ? FiEyeOff : FiEye}
-                w={4}
-                h={4}
-                color="gray.500"
-              />
-            </Button>
-          </InputRightElement>
-        </InputGroup>
+        <Box w="full">
+          <InputGroup size="lg">
+            <Input
+              type={showPassword ? 'text' : 'password'}
+              name="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Senha (mínimo 8 caracteres)"
+              minLength={8}
+              pr={12}
+              _focus={{ outline: 'none', ring: 2, ringColor: 'emerald.200' }}
+              transition="all"
+              required
+            />
+            <InputRightElement h={12}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowPassword(!showPassword)}
+                _hover={{ bg: 'transparent' }}
+                tabIndex={-1}
+              >
+                <Icon
+                  as={showPassword ? FiEyeOff : FiEye}
+                  w={4}
+                  h={4}
+                  color="gray.500"
+                />
+              </Button>
+            </InputRightElement>
+          </InputGroup>
+
+          {/* Password strength */}
+          {password.length > 0 && (
+            <Box mt={2}>
+              <Box h={1} bg="gray.200" rounded="full" overflow="hidden">
+                <Box
+                  h="full"
+                  bg={strength.color}
+                  transition="all 0.3s"
+                  w={strength.width}
+                />
+              </Box>
+              <Text
+                fontSize="xs"
+                mt={1}
+                color={
+                  strength.color === 'emerald.500' ? 'emerald.500' :
+                    strength.color === 'amber.500' ? 'orange.400' :
+                      'red.500'
+                }
+              >
+                Senha {strength.label.toLowerCase()}
+              </Text>
+            </Box>
+          )}
+        </Box>
 
         {/* Password confirmation field */}
-        <InputGroup size="lg">
-          <Input
-            type={showPasswordConfirmation ? 'text' : 'password'}
-            name="password_confirmation"
-            placeholder="Confirmar senha"
-            minLength={8}
-            pr={12}
-            required
-          />
-          <InputRightElement h={12}>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowPasswordConfirmation(!showPasswordConfirmation)}
-              _hover={{ bg: 'transparent' }}
-            >
-              <Icon
-                as={showPasswordConfirmation ? FiEyeOff : FiEye}
-                w={4}
-                h={4}
-                color="gray.500"
-              />
-            </Button>
-          </InputRightElement>
-        </InputGroup>
+        <Box w="full">
+          <InputGroup size="lg">
+            <Input
+              type={showPasswordConfirmation ? 'text' : 'password'}
+              name="password_confirmation"
+              value={passwordConfirmation}
+              onChange={(e) => setPasswordConfirmation(e.target.value)}
+              placeholder="Confirmar senha"
+              minLength={8}
+              pr={12}
+              _focus={{
+                outline: 'none',
+                ring: 2,
+                ringColor: passwordConfirmation && !passwordsMatch ? 'red.200' : 'emerald.200'
+              }}
+              ring={passwordConfirmation ? 2 : undefined}
+              ringColor={passwordConfirmation && !passwordsMatch ? 'red.200' : passwordsMatch ? 'emerald.200' : undefined}
+              transition="all"
+              required
+            />
+            <InputRightElement h={12}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowPasswordConfirmation(!showPasswordConfirmation)}
+                _hover={{ bg: 'transparent' }}
+                tabIndex={-1}
+              >
+                <Icon
+                  as={showPasswordConfirmation ? FiEyeOff : FiEye}
+                  w={4}
+                  h={4}
+                  color="gray.500"
+                />
+              </Button>
+            </InputRightElement>
+          </InputGroup>
+
+          {/* Match indicator */}
+          {passwordConfirmation && (
+            <Flex align="center" gap={1.5} mt={2}>
+              {passwordsMatch ? (
+                <>
+                  <Icon as={FiCheckCircle} w={3.5} h={3.5} color="emerald.500" />
+                  <Text fontSize="xs" color="emerald.500">Senhas coincidem</Text>
+                </>
+              ) : (
+                <>
+                  <Icon as={FiXCircle} w={3.5} h={3.5} color="red.500" />
+                  <Text fontSize="xs" color="red.500">Senhas não coincidem</Text>
+                </>
+              )}
+            </Flex>
+          )}
+        </Box>
 
         {/* Submit button */}
         <Button
