@@ -13,12 +13,12 @@ import {
   useToast,
 } from '@chakra-ui/react'
 import {
-  FiZap,
   FiEye,
   FiEyeOff,
   FiCheckCircle,
   FiXCircle,
 } from 'react-icons/fi'
+import OrcafastLogo from '../components/ui/OrcafastLogo'
 import { FaApple } from 'react-icons/fa'
 import { Link as RouterLink, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
@@ -141,27 +141,12 @@ const RegisterPage = () => {
       py={8}
     >
       {/* Logo */}
-      <Flex
-        as={RouterLink}
-        to="/"
-        align="center"
-        gap={2}
-        mb={10}
-      >
-        <Flex
-          w={10}
-          h={10}
-          bg="emerald.50"
-          borderRadius="xl"
-          align="center"
-          justify="center"
-        >
-          <Icon as={FiZap} w={6} h={6} color="emerald.500" />
-        </Flex>
-        <Text fontSize="xl" fontWeight="bold" color="gray.900">
-          OrçaFast
-        </Text>
-      </Flex>
+      <OrcafastLogo
+        variant="full"
+        height="40px"
+        style={{ cursor: 'pointer', marginBottom: '2.5rem' }}
+        onClick={() => window.location.href = '/'}
+      />
 
       {/* Card Container */}
       <Box w="full" maxW="sm">

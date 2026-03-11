@@ -1,10 +1,9 @@
 import {
   Box,
   Flex,
-  Icon,
   Text,
 } from '@chakra-ui/react'
-import { FiZap } from 'react-icons/fi'
+import OrcafastLogo from '../ui/OrcafastLogo'
 import { Link as RouterLink } from 'react-router-dom'
 
 const OnboardingLayout = ({
@@ -20,26 +19,15 @@ const OnboardingLayout = ({
         <Box maxW="lg" mx="auto">
           {/* Logo */}
           <Flex
-            as={RouterLink}
-            to="/"
-            align="center"
             justify="center"
-            gap={2}
             mb={8}
           >
-            <Flex
-              w={10}
-              h={10}
-              bg="emerald.50"
-              borderRadius="xl"
-              align="center"
-              justify="center"
-            >
-              <Icon as={FiZap} w={6} h={6} color="emerald.500" />
-            </Flex>
-            <Text fontSize="xl" fontWeight="bold" color="gray.900">
-              OrçaFast
-            </Text>
+            <OrcafastLogo
+              variant="full"
+              height="40px"
+              style={{ cursor: 'pointer' }}
+              onClick={() => window.location.href = '/'}
+            />
           </Flex>
 
           {/* Progress bar */}

@@ -17,7 +17,6 @@ import {
 } from '@chakra-ui/react'
 import { authService } from '../../services'
 import {
-    FiZap,
     FiEye,
     FiEyeOff,
     FiLock,
@@ -25,6 +24,7 @@ import {
     FiXCircle,
     FiAlertTriangle,
 } from 'react-icons/fi'
+import OrcafastLogo from '../../components/ui/OrcafastLogo'
 
 const ResetPasswordPage = () => {
     const [searchParams] = useSearchParams()
@@ -119,14 +119,12 @@ const ResetPasswordPage = () => {
     return (
         <Flex minH="100vh" bg="#f8fafc" direction="column" align="center" justify="center" px={4} py={8}>
             {/* Logo */}
-            <Flex as={RouterLink} to="/" align="center" gap={2} mb={10} _hover={{ textDecoration: 'none' }}>
-                <Flex w={10} h={10} bg="emerald.50" rounded="xl" align="center" justify="center">
-                    <Icon as={FiZap} w={6} h={6} color="emerald.500" />
-                </Flex>
-                <Text fontSize="xl" fontWeight="bold" color="gray.900">
-                    OrçaFast
-                </Text>
-            </Flex>
+            <OrcafastLogo
+                variant="full"
+                height="40px"
+                style={{ cursor: 'pointer', marginBottom: '2.5rem' }}
+                onClick={() => window.location.href = '/'}
+            />
 
             {/* Card Container */}
             <Box w="full" maxW="sm">

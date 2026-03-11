@@ -12,7 +12,8 @@ import {
   Avatar,
 } from '@chakra-ui/react'
 import { Link } from 'react-router-dom'
-import { FiZap, FiCrop, FiArrowLeft, FiLogOut, FiUser } from 'react-icons/fi'
+import { FiCrop, FiArrowLeft, FiLogOut, FiUser } from 'react-icons/fi'
+import OrcafastLogo from '../ui/OrcafastLogo'
 import { useAuth } from '../../hooks/useAuth'
 import { useSubscription } from '../../hooks/useSubscription'
 import SidebarToggle from './SidebarToggle'
@@ -63,21 +64,13 @@ const Header = ({ title, showBackButton = false, rightContent }) => {
             </Button>
           )}
 
-          <HStack spacing={2}>
-            <Flex
-              w={8}
-              h={8}
-              bg="linear-gradient(135deg, #00d97e 0%, #00b368 100%)"
-              borderRadius="lg"
-              align="center"
-              justify="center"
-              boxShadow="0 4px 12px rgba(0, 217, 126, 0.3)"
-            >
-              <Icon as={FiZap} color="white" boxSize={5} />
-            </Flex>
-            <Text fontSize="xl" fontWeight="800" color="gray.900" letterSpacing="-0.5px">
-              {title || 'OrçaFast'}
-            </Text>
+          <HStack spacing={3}>
+            <OrcafastLogo
+              variant="full"
+              height="32px"
+              style={{ cursor: 'pointer' }}
+              onClick={() => window.location.href = '/dashboard'}
+            />
           </HStack>
         </HStack>
 

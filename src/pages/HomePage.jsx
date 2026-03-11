@@ -12,12 +12,12 @@ import {
   FiCheck,
   FiMenu,
   FiX,
-  FiZap,
   FiClock,
   FiTrendingUp,
   FiStar,
   FiFileText
 } from 'react-icons/fi';
+import logoFull from '../assets/logo/logo-full.svg';
 import '../styles/landing.css';
 
 // Componentes auxiliares
@@ -42,10 +42,7 @@ const HomePage = () => {
       <nav className="nav-container">
         <div className="nav-content">
           <div className="nav-logo">
-            <div className="logo-icon">
-              <FiZap className="logo-arrow" />
-            </div>
-            <span className="logo-text">OrçaFast</span>
+            <img src={logoFull} alt="OrçaFast" style={{ height: '36px', width: 'auto' }} />
           </div>
 
           {/* Desktop Menu */}
@@ -454,10 +451,7 @@ const HomePage = () => {
         <div className="footer-content">
           <div className="footer-brand">
             <div className="footer-logo">
-              <div className="logo-icon">
-                <FiZap className="logo-arrow" />
-              </div>
-              <span className="logo-text">OrçaFast</span>
+              <img src={logoFull} alt="OrçaFast" style={{ height: '32px', width: 'auto' }} />
             </div>
             <p className="footer-tagline">Orçamentos profissionais em minutos</p>
           </div>
