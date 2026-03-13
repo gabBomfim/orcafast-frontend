@@ -20,6 +20,7 @@ import ProposalSuccessPage from './pages/ProposalSuccessPage'
 import OnboardingCreateClientPage from './pages/onboarding/CreateClientPage'
 import OnboardingCreateProposalPage from './pages/onboarding/CreateProposalPage'
 import SendProposalPage from './pages/onboarding/SendProposalPage'
+import PublicProposalView from './pages/PublicProposalView'
 
 // Settings pages
 import SettingsProfile from './pages/settings/SettingsProfile'
@@ -49,6 +50,7 @@ function App() {
               <Route path="/onboarding/create-client" element={<OnboardingCreateClientPage />} />
               <Route path="/onboarding/create-proposal" element={<OnboardingCreateProposalPage />} />
               <Route path="/onboarding/send-proposal" element={<SendProposalPage />} />
+              <Route path="/share/proposta/:token" element={<PublicProposalView />} />
 
               {/* Protected Routes */}
               <Route element={<ProtectedRoute />}>

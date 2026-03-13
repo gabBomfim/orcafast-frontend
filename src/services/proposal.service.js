@@ -31,5 +31,9 @@ export const proposalService = {
 
   updateStatus(id, status) {
     return api.patch(`proposals/${id}/status`, { status })
+  },
+  
+  getPublicProposal(token) {
+    return api.get(`proposta/${token}`)
   }
 }

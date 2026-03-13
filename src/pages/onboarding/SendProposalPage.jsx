@@ -22,6 +22,7 @@ import OnboardingLayout from '../../components/layout/OnboardingLayout'
 import LoginModal from '../../components/ui/LoginModal'
 import { useOnboarding } from '../../contexts/OnboardingContext'
 import { storage } from '../../utils/storage'
+import { openWhatsApp } from '../../utils/whatsapp'
 
 const SendProposalPage = () => {
   const navigate = useNavigate()
@@ -49,6 +50,13 @@ const SendProposalPage = () => {
   const total = subtotal - (proposalData.discount || 0)
 
   const handleSend = (method) => {
+    if (method === 'whatsapp') {
+      openWhatsApp({
+        phone: clientData.phone,
+        message: `Olá ${clientData.name}! Acabei de criar seu orçamento de *${proposalData.title}* via OrçaFast. 😊\n\nEm breve te envio o link oficial para visualização!`
+      })
+    }
+
     if (isAuthenticated) {
       navigate('/dashboard/propostas')
       return
@@ -58,7 +66,8 @@ const SendProposalPage = () => {
       setLinkCopied(true)
       setTimeout(() => setLinkCopied(false), 2000)
     }
-    // Mostra o modal de cadastro/login antes de enviar
+    // Mostra o modal de cadastro/login após ou em vez de enviar (dependendo do fluxo desejado)
+    // Para o onboarding, mantemos a captura de lead
     onLoginModalOpen()
   }
 

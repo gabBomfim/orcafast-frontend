@@ -24,6 +24,7 @@ import {
 import { useNavigate, useSearchParams, Link as RouterLink } from 'react-router-dom'
 import { clientService } from '../services'
 import { useState, useEffect, useRef } from 'react'
+import { maskPhone, unmaskPhone } from '../utils/mask'
 
 const CreateClientPage = () => {
   const navigate = useNavigate()
@@ -49,21 +50,10 @@ const CreateClientPage = () => {
     const loadClient = async () => {
       try {
         const { data } = await clientService.get(editId)
-        let phone = data.phone || ''
-        if (phone) {
-          const digits = phone.replace(/\D/g, '')
-          if (digits.length <= 2) {
-            phone = digits
-          } else if (digits.length <= 7) {
-            phone = `(${digits.slice(0, 2)}) ${digits.slice(2)}`
-          } else {
-            phone = `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`
-          }
-        }
         setFormData({
           name: data.name || '',
           email: data.email || '',
-          phone,
+          phone: maskPhone(data.phone || ''),
           company: data.company || '',
         })
       } catch (error) {
@@ -94,7 +84,7 @@ const CreateClientPage = () => {
 
     // Remove formatação do telefone antes de enviar
     if (phone) {
-      phone = phone.replace(/\D/g, '')
+      phone = unmaskPhone(phone)
     }
 
     // Validação: pelo menos telefone ou email deve ser fornecido
@@ -258,18 +248,7 @@ const CreateClientPage = () => {
                       placeholder="(11) 99999-9999"
                       value={formData.phone}
                       onChange={(e) => {
-                        let value = e.target.value.replace(/\D/g, '')
-                        let formatted = value
-                        if (value.length <= 11) {
-                          if (value.length <= 2) {
-                            formatted = value
-                          } else if (value.length <= 7) {
-                            formatted = `(${value.slice(0, 2)}) ${value.slice(2)}`
-                          } else {
-                            formatted = `(${value.slice(0, 2)}) ${value.slice(2, 7)}-${value.slice(7)}`
-                          }
-                        }
-                        setFormData({ ...formData, phone: formatted })
+                        setFormData({ ...formData, phone: maskPhone(e.target.value) })
                       }}
                       required
                     />

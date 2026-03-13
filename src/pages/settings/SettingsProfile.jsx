@@ -22,6 +22,7 @@ import {
 import { FiUpload, FiBriefcase, FiUser, FiKey, FiPhone, FiSave, FiTrash2 } from 'react-icons/fi'
 import { useSubscription } from '../../hooks/useSubscription'
 import { companyService } from '../../services'
+import { maskPhone, unmaskPhone } from '../../utils/mask'
 
 const SettingsProfile = () => {
     const { canCustomizeBranding } = useSubscription()
@@ -55,7 +56,7 @@ const SettingsProfile = () => {
                     name: data.name ?? '',
                     document: data.document ?? '',
                     pix_key: data.pix_key ?? '',
-                    phone: data.phone ?? '',
+                    phone: maskPhone(data.phone ?? ''),
                     default_proposal_terms: data.default_proposal_terms ?? '',
                 })
                 setLogoUrl(data.logo_url ?? null)
@@ -75,8 +76,10 @@ const SettingsProfile = () => {
     }, [])
 
     // ─── Handlers ───────────────────────────────────────────────────────────────
-    const handleInputChange = (field, value) =>
-        setFormData(prev => ({ ...prev, [field]: value }))
+    const handleInputChange = (field, value) => {
+        const newValue = field === 'phone' ? maskPhone(value) : value
+        setFormData(prev => ({ ...prev, [field]: newValue }))
+    }
 
     const handleLogoSelect = (e) => {
         const file = e.target.files?.[0]
@@ -126,7 +129,7 @@ const SettingsProfile = () => {
             fd.append('name', formData.name)
             if (formData.document) fd.append('document', formData.document)
             if (formData.pix_key) fd.append('pix_key', formData.pix_key)
-            if (formData.phone) fd.append('phone', formData.phone)
+            if (formData.phone) fd.append('phone', unmaskPhone(formData.phone))
             if (formData.default_proposal_terms)
                 fd.append('default_proposal_terms', formData.default_proposal_terms)
             if (logoFile) fd.append('logo', logoFile)

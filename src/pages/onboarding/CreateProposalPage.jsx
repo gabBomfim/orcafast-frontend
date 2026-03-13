@@ -60,6 +60,14 @@ const CreateProposalPage = () => {
   }
 
   const handleItemChange = (id, field, value) => {
+    // Limites de entrada
+    if (field === 'qtd') {
+      if (value.length > 6) return
+    }
+    if (field === 'value') {
+      if (value.length > 10) return
+    }
+
     const newItems = items.map((item) => {
       if (item.id === id) {
         return { ...item, [field]: value }
@@ -71,7 +79,7 @@ const CreateProposalPage = () => {
 
   const subtotal = items.reduce((acc, item) => {
     const value = parseFloat(String(item.value).replace(',', '.')) || 0
-    const qtd = parseInt(item.qtd, 10) || 0
+    const qtd = parseFloat(item.qtd) || 0
     return acc + value * qtd
   }, 0)
 
@@ -137,7 +145,7 @@ const CreateProposalPage = () => {
       discount: discountPct,
       items: items.map(item => ({
         description: item.desc,
-        quantity: parseInt(item.qtd, 10),
+        quantity: parseFloat(item.qtd) || 0,
         unit_price: parseFloat(String(item.value).replace(',', '.')) || 0
       }))
     }
@@ -278,13 +286,13 @@ const CreateProposalPage = () => {
                       <Flex align="center" gap={3} w="full">
                         <Box flex={1}>
                           <Text fontSize="xs" color="gray.600" mb={1}>
-                            Qtd
+                            Quantidade
                           </Text>
                           <Input
                             type="number"
-                            min="1"
+                            min="0"
                             value={item.qtd}
-                            onChange={(e) => handleItemChange(item.id, 'qtd', parseInt(e.target.value) || 1)}
+                            onChange={(e) => handleItemChange(item.id, 'qtd', e.target.value)}
                             h={10}
                             px={3}
                             borderRadius="lg"
@@ -386,7 +394,12 @@ const CreateProposalPage = () => {
                 value={discount}
                 onFocus={(e) => { if (e.target.value === '0' || e.target.value === 0) setDiscount('') }}
                 onBlur={(e) => { if (e.target.value === '') setDiscount('') }}
-                onChange={(e) => setDiscount(e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value
+                  if (val.length > 3) return
+                  if (parseFloat(val) > 100) return
+                  setDiscount(val)
+                }}
               />
             </Box>
 

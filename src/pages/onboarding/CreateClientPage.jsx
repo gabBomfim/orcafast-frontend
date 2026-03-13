@@ -18,6 +18,7 @@ import {
 import { Link as RouterLink, useNavigate } from 'react-router-dom'
 import OnboardingLayout from '../../components/layout/OnboardingLayout'
 import { useOnboarding } from '../../contexts/OnboardingContext'
+import { maskPhone, unmaskPhone } from '../../utils/mask'
 
 const CreateClientPage = () => {
   const navigate = useNavigate()
@@ -27,7 +28,7 @@ const CreateClientPage = () => {
     e.preventDefault()
     const formData = new FormData(e.target)
 
-    const phone = formData.get('phone')
+    const phone = unmaskPhone(formData.get('phone'))
     const email = formData.get('email')
 
     // Validação: pelo menos telefone ou email deve ser fornecido
@@ -113,16 +114,7 @@ const CreateClientPage = () => {
               placeholder="(11) 99999-9999"
               required
               onChange={(e) => {
-                let value = e.target.value.replace(/\D/g, '')
-                if (value.length <= 11) {
-                  if (value.length <= 2) {
-                    e.target.value = value
-                  } else if (value.length <= 7) {
-                    e.target.value = `(${value.slice(0, 2)}) ${value.slice(2)}`
-                  } else {
-                    e.target.value = `(${value.slice(0, 2)}) ${value.slice(2, 7)}-${value.slice(7)}`
-                  }
-                }
+                e.target.value = maskPhone(e.target.value)
               }}
             />
           </Box>

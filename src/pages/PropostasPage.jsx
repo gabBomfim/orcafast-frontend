@@ -43,6 +43,8 @@ import {
   FiCheckCircle,
   FiXCircle,
   FiSearch,
+  FiExternalLink,
+  FiCheck,
 } from 'react-icons/fi'
 import { FaWhatsapp } from 'react-icons/fa'
 
@@ -54,6 +56,7 @@ import StatusBadge from '../components/ui/StatusBadge'
 import Pagination from '../components/ui/Pagination'
 
 import { proposalService } from '../services'
+import { openWhatsApp } from '../utils/whatsapp'
 
 const STATUS_MAP = {
   1: 'draft',
@@ -124,6 +127,7 @@ const PropostasPage = () => {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const cancelRef = useRef()
   const [refreshTrigger, setRefreshTrigger] = useState(0)
+  const [copiedProposalId, setCopiedProposalId] = useState(null)
 
   // Debounce search term to avoid excessive API calls
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm)
@@ -347,20 +351,24 @@ const PropostasPage = () => {
         await proposalService.updateStatus(proposal.id, 2)
       }
 
-      const proposalUrl = `${window.location.origin}/proposta/${proposal.id}`
+      const proposalUrl = proposal.sharing_token
+        ? `${window.location.origin}/share/proposta/${proposal.sharing_token}`
+        : `${window.location.origin}/proposta/${proposal.id}` // Fallback para rota interna
+
       const message = `Olá ${proposal.client}!
 
-Seu orçamento "${proposal.service}" está pronto!
+Seu orçamento de *${proposal.service}* está pronto! 😊
 
-Valor: R$ ${proposal.value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-
-Visualize os detalhes completos aqui:
-${proposalUrl}
+Visualize os detalhes completos clicando no link abaixo:
+🔗 ${proposalUrl}
 
 Qualquer dúvida, estou à disposição!`
 
-      const whatsappUrl = `https://web.whatsapp.com/send?text=${encodeURIComponent(message)}`
-      window.open(whatsappUrl, '_blank')
+      // Abre o WhatsApp de forma inteligente
+      openWhatsApp({
+        phone: proposal.client_phone || proposal.client?.phone,
+        message: message
+      })
 
       toast({
         title: proposal.status === 'approved' ? 'Abrindo WhatsApp' : 'Orçamento marcado como enviado',
@@ -415,6 +423,28 @@ Qualquer dúvida, estou à disposição!`
     } finally {
       setLoadingAction({ ...loadingAction, [proposalId]: null })
     }
+  }
+
+  const handleCopyLink = (proposal) => {
+    const proposalUrl = proposal.sharing_token 
+      ? `${window.location.origin}/share/proposta/${proposal.sharing_token}`
+      : `${window.location.origin}/proposta/${proposal.id}`
+
+    navigator.clipboard.writeText(proposalUrl)
+    setCopiedProposalId(proposal.id)
+    
+    setTimeout(() => {
+      setCopiedProposalId(null)
+    }, 2000)
+    
+    toast({
+      title: 'Link copiado!',
+      status: 'success',
+      duration: 2000,
+      isClosable: true,
+      position: 'top',
+      variant: 'subtle',
+    })
   }
 
   const getDialogContent = () => {
@@ -732,19 +762,30 @@ Qualquer dúvida, estou à disposição!`
                             </MenuButton>
                             <MenuList>
                               <MenuItem
+                                icon={<Icon as={FiExternalLink} />}
+                                as="a"
+                                href={proposal.sharing_token ? `/share/proposta/${proposal.sharing_token}` : '#'}
+                                target="_blank"
+                              >
+                                Visualizar
+                              </MenuItem>
+                              <MenuItem
                                 icon={<Icon as={FaWhatsapp} color="#25D366" />}
                                 onClick={() => handleWhatsAppShare(proposal)}
                               >
                                 {proposal.status === 'draft' ? 'Enviar via WhatsApp' : 'Reenviar via WhatsApp'}
                               </MenuItem>
                               <MenuItem
+                                icon={<Icon as={copiedProposalId === proposal.id ? FiCheck : FiCopy} color={copiedProposalId === proposal.id ? "emerald.500" : undefined} />}
+                                onClick={() => handleCopyLink(proposal)}
+                              >
+                                {copiedProposalId === proposal.id ? 'Link Copiado!' : 'Copiar Link'}
+                              </MenuItem>
+                              <MenuItem
                                 icon={<Icon as={FiDownload} />}
                                 onClick={() => handleDownloadPDF(proposal.id)}
                               >
                                 Baixar PDF
-                              </MenuItem>
-                              <MenuItem icon={<Icon as={FiCopy} />}>
-                                Duplicar
                               </MenuItem>
                               <MenuItem
                                 as={Link}

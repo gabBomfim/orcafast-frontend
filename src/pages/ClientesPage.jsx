@@ -57,6 +57,7 @@ import DataCard from '../components/ui/DataCard'
 import Pagination from '../components/ui/Pagination'
 
 import { clientService } from '../services'
+import { openWhatsApp } from '../utils/whatsapp'
 
 const ClientesPage = () => {
   const [searchTerm, setSearchTerm] = useState('')
@@ -199,15 +200,10 @@ const ClientesPage = () => {
       return
     }
 
-    // Remove todos os caracteres não numéricos do telefone
-    const phoneNumber = client.phone.replace(/\D/g, '')
-
-    // Se o número não começar com 55 (código do Brasil), adiciona
-    const formattedNumber = phoneNumber.startsWith('55') ? phoneNumber : `55${phoneNumber}`
-
-    // Abre o WhatsApp Web com o número formatado
-    const whatsappUrl = `https://web.whatsapp.com/send?phone=${formattedNumber}`
-    window.open(whatsappUrl, '_blank')
+    // Abre o WhatsApp de forma inteligente (Web no desktop, App no mobile)
+    openWhatsApp({
+      phone: client.phone
+    })
 
     toast({
       title: 'Abrindo WhatsApp',

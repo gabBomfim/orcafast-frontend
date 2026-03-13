@@ -44,6 +44,7 @@ import { WiStars } from 'react-icons/wi'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { proposalService, clientService } from '../services'
 import { storage } from '../utils/storage'
+import { maskPhone, unmaskPhone } from '../utils/mask'
 
 const CreateProposalPage = () => {
   const navigate = useNavigate()
@@ -208,7 +209,10 @@ const CreateProposalPage = () => {
     }
     setIsSavingClient(true)
     try {
-      const { data } = await clientService.create(newClient)
+      const { data } = await clientService.create({
+        ...newClient,
+        phone: unmaskPhone(newClient.phone)
+      })
       // Add to local list immediately
       setClients((prev) => [...prev, data])
       // Auto-select the new client
@@ -247,6 +251,14 @@ const CreateProposalPage = () => {
   }
 
   const handleItemChange = (id, field, value) => {
+    // Limites de entrada
+    if (field === 'qtd') {
+      if (value.length > 6) return
+    }
+    if (field === 'value') {
+      if (value.length > 10) return
+    }
+
     const newItems = items.map((item) => {
       if (item.id === id) {
         return { ...item, [field]: value }
@@ -306,7 +318,7 @@ const CreateProposalPage = () => {
 
   const subtotal = items.reduce((acc, item) => {
     const value = parseFloat(String(item.value).replace(',', '.')) || 0
-    const qtd = parseInt(item.qtd, 10) || 0
+    const qtd = parseFloat(item.qtd) || 0
     return acc + value * qtd
   }, 0)
 
@@ -568,6 +580,7 @@ const CreateProposalPage = () => {
                               <Input
                                 type="number"
                                 value={item.qtd}
+                                min="0"
                                 onChange={(e) =>
                                   handleItemChange(item.id, 'qtd', e.target.value)
                                 }
@@ -646,7 +659,12 @@ const CreateProposalPage = () => {
                         value={formData.discount}
                         onFocus={(e) => { if (e.target.value === '0' || e.target.value === 0) setFormData({ ...formData, discount: '' }) }}
                         onBlur={(e) => { if (e.target.value === '') setFormData({ ...formData, discount: '' }) }}
-                        onChange={(e) => setFormData({ ...formData, discount: e.target.value })}
+                        onChange={(e) => {
+                          const val = e.target.value
+                          if (val.length > 3) return
+                          if (parseFloat(val) > 100) return
+                          setFormData({ ...formData, discount: val })
+                        }}
                       />
                     </FormControl>
 
@@ -804,7 +822,7 @@ const CreateProposalPage = () => {
                   <Input
                     placeholder="(11) 99999-9999"
                     value={newClient.phone}
-                    onChange={(e) => setNewClient({ ...newClient, phone: e.target.value })}
+                    onChange={(e) => setNewClient({ ...newClient, phone: maskPhone(e.target.value) })}
                   />
                 </FormControl>
               </SimpleGrid>

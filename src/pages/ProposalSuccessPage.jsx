@@ -26,6 +26,7 @@ import {
 import { FaWhatsapp } from 'react-icons/fa'
 import Container from '../components/layout/Container'
 import { proposalService } from '../services'
+import { openWhatsApp } from '../utils/whatsapp'
 
 const ProposalSuccessPage = () => {
   const navigate = useNavigate()
@@ -62,26 +63,26 @@ const ProposalSuccessPage = () => {
       // Atualiza o status do orçamento para "enviado" (status 2)
       await proposalService.updateStatus(proposalId, 2)
 
-      // Constrói a URL pública do orçamento (será ajustada quando o backend fornecer o UUID)
-      const proposalUrl = `${window.location.origin}/proposta/${proposalId}`
+      // Constrói a URL pública do orçamento usando o token
+      const proposalUrl = initialData.sharingToken 
+        ? `${window.location.origin}/share/proposta/${initialData.sharingToken}`
+        : `${window.location.origin}/proposta/${proposalId}`
 
-      // Mensagem personalizada
+      // Mensagem personalizada mais amigável
       const message = `Olá ${proposalData.clientName}!
 
-Seu orçamento "${proposalData.title}" está pronto!
+Seu orçamento de *${proposalData.title}* está pronto! 😊
 
-Valor: R$ ${proposalData.totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-
-Visualize os detalhes completos aqui:
-${proposalUrl}
+Visualize os detalhes completos clicando no link abaixo:
+🔗 ${proposalUrl}
 
 Qualquer dúvida, estou à disposição!`
 
-      // URL do WhatsApp Web (sem número específico - permite escolher o contato)
-      const whatsappUrl = `https://web.whatsapp.com/send?text=${encodeURIComponent(message)}`
-
-      // Abre em nova guia
-      window.open(whatsappUrl, '_blank')
+      // Abre o WhatsApp de forma inteligente (Web no desktop, App no mobile)
+      openWhatsApp({
+        phone: proposalData.clientPhone,
+        message: message
+      })
 
       toast({
         title: 'Orçamento marcado como enviado',
