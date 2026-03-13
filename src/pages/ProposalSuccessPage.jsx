@@ -22,6 +22,8 @@ import {
   FiUser,
   FiDollarSign,
   FiFileText,
+  FiCopy,
+  FiCheck,
 } from 'react-icons/fi'
 import { FaWhatsapp } from 'react-icons/fa'
 import Container from '../components/layout/Container'
@@ -34,6 +36,8 @@ const ProposalSuccessPage = () => {
   const toast = useToast()
   const [isDownloading, setIsDownloading] = useState(false)
   const [isSendingWhatsApp, setIsSendingWhatsApp] = useState(false)
+  const [isCopyingLink, setIsCopyingLink] = useState(false)
+  const [linkCopied, setLinkCopied] = useState(false)
 
   const bgColor = useColorModeValue('white', 'gray.800')
   const textColor = useColorModeValue('gray.900', 'white')
@@ -64,8 +68,9 @@ const ProposalSuccessPage = () => {
       await proposalService.updateStatus(proposalId, 2)
 
       // Constrói a URL pública do orçamento usando o token
-      const proposalUrl = initialData.sharingToken 
-        ? `${window.location.origin}/share/proposta/${initialData.sharingToken}`
+      const token = initialData.sharingToken || initialData.sharing_token
+      const proposalUrl = token
+        ? `${window.location.origin}/share/proposta/${token}`
         : `${window.location.origin}/proposta/${proposalId}`
 
       // Mensagem personalizada mais amigável
@@ -127,6 +132,9 @@ Qualquer dúvida, estou à disposição!`
         duration: 3000,
         isClosable: true,
       })
+
+      // Marca como enviado
+      await proposalService.updateStatus(proposalId, 2)
     } catch (error) {
       toast({
         title: 'Erro ao baixar PDF',
@@ -137,6 +145,42 @@ Qualquer dúvida, estou à disposição!`
       })
     } finally {
       setIsDownloading(false)
+    }
+  }
+
+  const handleCopyLink = async () => {
+    setIsCopyingLink(true)
+    try {
+      const token = initialData.sharingToken || initialData.sharing_token
+      const proposalUrl = token
+        ? `${window.location.origin}/share/proposta/${token}`
+        : `${window.location.origin}/proposta/${proposalId}`
+
+      await navigator.clipboard.writeText(proposalUrl)
+      setLinkCopied(true)
+
+      // Marca como enviado
+      await proposalService.updateStatus(proposalId, 2)
+
+      toast({
+        title: 'Link copiado!',
+        status: 'success',
+        duration: 2000,
+        isClosable: true,
+        position: 'top',
+        variant: 'subtle',
+      })
+
+      setTimeout(() => setLinkCopied(false), 3000)
+    } catch (error) {
+      toast({
+        title: 'Erro ao copiar',
+        status: 'error',
+        duration: 4000,
+        isClosable: true,
+      })
+    } finally {
+      setIsCopyingLink(false)
     }
   }
 
@@ -235,34 +279,69 @@ Qualquer dúvida, estou à disposição!`
               </VStack>
 
               {/* Botões de Ação */}
-              <VStack spacing={4} pt={4}>
-                <Button
-                  leftIcon={<Icon as={FaWhatsapp} />}
-                  size="lg"
-                  w="full"
-                  onClick={handleWhatsAppShare}
-                  bg="#25D366"
-                  color="white"
-                  _hover={{ bg: '#128C7E' }}
-                  _active={{ bg: '#075E54' }}
-                  isLoading={isSendingWhatsApp}
-                  loadingText="Enviando..."
-                >
-                  Enviar via WhatsApp
-                </Button>
+              <VStack spacing={6} pt={4}>
+                <VStack spacing={2} w="full">
+                  <Button
+                    leftIcon={<Icon as={FaWhatsapp} />}
+                    size="lg"
+                    w="full"
+                    onClick={handleWhatsAppShare}
+                    bg="#25D366"
+                    color="white"
+                    _hover={{ bg: '#128C7E' }}
+                    _active={{ bg: '#075E54' }}
+                    isLoading={isSendingWhatsApp}
+                    loadingText="Enviando..."
+                    h={14}
+                  >
+                    Enviar via WhatsApp
+                  </Button>
+                  <Text fontSize="xs" color="emerald.600" fontWeight="medium" textAlign="center">
+                    Acompanhe quando o cliente visualizar e aprovar a proposta.
+                  </Text>
+                </VStack>
 
-                <Button
-                  leftIcon={<Icon as={FiDownload} />}
-                  variant="outline"
-                  colorScheme="emerald"
-                  size="lg"
-                  w="full"
-                  onClick={handleDownloadPDF}
-                  isLoading={isDownloading}
-                  loadingText="Baixando..."
-                >
-                  Baixar PDF
-                </Button>
+                <VStack spacing={2} w="full">
+                  <Button
+                    leftIcon={<Icon as={linkCopied ? FiCheck : FiCopy} />}
+                    variant="outline"
+                    colorScheme="emerald"
+                    size="lg"
+                    w="full"
+                    onClick={handleCopyLink}
+                    isLoading={isCopyingLink}
+                    loadingText="Copiando..."
+                    isDisabled={linkCopied}
+                    h={14}
+                  >
+                    {linkCopied ? 'Link Copiado!' : 'Copiar link para o cliente'}
+                  </Button>
+                  {!linkCopied && (
+                    <Text fontSize="xs" color="emerald.600" fontWeight="medium" textAlign="center">
+                      Ideal para enviar em outras redes sociais com rastreamento.
+                    </Text>
+                  )}
+                </VStack>
+
+                <VStack spacing={2} w="full">
+                  <Button
+                    leftIcon={<Icon as={FiDownload} />}
+                    variant="outline"
+                    colorScheme="gray"
+                    size="lg"
+                    w="full"
+                    onClick={handleDownloadPDF}
+                    isLoading={isDownloading}
+                    loadingText="Baixando..."
+                    h={14}
+                    color="gray.600"
+                  >
+                    Baixar PDF
+                  </Button>
+                  <Text fontSize="xs" color="gray.500" textAlign="center">
+                    Atenção: O rastreamento de visualização não funciona em arquivos PDF.
+                  </Text>
+                </VStack>
 
                 <Button
                   leftIcon={<Icon as={FiList} />}

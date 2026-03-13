@@ -396,6 +396,7 @@ const CreateProposalPage = () => {
       navigate('/dashboard/propostas/sucesso', {
         state: {
           proposalId: response.data.id || editId,
+          sharingToken: response.data.sharing_token || response.data.sharingToken,
           proposalData: {
             clientName: selectedClient?.name || 'Cliente',
             clientPhone: selectedClient?.phone || '',

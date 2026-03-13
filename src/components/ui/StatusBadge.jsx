@@ -1,10 +1,10 @@
 import { Badge, Icon, HStack } from '@chakra-ui/react'
-import { 
-  FiCheckCircle, 
-  FiEye, 
-  FiSend, 
-  FiXCircle, 
-  FiClock 
+import {
+  FiCheckCircle,
+  FiEye,
+  FiSend,
+  FiXCircle,
+  FiClock
 } from 'react-icons/fi'
 
 const StatusBadge = ({ status, customLabel }) => {
@@ -38,7 +38,7 @@ const StatusBadge = ({ status, customLabel }) => {
         return {
           colorScheme: 'gray',
           icon: FiClock,
-          text: 'Rascunho'
+          text: 'Pendente de Envio'
         }
       default:
         return {

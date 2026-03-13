@@ -129,53 +129,66 @@ const SendProposalPage = () => {
         </Box>
 
         {/* Send options */}
-        <Button
-          type="button"
-          w="full"
-          h={14}
-          bg="#25D366"
-          _hover={{ bg: '#20BD5A' }}
-          borderRadius="xl"
-          color="white"
-          fontWeight="medium"
-          fontSize="sm"
-          leftIcon={<Icon as={FiMessageSquare} w={5} h={5} />}
-          onClick={() => handleSend('whatsapp')}
-        >
-          Enviar pelo WhatsApp
-        </Button>
+        <VStack spacing={4} w="full">
+          <VStack spacing={1} w="full">
+            <Button
+              type="button"
+              w="full"
+              h={14}
+              bg="#25D366"
+              _hover={{ bg: '#20BD5A' }}
+              borderRadius="xl"
+              color="white"
+              fontWeight="medium"
+              fontSize="sm"
+              leftIcon={<Icon as={FiMessageSquare} w={5} h={5} />}
+              onClick={() => handleSend('whatsapp')}
+            >
+              Enviar via WhatsApp
+            </Button>
+            <Text fontSize="xs" color="emerald.600" fontWeight="medium" textAlign="center">
+              Saiba exatamente quando o cliente abrir seu orçamento.
+            </Text>
+          </VStack>
 
-        <Button
-          type="button"
-          w="full"
-          h={14}
-          bg="gray.100"
-          _hover={{ bg: 'gray.200' }}
-          borderRadius="xl"
-          color="gray.900"
-          fontWeight="medium"
-          fontSize="sm"
-          leftIcon={<Icon as={FiMail} w={5} h={5} />}
-          onClick={() => handleSend('email')}
-        >
-          Enviar por E-mail
-        </Button>
+          <VStack spacing={1} w="full">
+            <Button
+              type="button"
+              w="full"
+              h={14}
+              bg="gray.100"
+              _hover={{ bg: 'gray.200' }}
+              borderRadius="xl"
+              color="gray.900"
+              fontWeight="medium"
+              fontSize="sm"
+              leftIcon={linkCopied ? <Icon as={FiCheck} w={5} h={5} color="emerald.500" /> : <Icon as={FiLink} w={5} h={5} />}
+              onClick={() => handleSend('link')}
+            >
+              {linkCopied ? 'Link copiado!' : 'Copiar link para o cliente'}
+            </Button>
+            {!linkCopied && (
+              <Text fontSize="xs" color="gray.500" textAlign="center">
+                Acompanhe a visualização e aprovação em tempo real.
+              </Text>
+            )}
+          </VStack>
 
-        <Button
-          type="button"
-          w="full"
-          h={14}
-          bg="gray.100"
-          _hover={{ bg: 'gray.200' }}
-          borderRadius="xl"
-          color="gray.900"
-          fontWeight="medium"
-          fontSize="sm"
-          leftIcon={linkCopied ? <Icon as={FiCheck} w={5} h={5} color="emerald.500" /> : <Icon as={FiLink} w={5} h={5} />}
-          onClick={() => handleSend('link')}
-        >
-          {linkCopied ? 'Link copiado!' : 'Copiar link do orçamento'}
-        </Button>
+          <Button
+            type="button"
+            w="full"
+            h={12}
+            variant="ghost"
+            borderRadius="xl"
+            color="gray.600"
+            fontWeight="medium"
+            fontSize="sm"
+            leftIcon={<Icon as={FiMail} w={5} h={5} />}
+            onClick={() => handleSend('email')}
+          >
+            Enviar por E-mail
+          </Button>
+        </VStack>
 
         {/* Navigation */}
         <Flex align="center" justify="space-between" w="full" mt={8} pt={6} borderTop="1px" borderColor="gray.200">

@@ -306,6 +306,9 @@ const PropostasPage = () => {
         })
       } else if (actionType === 'approve') {
         await proposalService.updateStatus(selectedProposal.id, 4)
+        setProposals(prev => prev.map(p => 
+          p.id === selectedProposal.id ? { ...p, status: 'approved' } : p
+        ))
         toast({
           title: 'Orçamento aprovado!',
           status: 'success',
@@ -314,6 +317,9 @@ const PropostasPage = () => {
         })
       } else if (actionType === 'reject') {
         await proposalService.updateStatus(selectedProposal.id, 5)
+        setProposals(prev => prev.map(p => 
+          p.id === selectedProposal.id ? { ...p, status: 'rejected' } : p
+        ))
         toast({
           title: 'Orçamento reprovado',
           status: 'success',
@@ -321,6 +327,7 @@ const PropostasPage = () => {
           isClosable: true,
         })
       }
+
       await reloadData()
     } catch (err) {
       toast({
@@ -349,6 +356,10 @@ const PropostasPage = () => {
       // Only update status if NOT approved
       if (proposal.status !== 'approved') {
         await proposalService.updateStatus(proposal.id, 2)
+        // Update local state
+        setProposals(prev => prev.map(p => 
+          p.id === proposal.id ? { ...p, status: 'sent' } : p
+        ))
       }
 
       const proposalUrl = proposal.sharing_token
@@ -421,12 +432,26 @@ Qualquer dúvida, estou à disposição!`
         isClosable: true,
       })
     } finally {
+      // Se era rascunho, marca como enviado e recarrega
+      const proposal = proposals.find(p => p.id === proposalId)
+      if (proposal?.status === 'draft') {
+        try {
+          await proposalService.updateStatus(proposalId, 2)
+          // Update local state
+          setProposals(prev => prev.map(p => 
+            p.id === proposalId ? { ...p, status: 'sent' } : p
+          ))
+          await reloadData()
+        } catch (e) {
+          console.error("Erro ao atualizar status após download", e)
+        }
+      }
       setLoadingAction({ ...loadingAction, [proposalId]: null })
     }
   }
 
-  const handleCopyLink = (proposal) => {
-    const proposalUrl = proposal.sharing_token 
+  const handleCopyLink = async (proposal) => {
+    const proposalUrl = proposal.sharing_token
       ? `${window.location.origin}/share/proposta/${proposal.sharing_token}`
       : `${window.location.origin}/proposta/${proposal.id}`
 
@@ -445,6 +470,20 @@ Qualquer dúvida, estou à disposição!`
       position: 'top',
       variant: 'subtle',
     })
+
+    // Se é rascunho, marca como enviado
+    if (proposal.status === 'draft') {
+      try {
+        await proposalService.updateStatus(proposal.id, 2)
+        // Update local state
+        setProposals(prev => prev.map(p => 
+          p.id === proposal.id ? { ...p, status: 'sent' } : p
+        ))
+        await reloadData()
+      } catch (error) {
+        console.error("Erro ao atualizar status após copiar link", error)
+      }
+    }
   }
 
   const getDialogContent = () => {
@@ -518,7 +557,7 @@ Qualquer dúvida, estou à disposição!`
               onClick={() => setStatusFilter('sent')}
             />
             <StatsCard
-              title="Rascunhos"
+              title="Pendentes de Envio"
               value={getStatusCount('draft')}
               colorScheme="gray"
               isActive={statusFilter === 'draft'}
@@ -694,40 +733,7 @@ Qualquer dúvida, estou à disposição!`
 
                         <HStack spacing={2}>
                           {/* Action Buttons */}
-                          {proposal.status === 'draft' ? (
-                            <Button
-                              as={Link}
-                              to={`/dashboard/propostas/nova?edit=${proposal.id}`}
-                              variant="outline"
-                              colorScheme="emerald"
-                              size="sm"
-                              leftIcon={<Icon as={FiEdit} />}
-                            >
-                              Continuar
-                            </Button>
-                          ) : proposal.status === 'approved' ? (
-                            <Button
-                              size="sm"
-                              colorScheme="red"
-                              variant="outline"
-                              onClick={() => confirmAction('reject', proposal)}
-                              leftIcon={<Icon as={FiXCircle} />}
-                              _hover={{ bg: 'red.50', borderColor: 'red.500', color: 'red.600' }}
-                            >
-                              Reprovar orçamento
-                            </Button>
-                          ) : proposal.status === 'rejected' ? (
-                            <Button
-                              size="sm"
-                              colorScheme="green"
-                              variant="outline"
-                              onClick={() => confirmAction('approve', proposal)}
-                              leftIcon={<Icon as={FiCheckCircle} />}
-                            >
-                              Aprovar orçamento
-                            </Button>
-                          ) : (
-                            // Status is sent or viewed
+                          {(proposal.status === 'draft' || proposal.status === 'sent' || proposal.status === 'viewed') ? (
                             <HStack spacing={1}>
                               <Button
                                 size="sm"
@@ -749,6 +755,27 @@ Qualquer dúvida, estou à disposição!`
                                 Reprovar orçamento
                               </Button>
                             </HStack>
+                          ) : proposal.status === 'approved' ? (
+                            <Button
+                              size="sm"
+                              colorScheme="red"
+                              variant="outline"
+                              onClick={() => confirmAction('reject', proposal)}
+                              leftIcon={<Icon as={FiXCircle} />}
+                              _hover={{ bg: 'red.50', borderColor: 'red.500', color: 'red.600' }}
+                            >
+                              Reprovar orçamento
+                            </Button>
+                          ) : proposal.status === 'rejected' && (
+                            <Button
+                              size="sm"
+                              colorScheme="green"
+                              variant="outline"
+                              onClick={() => confirmAction('approve', proposal)}
+                              leftIcon={<Icon as={FiCheckCircle} />}
+                            >
+                              Aprovar orçamento
+                            </Button>
                           )}
 
                           <Menu>
@@ -779,7 +806,7 @@ Qualquer dúvida, estou à disposição!`
                                 icon={<Icon as={copiedProposalId === proposal.id ? FiCheck : FiCopy} color={copiedProposalId === proposal.id ? "emerald.500" : undefined} />}
                                 onClick={() => handleCopyLink(proposal)}
                               >
-                                {copiedProposalId === proposal.id ? 'Link Copiado!' : 'Copiar Link'}
+                                {copiedProposalId === proposal.id ? 'Link Copiado!' : 'Copiar link para o cliente'}
                               </MenuItem>
                               <MenuItem
                                 icon={<Icon as={FiDownload} />}
