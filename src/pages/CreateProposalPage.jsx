@@ -542,6 +542,7 @@ const CreateProposalPage = () => {
                       <Input
                         name="validUntil"
                         type="date"
+                        min={new Date().toISOString().split('T')[0]}
                         value={formData.validUntil}
                         onChange={(e) => setFormData({ ...formData, validUntil: e.target.value })}
                       />

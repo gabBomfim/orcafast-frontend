@@ -245,6 +245,7 @@ const CreateProposalPage = () => {
                 id="validUntil"
                 name="validUntil"
                 type="date"
+                min={new Date().toISOString().split('T')[0]}
                 value={validUntil}
                 onChange={(e) => setValidUntil(e.target.value)}
               />
