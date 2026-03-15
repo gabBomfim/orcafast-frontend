@@ -181,7 +181,7 @@ const HomePage = () => {
                       <FiDollarSign style={{ width: '1.25rem', height: '1.25rem' }} />
                     </div>
                     <div>
-                      <p className="proposal-title">Proposta #1234</p>
+                      <p className="proposal-title">Orçamento #1234</p>
                       <p className="proposal-status">Cliente visualizou</p>
                     </div>
                   </div>
@@ -193,7 +193,7 @@ const HomePage = () => {
                       <span style={{ fontSize: '0.75rem' }}>✓</span>
                     </div>
                     <div>
-                      <p className="proposal-title">Proposta #1233</p>
+                      <p className="proposal-title">Orçamento #1233</p>
                       <p className="proposal-status">Aprovada</p>
                     </div>
                   </div>
@@ -262,7 +262,7 @@ const HomePage = () => {
               </div>
               <h3 className="step-title">Criar</h3>
               <p className="step-description">
-                Monte sua proposta em minutos com templates prontos e personalizáveis
+                Monte seu orçamento em minutos com templates prontos e personalizáveis
               </p>
             </CardContent>
           </Card>
@@ -292,7 +292,7 @@ const HomePage = () => {
               </div>
               <h3 className="step-title">Acompanhar</h3>
               <p className="step-description">
-                Saiba em tempo real quando sua proposta foi visualizada
+                Saiba em tempo real quando seu orçamento foi visualizado
               </p>
             </CardContent>
           </Card>
@@ -330,7 +330,7 @@ const HomePage = () => {
               </div>
               <h3 className="feature-title">Gestão centralizada</h3>
               <p className="feature-description">
-                Organize sua base de clientes e histórico de propostas de forma inteligente. Nunca mais perca um orçamento em planilhas ou PDFs antigos.
+                Organize sua base de clientes e histórico de orçamentos de forma inteligente. Nunca mais perca um orçamento em planilhas ou PDFs antigos.
               </p>
             </CardContent>
           </Card>
@@ -429,7 +429,7 @@ const HomePage = () => {
         <div className="cta-container">
           <h2 className="cta-title">Pronto para elevar o nível do seu negócio?</h2>
           <p className="cta-subtitle">
-            Junte-se aos profissionais que usam o OrçaFast para modernizar a apresentação de seus serviços.
+            Junte-se aos profissionais que usam a OrçaFast para modernizar a apresentação de seus serviços.
           </p>
           <Link
             to="/onboarding/create-client"
@@ -460,9 +460,9 @@ const HomePage = () => {
           </div>
 
           <div className="footer-links">
-            <a href="#" className="footer-link">Termos de uso</a>
-            <a href="#" className="footer-link">Privacidade</a>
-            <a href="#" className="footer-link">Suporte</a>
+            <Link to="/termos" className="footer-link">Termos de uso</Link>
+            <Link to="/privacidade" className="footer-link">Privacidade</Link>
+            <Link to="/suporte" className="footer-link">Suporte</Link>
           </div>
         </div>
 

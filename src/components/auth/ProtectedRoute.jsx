@@ -12,6 +12,7 @@ import { useToast, Spinner, Center, useDisclosure } from '@chakra-ui/react'
 import { subscriptionService } from '../../services'
 import { useState, useEffect } from 'react'
 import WelcomePlanModal from '../ui/WelcomePlanModal'
+import { useIdleTimeout } from '../../hooks/useIdleTimeout'
 
 const ProtectedRoute = () => {
   const token = storage.getToken()
@@ -26,6 +27,9 @@ const ProtectedRoute = () => {
   const [searchParams, setSearchParams] = useSearchParams()
   const { isOpen: isWelcomeOpen, onOpen: onWelcomeOpen, onClose: onWelcomeClose } = useDisclosure()
   const [welcomePlanSlug, setWelcomePlanSlug] = useState('pro')
+
+  // Inicia o monitoramento de inatividade (Idle Timeout - 30 min)
+  useIdleTimeout()
 
   useEffect(() => {
     const checkSubscription = async () => {

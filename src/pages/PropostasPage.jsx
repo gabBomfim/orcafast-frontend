@@ -197,6 +197,17 @@ const PropostasPage = () => {
           lastPage: data.last_page,
           total: data.total,
         })
+        
+        if (data.counts) {
+          setStatusCounts({
+            all: data.counts.all || 0,
+            approved: data.counts.approved || 0,
+            viewed: data.counts.viewed || 0,
+            sent: data.counts.sent || 0,
+            draft: data.counts.draft || 0,
+          })
+        }
+        
         setError(null)
       } catch (err) {
         if (!isCancelled) setError('Não foi possível carregar os orçamentos.')
@@ -210,45 +221,7 @@ const PropostasPage = () => {
     return () => { isCancelled = true }
   }, [debouncedSearchTerm, statusFilter, dateRange.start, dateRange.end, dateError, pagination.currentPage, refreshTrigger])
 
-  // 2. Fetch Status Counts separately (Runs less frequently)
-  useEffect(() => {
-    let isCancelled = false
 
-    const loadCounts = async () => {
-      try {
-        const baseParams = {
-          page: 1,
-          search: debouncedSearchTerm || undefined,
-          beginDate: dateRange.start || undefined,
-          endDate: dateRange.end || undefined
-        }
-
-        const [approvedRes, viewedRes, sentRes, draftRes, rejectedRes] = await Promise.all([
-          proposalService.list({ ...baseParams, status: 4 }),
-          proposalService.list({ ...baseParams, status: 3 }),
-          proposalService.list({ ...baseParams, status: 2 }),
-          proposalService.list({ ...baseParams, status: 1 }),
-          proposalService.list({ ...baseParams, status: 5 }), // Include rejected stats
-        ])
-
-        if (isCancelled) return
-
-        setStatusCounts({
-          all: approvedRes.data.total + viewedRes.data.total + sentRes.data.total + draftRes.data.total + rejectedRes.data.total,
-          approved: approvedRes.data.total,
-          viewed: viewedRes.data.total,
-          sent: sentRes.data.total,
-          draft: draftRes.data.total,
-        })
-      } catch (err) {
-        // Silently fail counts so it doesn't break UI
-      }
-    }
-
-    if (!dateError) loadCounts()
-
-    return () => { isCancelled = true }
-  }, [debouncedSearchTerm, dateRange.start, dateRange.end, dateError, refreshTrigger])
 
   const handleDatePresetChange = (preset) => {
     setDatePreset(preset)

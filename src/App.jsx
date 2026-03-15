@@ -28,6 +28,11 @@ import SettingsGoals from './pages/settings/SettingsGoals'
 import SettingsSubscription from './pages/settings/SettingsSubscription'
 import UsersPage from './pages/UsersPage'
 
+// Institucional
+import TermosDeUsoPage from './pages/institucional/TermosDeUsoPage'
+import PoliticaPrivacidadePage from './pages/institucional/PoliticaPrivacidadePage'
+import SuportePage from './pages/institucional/SuportePage'
+
 // Contexts
 import { OnboardingProvider } from './contexts/OnboardingContext'
 import { SidebarProvider } from './contexts/SidebarContext'
@@ -51,6 +56,11 @@ function App() {
               <Route path="/onboarding/create-proposal" element={<OnboardingCreateProposalPage />} />
               <Route path="/onboarding/send-proposal" element={<SendProposalPage />} />
               <Route path="/share/proposta/:token" element={<PublicProposalView />} />
+
+              {/* Institucional Routes */}
+              <Route path="/termos" element={<TermosDeUsoPage />} />
+              <Route path="/privacidade" element={<PoliticaPrivacidadePage />} />
+              <Route path="/suporte" element={<SuportePage />} />
 
               {/* Protected Routes */}
               <Route element={<ProtectedRoute />}>
