@@ -30,6 +30,7 @@ import {
   FiChevronRight,
   FiChevronLeft,
   FiLock,
+  FiBriefcase,
 } from 'react-icons/fi'
 import { useAuth } from '../../hooks/useAuth'
 import { useSidebar } from '../../contexts/SidebarContext'
@@ -37,11 +38,17 @@ import { useSubscription } from '../../hooks/useSubscription'
 
 const SidebarContent = ({ isCollapsed = false, onItemClick = () => { } }) => {
   const { logout, getCurrentUser } = useAuth()
-  const { toggleCollapse } = useSidebar()
+  const { toggleCollapse, isMobile, closeSidebar } = useSidebar()
   const { isFree, isPro, isBusiness, canSetFinancialGoals, canCustomizeBranding, subscribed, onTrial } = useSubscription()
   const location = useLocation()
   const user = getCurrentUser()
   const { isOpen: isSettingsOpen, onToggle: onSettingsToggle } = useDisclosure()
+  const roleLabel = {
+    1: 'Administrador',
+    2: 'Cliente',
+    3: 'Proprietário',
+    4: 'Membro',
+  }[user?.role] || 'Usuário'
 
   const hasAccess = subscribed || onTrial
 
@@ -60,18 +67,33 @@ const SidebarContent = ({ isCollapsed = false, onItemClick = () => { } }) => {
       isLocked: !hasAccess || !canCustomizeBranding,
     },
     {
+      icon: FiBriefcase,
+      label: 'Perfil da Empresa',
+      path: '/dashboard/configuracoes/empresa',
+      isLocked: !hasAccess || !canCustomizeBranding,
+      isHidden: user?.role !== 3 && user?.role !== 1,
+    },
+    {
       icon: FiTarget,
       label: 'Metas',
       path: '/dashboard/configuracoes/metas',
       isLocked: !hasAccess || !canSetFinancialGoals,
+      isHidden: user?.role !== 3 && user?.role !== 1,
     },
     {
       icon: FiUsers,
       label: 'Usuários',
       path: '/dashboard/usuarios',
       isLocked: !subscribed || !isBusiness,
+      isHidden: user?.role !== 3 && user?.role !== 1,
     },
-    { icon: FiStar, label: 'Assinatura', path: '/dashboard/configuracoes/assinatura', isLocked: false },
+    { 
+      icon: FiStar, 
+      label: 'Assinatura', 
+      path: '/dashboard/configuracoes/assinatura', 
+      isLocked: false,
+      isHidden: user?.role !== 3 && user?.role !== 1,
+    },
   ]
 
   const handleLogout = () => {
@@ -167,15 +189,16 @@ const SidebarContent = ({ isCollapsed = false, onItemClick = () => { } }) => {
                   {user?.name || 'Usuário'}
                 </Text>
                 <Text fontSize="xs" color="gray.500" isTruncated>
-                  Admin
+                  {roleLabel}
                 </Text>
+
               </Box>
             </HStack>
           </Box>
         </Collapse>
 
-        {/* Upgrade card — Free sees "Upgrade Pro", Pro sees "Upgrade Business", Business sees nothing */}
-        <Collapse in={!isCollapsed}>
+        {/* Upgrade card — Free sees "Upgrade Pro", Pro sees "Upgrade Business", Business sees nothing — ONLY FOR ADMINS */}
+        <Collapse in={!isCollapsed && (user?.role === 3 || user?.role === 1)}>
           {isFree && (
             <Box
               mt={1}
@@ -302,7 +325,7 @@ const SidebarContent = ({ isCollapsed = false, onItemClick = () => { } }) => {
 
             <Collapse in={isSettingsOpen} animateOpacity>
               <VStack spacing={1} align="stretch" mt={1} ml={4} pl={4} borderLeft="2px" borderColor="gray.200">
-                {settingsSubItems.map((item) => {
+                {settingsSubItems.filter(item => !item.isHidden).map((item) => {
                   const isActive = location.pathname === item.path
                   return (
                     <Button
@@ -367,7 +390,13 @@ const SidebarContent = ({ isCollapsed = false, onItemClick = () => { } }) => {
             leftIcon={<Icon as={isCollapsed ? FiChevronRight : FiChevronLeft} boxSize={4} />}
             color="gray.600"
             _hover={{ bg: 'gray.50', transform: 'translateX(2px)' }}
-            onClick={toggleCollapse}
+            onClick={() => {
+              if (isMobile) {
+                closeSidebar()
+              } else {
+                toggleCollapse()
+              }
+            }}
             h="40px"
             w="full"
             borderRadius="lg"

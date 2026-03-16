@@ -35,6 +35,7 @@ import {
     FiRefreshCw, FiTarget, FiArrowRight,
 } from 'react-icons/fi'
 import { useSubscription } from '../../hooks/useSubscription'
+import { useAuth } from '../../hooks/useAuth'
 import { subscriptionService } from '../../services'
 import { storage } from '../../utils/storage'
 const FREE_TO_PRO_BENEFITS = [
@@ -216,6 +217,10 @@ const ActiveSubscriptionCard = ({ subscription, onPortal, onCancel, onResume, is
 // ─── Main component ───────────────────────────────────────────────────────────
 
 const SettingsSubscription = () => {
+    const { getCurrentUser } = useAuth()
+    const user = getCurrentUser()
+    const isAdmin = user?.role === 3 || user?.role === 1
+
     const { planSlug, planName, isPro, isPaid, subscribed, onTrial, trialEndsAt } = useSubscription()
     // Defaults to pro display if they are not Free and not Business, ensures styling doesn't break
     const display = PLAN_DISPLAY[planSlug] ?? PLAN_DISPLAY.pro
@@ -410,7 +415,34 @@ const SettingsSubscription = () => {
     const isPaidPlan = isActiveSubscription && isPaid
 
     return (
-        <Box maxW="2xl" mx="auto" p={6}>
+        <Box maxW="2xl" mx="auto" p={6} position="relative">
+            {!isAdmin && (
+                <Flex
+                    position="absolute"
+                    top={0} left={0} right={0} bottom={0}
+                    bg="whiteAlpha.700"
+                    zIndex={100}
+                    align="center"
+                    justify="center"
+                    backdropFilter="blur(8px)"
+                    borderRadius="2xl"
+                    minH="400px"
+                >
+                    <VStack spacing={4} bg="white" p={8} borderRadius="2xl" shadow="2xl" border="1px" borderColor="gray.100" maxW="sm" textAlign="center">
+                        <Box p={3} bg="emerald.50" borderRadius="xl">
+                            <Icon as={FiLock} color="emerald.500" boxSize={8} />
+                        </Box>
+                        <Box>
+                            <Text fontSize="lg" fontWeight="bold" color="gray.900" mb={1}>
+                                Acesso Restrito
+                            </Text>
+                            <Text fontSize="sm" color="gray.600">
+                                Apenas Administradores podem gerenciar a assinatura da empresa.
+                            </Text>
+                        </Box>
+                    </VStack>
+                </Flex>
+            )}
             {/* Header */}
             <Box mb={8}>
                 <Text fontSize="2xl" fontWeight="bold" color="gray.800">Assinatura</Text>

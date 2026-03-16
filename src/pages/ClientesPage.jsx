@@ -30,6 +30,8 @@ import {
   InputGroup,
   InputLeftElement,
   Stack,
+  Avatar,
+  Tooltip,
 } from '@chakra-ui/react'
 import ReactSelect from 'react-select'
 import { appSelectStyles } from '../theme/selectStyles'
@@ -46,9 +48,11 @@ import {
   FiFileText,
   FiZap,
   FiSearch,
+  FiChevronDown,
 } from 'react-icons/fi'
 import { FaWhatsapp } from 'react-icons/fa'
 import { useColorModeValue } from '@chakra-ui/react'
+import { useAuth } from '../hooks/useAuth'
 
 // Components
 import Container from '../components/layout/Container'
@@ -56,7 +60,7 @@ import StatsCard from '../components/ui/StatsCard'
 import DataCard from '../components/ui/DataCard'
 import Pagination from '../components/ui/Pagination'
 
-import { clientService } from '../services'
+import { clientService, teamUserService } from '../services'
 import { openWhatsApp } from '../utils/whatsapp'
 
 const ClientesPage = () => {
@@ -65,6 +69,12 @@ const ClientesPage = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
   const [selectedClient, setSelectedClient] = useState(null)
+
+  const { getCurrentUser } = useAuth()
+  const user = getCurrentUser()
+  const isAdmin = user?.role === 3 || user?.role === 1
+  const [teamMembers, setTeamMembers] = useState([])
+  const [selectedUserIds, setSelectedUserIds] = useState([])
 
   // Date Filters
   const [datePreset, setDatePreset] = useState('all')
@@ -80,15 +90,26 @@ const ClientesPage = () => {
   const cancelRef = useRef()
   const toast = useToast()
 
+  // Debounce search term
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm)
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm)
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [searchTerm])
+
   const fetchClients = async (page = 1) => {
     setIsLoading(true)
     setError(null)
     try {
       const params = {
         page,
-        search: searchTerm || undefined,
+        search: debouncedSearchTerm || undefined,
         beginDate: dateRange.start || undefined,
-        endDate: dateRange.end || undefined
+        endDate: dateRange.end || undefined,
+        'user_ids[]': selectedUserIds.length > 0 ? selectedUserIds : undefined
       }
 
       const { data } = await clientService.list(params)
@@ -112,16 +133,24 @@ const ClientesPage = () => {
     }
   }
 
-  // Debounce search and consolidate filters
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (!dateError) {
-        fetchClients(1)
-      }
-    }, 500)
+    if (!dateError) fetchClients(pagination.currentPage)
+  }, [debouncedSearchTerm, dateRange.start, dateRange.end, dateError, pagination.currentPage, selectedUserIds])
 
-    return () => clearTimeout(timer)
-  }, [searchTerm, dateRange.start, dateRange.end, dateError])
+  // Fetch team members if admin
+  useEffect(() => {
+    if (isAdmin) {
+      teamUserService.list().then(response => {
+        const membersList = response.data || []
+        setTeamMembers(membersList.map(m => ({
+          value: m.id,
+          label: m.name
+        })))
+      }).catch(err => {
+        console.error('Erro ao buscar membros da equipe:', err)
+      })
+    }
+  }, [isAdmin])
 
   const handleDatePresetChange = (preset) => {
     setDatePreset(preset)
@@ -296,6 +325,25 @@ const ClientesPage = () => {
               />
             </FormControl>
 
+            {isAdmin && teamMembers.length > 0 && (
+              <FormControl flex={1.5}>
+                <FormLabel>Filtrar por Equipe</FormLabel>
+                <ReactSelect
+                  isMulti
+                  placeholder="Membros da equipe"
+                  closeMenuOnSelect={false}
+                  styles={appSelectStyles}
+                  value={teamMembers.filter(m => selectedUserIds.includes(m.value))}
+                  options={teamMembers}
+                  onChange={(selected) => setSelectedUserIds(selected ? selected.map(s => s.value) : [])}
+                  noOptionsMessage={() => "Nenhum membro encontrado"}
+                  loadingMessage={() => "Carregando..."}
+                  menuPortalTarget={document.body}
+                  menuPosition="fixed"
+                />
+              </FormControl>
+            )}
+
             {(datePreset === 'custom') && (
               <>
                 <FormControl w={{ base: 'full', lg: 'auto' }} isInvalid={!!dateError}>
@@ -409,6 +457,17 @@ const ClientesPage = () => {
                               <Text>{client.company || 'Sem empresa'}</Text>
                             </HStack>
                           </VStack>
+
+                          {isAdmin && client.user && (
+                            <HStack spacing={2} mt={3}>
+                              <Tooltip label={`Criado por ${client.user.name}`}>
+                                <Avatar size="xs" name={client.user.name} />
+                              </Tooltip>
+                              <Text fontSize="xs" color="gray.600" fontWeight="medium">
+                                Criado por: {client.user.name.split(' ')[0]}
+                              </Text>
+                            </HStack>
+                          )}
                         </Box>
                       </HStack>
 
@@ -426,14 +485,14 @@ const ClientesPage = () => {
                           </Text>
                         </Box>
 
-                        <HStack spacing={2} w={{ base: 'full', md: 'auto' }}>
+                        <Stack spacing={2} direction={{ base: 'column', md: 'row' }} w={{ base: 'full', md: 'auto' }} align="center">
                           <Button
                             as={Link}
                             to={`/dashboard/propostas/nova?client=${client.id}`}
                             variant="outline"
                             size="sm"
                             leftIcon={<Icon as={FiFileText} />}
-                            flex={{ base: 1, md: 'auto' }}
+                            w={{ base: 'full', md: 'auto' }}
                           >
                             Novo Orçamento
                           </Button>
@@ -441,10 +500,15 @@ const ClientesPage = () => {
                           <Menu>
                             <MenuButton
                               as={Button}
-                              variant="ghost"
+                              variant="outline"
                               size="sm"
+                              rightIcon={<Icon as={FiChevronDown} />}
+                              bg="gray.50"
+                              borderColor="gray.200"
+                              _hover={{ bg: 'gray.100' }}
+                              w={{ base: 'full', md: 'auto' }}
                             >
-                              <Icon as={FiMoreVertical} />
+                              Opções
                             </MenuButton>
                             <MenuList>
                               <MenuItem
@@ -472,7 +536,7 @@ const ClientesPage = () => {
                               </MenuItem>
                             </MenuList>
                           </Menu>
-                        </HStack>
+                        </Stack>
                       </VStack>
                     </Flex>
                   </Box>

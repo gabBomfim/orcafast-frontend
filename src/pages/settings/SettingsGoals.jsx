@@ -21,6 +21,7 @@ import ReactSelect from 'react-select'
 import { appSelectStyles } from '../../theme/selectStyles'
 import { FiTarget, FiCalendar, FiSave, FiInfo, FiLock } from 'react-icons/fi'
 import { useSubscription } from '../../hooks/useSubscription'
+import { useAuth } from '../../hooks/useAuth'
 import { goalsService } from '../../services'
 
 const MONTHS = [
@@ -51,6 +52,10 @@ const formatCurrency = (value) => {
 
 const SettingsGoals = () => {
     const { canSetFinancialGoals } = useSubscription()
+    const { getCurrentUser } = useAuth()
+    const user = getCurrentUser()
+    const isAdmin = user?.role === 3 || user?.role === 1
+
     const toast = useToast()
 
     const [year, setYear] = useState(CURRENT_YEAR)
@@ -179,7 +184,34 @@ const SettingsGoals = () => {
     }
 
     return (
-        <Box maxW="2xl" mx="auto" p={6}>
+        <Box maxW="2xl" mx="auto" p={6} position="relative">
+            {!isAdmin && (
+                <Flex
+                    position="absolute"
+                    top={0} left={0} right={0} bottom={0}
+                    bg="whiteAlpha.700"
+                    zIndex={100}
+                    align="center"
+                    justify="center"
+                    backdropFilter="blur(8px)"
+                    borderRadius="2xl"
+                    minH="400px"
+                >
+                    <VStack spacing={4} bg="white" p={8} borderRadius="2xl" shadow="2xl" border="1px" borderColor="gray.100" maxW="sm" textAlign="center">
+                        <Box p={3} bg="emerald.50" borderRadius="xl">
+                            <Icon as={FiLock} color="emerald.500" boxSize={8} />
+                        </Box>
+                        <Box>
+                            <Text fontSize="lg" fontWeight="bold" color="gray.900" mb={1}>
+                                Acesso Restrito
+                            </Text>
+                            <Text fontSize="sm" color="gray.600">
+                                Apenas Administradores podem definir e gerenciar as metas financeiras.
+                            </Text>
+                        </Box>
+                    </VStack>
+                </Flex>
+            )}
             {/* Header */}
             <HStack justify="space-between" align="flex-start" mb={8} wrap="wrap" gap={4}>
                 <Box>

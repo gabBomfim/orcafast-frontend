@@ -21,6 +21,10 @@ export const useAuth = () => {
     return storage.getUser()
   }
 
+  const updateUser = (userData) => {
+    storage.setUser(userData)
+  }
+
   const isAuthenticated = () => {
     return !!storage.getToken()
   }
@@ -28,6 +32,7 @@ export const useAuth = () => {
   return {
     logout,
     getCurrentUser,
+    updateUser,
     isAuthenticated,
   }
 }

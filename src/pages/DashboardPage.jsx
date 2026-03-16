@@ -32,7 +32,7 @@ import {
 } from 'react-icons/fi'
 
 import Container from '../components/layout/Container'
-import { dashboardService } from '../services'
+import { dashboardService, teamUserService } from '../services'
 import { useAuth } from '../hooks/useAuth'
 import { useSubscription } from '../hooks/useSubscription'
 
@@ -61,6 +61,8 @@ const EMPTY_STATS = {
 const DashboardPage = () => {
   const { getCurrentUser } = useAuth()
   const user = getCurrentUser()
+  const isAdmin = user?.role === 3 || user?.role === 1
+  const isMember = user?.role === 4
   const { isFree, onTrial, trialEndsAt } = useSubscription()
   const toast = useToast()
 
@@ -80,13 +82,22 @@ const DashboardPage = () => {
 
   const [stats, setStats] = useState(EMPTY_STATS)
   const [isLoading, setIsLoading] = useState(true)
+  const [teamMembers, setTeamMembers] = useState([])
+  const [selectedUserIds, setSelectedUserIds] = useState([])
   const [periodLabel, setPeriodLabel] = useState('')
 
   // ─── Fetch ──────────────────────────────────────────────────────────────────
-  const fetchDashboard = useCallback(async (period, dates = {}) => {
+  const fetchDashboard = useCallback(async (period, dates = {}, userIds = []) => {
     setIsLoading(true)
     try {
       const params = { period, ...dates }
+
+      // Axios serializes arrays as user_ids[] automatically with index or brackets
+      // but let's be explicit with the keys if needed
+      if (userIds.length > 0) {
+        params['user_ids[]'] = userIds
+      }
+
       const { data } = await dashboardService.get(params)
       setStats(data)
 
@@ -109,16 +120,31 @@ const DashboardPage = () => {
     }
   }, [])
 
-  // Fetch whenever period changes (but wait for both dates to be filled on custom)
+  // Fetch whenever period or team filter changes
   useEffect(() => {
     if (selectedPeriod === 'custom') {
       if (customDates.begin_date && customDates.end_date) {
-        fetchDashboard('custom', customDates)
+        fetchDashboard('custom', customDates, selectedUserIds)
       }
     } else {
-      fetchDashboard(selectedPeriod)
+      fetchDashboard(selectedPeriod, {}, selectedUserIds)
     }
-  }, [selectedPeriod, customDates.begin_date, customDates.end_date, fetchDashboard])
+  }, [selectedPeriod, customDates.begin_date, customDates.end_date, selectedUserIds, fetchDashboard])
+
+  // Fetch team members if admin
+  useEffect(() => {
+    if (isAdmin) {
+      teamUserService.list().then(response => {
+        const membersList = response.data || []
+        setTeamMembers(membersList.map(m => ({
+          value: m.id,
+          label: m.name
+        })))
+      }).catch(err => {
+        console.error('Erro ao buscar membros da equipe:', err)
+      })
+    }
+  }, [isAdmin])
 
   // ─── Derived values ──────────────────────────────────────────────────────────
   const isYearlyView = selectedPeriod === 'this-year'
@@ -138,6 +164,7 @@ const DashboardPage = () => {
   ]
 
   const getMetaTitle = () => {
+    if (isMember) return 'Seu Desempenho'
     if (isYearlyView) return `Meta de ${new Date().getFullYear()}`
     const m = new Date().toLocaleDateString('pt-BR', { month: 'long' })
     if (selectedPeriod === 'last-month') {
@@ -172,25 +199,44 @@ const DashboardPage = () => {
             </Text>
           </Box>
 
-          {/* Period Filter */}
-          <Box w={{ base: 'full', sm: '200px' }}>
-            <ReactSelect
-              styles={{
-                ...appSelectStyles,
-                control: (p, s) => ({
-                  ...appSelectStyles.control(p, s),
-                  minHeight: '38px',
-                }),
-              }}
-              value={PERIOD_OPTIONS.find((p) => p.value === selectedPeriod)}
-              onChange={(opt) => setSelectedPeriod(opt?.value || 'this-month')}
-              options={PERIOD_OPTIONS}
-              isSearchable={false}
-              isDisabled={isLoading}
-              menuPortalTarget={document.body}
-              menuPosition="fixed"
-            />
-          </Box>
+          {/* Filters */}
+          <HStack spacing={3} w={{ base: 'full', sm: 'auto' }} flexWrap="wrap">
+            {isAdmin && teamMembers.length > 0 && (
+              <Box w={{ base: 'full', sm: '250px' }}>
+                <ReactSelect
+                  isMulti
+                  placeholder="Filtrar por equipe"
+                  closeMenuOnSelect={false}
+                  styles={appSelectStyles}
+                  options={teamMembers}
+                  onChange={(selected) => setSelectedUserIds(selected ? selected.map((s) => s.value) : [])}
+                  noOptionsMessage={() => 'Nenhum membro encontrado'}
+                  loadingMessage={() => 'Carregando...'}
+                  menuPortalTarget={document.body}
+                  menuPosition="fixed"
+                />
+              </Box>
+            )}
+
+            <Box w={{ base: 'full', sm: '200px' }}>
+              <ReactSelect
+                styles={{
+                  ...appSelectStyles,
+                  control: (p, s) => ({
+                    ...appSelectStyles.control(p, s),
+                    minHeight: '38px',
+                  }),
+                }}
+                value={PERIOD_OPTIONS.find((p) => p.value === selectedPeriod)}
+                onChange={(opt) => setSelectedPeriod(opt?.value || 'this-month')}
+                options={PERIOD_OPTIONS}
+                isSearchable={false}
+                isDisabled={isLoading}
+                menuPortalTarget={document.body}
+                menuPosition="fixed"
+              />
+            </Box>
+          </HStack>
         </Flex>
 
         {/* Custom date inputs */}
@@ -249,182 +295,233 @@ const DashboardPage = () => {
         {!isLoading && (
           <VStack spacing={4} align="stretch">
             {/* Card 1: Faturamento */}
-            <Card borderRadius="2xl" boxShadow="sm" border="1px" borderColor="gray.200">
-              <CardBody p={6}>
-                <Flex align="start" gap={4}>
-                  <Box w={12} h={12} bg="emerald.50" borderRadius="xl"
-                    display="flex" alignItems="center" justifyContent="center" flexShrink={0}>
-                    <Icon as={FiTrendingUp} w={6} h={6} color="emerald.500" />
-                  </Box>
-                  <Box flex={1}>
-                    <Text fontSize="sm" fontWeight="medium" color="gray.600" mb={1}>
-                      Faturamento Aprovado
-                    </Text>
-                    {totalSent > 0 ? (
-                      <>
-                        <Text fontSize="3xl" fontWeight="bold" color="emerald.500" mt={1}>
-                          R$ {fmt(revenue)}
-                        </Text>
-                        <Text fontSize="xs" color="gray.500" mt={2}>
-                          Baseado em propostas aprovadas neste período
-                        </Text>
-                      </>
-                    ) : (
-                      <Box mt={3}>
-                        <Text fontSize="3xl" fontWeight="bold" color="gray.300">R$ 0,00</Text>
-                        <Box mt={4} p={4} bg="emerald.50" rounded="xl" border="1px" borderColor="emerald.100">
-                          <Flex align="start" gap={3}>
-                            <Box w={10} h={10} bg="emerald.100" rounded="lg" display="flex" alignItems="center" justifyContent="center" flexShrink={0}>
-                              <Icon as={FiFileText} w={5} h={5} color="emerald.600" />
-                            </Box>
-                            <Box flex={1}>
-                              <Text fontSize="sm" fontWeight="medium" color="gray.900">Comece a faturar agora</Text>
-                              <Text fontSize="xs" color="gray.500" mt={1}>
-                                Crie seu primeiro orçamento e acompanhe seu faturamento em tempo real.
-                              </Text>
-                              <Button
-                                as={Link}
-                                to="/dashboard/propostas/nova"
-                                mt={3}
-                                size="sm"
-                                bg="emerald.600"
-                                color="white"
-                                _hover={{ bg: 'emerald.700' }}
-                                rounded="lg"
-                                shadow="sm"
-                                fontWeight="medium"
-                              >
-                                <Icon as={FiZap} w={4} h={4} mr={1.5} />
-                                Criar primeiro orçamento
-                                <Icon as={FiArrowRight} w={4} h={4} ml={1.5} />
-                              </Button>
-                            </Box>
-                          </Flex>
-                        </Box>
-                      </Box>
-                    )}
-                  </Box>
-                </Flex>
-              </CardBody>
-            </Card>
+            {!isMember && (
+              <Card borderRadius="2xl" boxShadow="sm" border="1px" borderColor="gray.200">
+                <CardBody p={6}>
+                  <Flex align="start" gap={4}>
+                    <Box w={12} h={12} bg="emerald.50" borderRadius="xl"
+                      display="flex" alignItems="center" justifyContent="center" flexShrink={0}>
+                      <Icon as={FiTrendingUp} w={6} h={6} color="emerald.500" />
+                    </Box>
 
-            {/* Card 2: Meta */}
+                    <Box flex={1}>
+                      <Text fontSize="sm" fontWeight="medium" color="gray.600" mb={1}>
+                        Faturamento Aprovado
+                      </Text>
+                      {totalSent > 0 ? (
+                        <>
+                          <Text fontSize="3xl" fontWeight="bold" color="emerald.500" mt={1}>
+                            R$ {fmt(revenue)}
+                          </Text>
+                          <Text fontSize="xs" color="gray.500" mt={2}>
+                            Baseado em orçamentos aprovados neste período
+                          </Text>
+                        </>
+                      ) : (
+                        <Box mt={3}>
+                          <Text fontSize="3xl" fontWeight="bold" color="gray.300">R$ 0,00</Text>
+                          <Box mt={4} p={4} bg="emerald.50" rounded="xl" border="1px" borderColor="emerald.100">
+                            <Flex align="start" gap={3}>
+                              <Box w={10} h={10} bg="emerald.100" rounded="lg" display="flex" alignItems="center" justifyContent="center" flexShrink={0}>
+                                <Icon as={FiFileText} w={5} h={5} color="emerald.600" />
+                              </Box>
+                              <Box flex={1}>
+                                <Text fontSize="sm" fontWeight="medium" color="gray.900">
+                                  {selectedUserIds.length > 0 ? 'Nenhum faturamento encontrado' : 'Comece a faturar agora'}
+                                </Text>
+                                <Text fontSize="xs" color="gray.500" mt={1}>
+                                  {selectedUserIds.length > 0
+                                    ? 'O(s) membro(s) selecionado(s) ainda não possui(em) orçamentos aprovados neste período.'
+                                    : 'Crie seu primeiro orçamento e acompanhe seu faturamento em tempo real.'}
+                                </Text>
+                                {selectedUserIds.length === 0 && (
+                                  <Button
+                                    as={Link}
+                                    to="/dashboard/propostas/nova"
+                                    mt={3}
+                                    size="sm"
+                                    bg="emerald.600"
+                                    color="white"
+                                    _hover={{ bg: 'emerald.700' }}
+                                    rounded="lg"
+                                    shadow="sm"
+                                    fontWeight="medium"
+                                  >
+                                    <Icon as={FiZap} w={4} h={4} mr={1.5} />
+                                    Criar primeiro orçamento
+                                    <Icon as={FiArrowRight} w={4} h={4} ml={1.5} />
+                                  </Button>
+                                )}
+                              </Box>
+                            </Flex>
+                          </Box>
+                        </Box>
+                      )}
+                    </Box>
+                  </Flex>
+                </CardBody>
+              </Card>
+            )}
+
+            {/* Card 2: Meta / Performance */}
             <Card borderRadius="2xl" boxShadow="sm" border="1px" borderColor="gray.200" overflow="hidden">
               <CardBody p={6}>
                 <Flex align="start" gap={4}>
                   <Box w={12} h={12} bg="emerald.50" borderRadius="xl"
                     display="flex" alignItems="center" justifyContent="center" flexShrink={0}>
-                    <Icon as={FiTarget} w={6} h={6} color="emerald.500" />
+                    <Icon as={isMember ? FiTrendingUp : FiTarget} w={6} h={6} color="emerald.500" />
                   </Box>
                   <Box flex={1}>
                     <Text fontSize="sm" fontWeight="medium" color="gray.600" mb={1}>
                       {getMetaTitle()}
                     </Text>
 
-                    {!target || target <= 0 ? (
-                      // EMPTY STATE
-                      <Box mt={4} textAlign="center" py={6}>
-                        {isFree ? (
-                          <>
-                            <Flex w={16} h={16} bg="orange.100" rounded="2xl" align="center" justify="center" mx="auto" mb={4}>
-                              <Icon as={FiLock} w={8} h={8} color="orange.600" />
-                            </Flex>
-                            <Text fontSize="md" fontWeight="semibold" color="gray.900">Metas Financeiras</Text>
-                            <Text fontSize="sm" color="gray.500" mt={2} maxW="xs" mx="auto">
-                              Defina objetivos mensais e anuais para acompanhar o crescimento do seu negócio.
-                            </Text>
-                            <Button
-                              as={Link}
-                              to="/dashboard/configuracoes/assinatura"
-                              variant="outline"
-                              size="sm"
-                              mt={4}
-                              fontWeight="medium"
-                              rounded="lg"
-                              borderColor="orange.300"
-                              color="orange.700"
-                              _hover={{ bg: 'orange.50' }}
-                            >
-                              <Icon as={FiStar} w={4} h={4} mr={1.5} />
-                              Fazer Upgrade para o Pro
-                            </Button>
-                          </>
-                        ) : (
-                          <>
-                            <Flex w={16} h={16} bg="emerald.50" rounded="2xl" align="center" justify="center" mx="auto" mb={4}>
-                              <Icon as={FiTarget} w={8} h={8} color="emerald.500" />
-                            </Flex>
-                            <Text fontSize="md" fontWeight="semibold" color="gray.900">Configure sua meta</Text>
-                            <Text fontSize="sm" color="gray.500" mt={2} maxW="xs" mx="auto">
-                              Defina quanto deseja faturar este mês para acompanhar seu progresso.
-                            </Text>
-                            <Button
-                              as={Link}
-                              to="/dashboard/configuracoes/metas"
-                              size="sm"
-                              mt={4}
-                              bg="emerald.500"
-                              color="white"
-                              _hover={{ bg: 'emerald.600' }}
-                              fontWeight="medium"
-                              rounded="lg"
-                            >
-                              Definir meta mensal
-                              <Icon as={FiArrowRight} w={4} h={4} ml={1.5} />
-                            </Button>
-                          </>
-                        )}
-                      </Box>
-                    ) : (
-                      // FILLED STATE
-                      <>
-                        <Text fontSize="sm" color="gray.900" mt={2}>
-                          Sua meta:{' '}
-                          <Text as="span" fontWeight="semibold">
-                            R$ {fmt(target)}
+                    {isMember ? (
+                      // MEMBER PERFORMANCE VIEW
+                      <VStack align="stretch" spacing={4} mt={3}>
+                        <Box>
+                          <Text fontSize="xs" color="gray.500" mb={1}>Faturamento no período</Text>
+                          <Text fontSize="2xl" fontWeight="bold" color="emerald.500">
+                            R$ {fmt(revenue)}
                           </Text>
-                        </Text>
+                        </Box>
 
-                        {/* Progress bar */}
-                        <Box mt={3}>
+                        <Box>
+                          <Text fontSize="xs" color="gray.500" mb={2}>Taxa de conversão atual</Text>
                           <Box h={3} bg="gray.100" borderRadius="full" overflow="hidden">
                             <Box
                               h="full"
                               borderRadius="full"
-                              bg={progress >= 100 ? 'green.500' : 'emerald.500'}
+                              bg="blue.400"
                               transition="all 0.5s"
-                              width={`${progress}%`}
+                              width={`${stats.proposals.conversion_rate ?? 0}%`}
                             />
                           </Box>
                           <Flex justify="space-between" align="center" mt={2}>
                             <Text fontSize="xs" color="gray.500">
-                              {Math.round(progress)}% concluído
+                              {Math.round(stats.proposals.conversion_rate ?? 0)}% orçamentos aprovadas
                             </Text>
-                            <Text fontSize="xs" fontWeight="medium"
-                              color={progress >= 100 ? 'green.500' : 'emerald.500'}>
-                              R$ {fmt(revenue)}
+                            <Text fontSize="xs" fontWeight="medium" color="blue.500">
+                              {stats.proposals.total_approved ?? 0} aprovadas
                             </Text>
                           </Flex>
                         </Box>
 
-                        {/* Motivational text */}
-                        {remaining > 0 ? (
-                          <Box mt={3} bg="emerald.50" px={3} py={2} borderRadius="lg">
-                            <Text fontSize="sm" color="gray.900">
-                              Faltam apenas{' '}
-                              <Text as="span" fontWeight="semibold" color="emerald.600">
-                                R$ {fmt(remaining)}
-                              </Text>{' '}
-                              para bater a meta!
-                            </Text>
+                        <Box p={3} bg="blue.50" borderRadius="lg">
+                          <Text fontSize="xs" color="blue.700">
+                            Continue enviando orçamentos para aumentar suas conversões! 🚀
+                          </Text>
+                        </Box>
+                      </VStack>
+                    ) : (
+                      // ADMIN META VIEW
+                      <>
+                        {!target || target <= 0 ? (
+                          // EMPTY STATE
+                          <Box mt={4} textAlign="center" py={6}>
+                            {isFree ? (
+                              <>
+                                <Flex w={16} h={16} bg="orange.100" rounded="2xl" align="center" justify="center" mx="auto" mb={4}>
+                                  <Icon as={FiLock} w={8} h={8} color="orange.600" />
+                                </Flex>
+                                <Text fontSize="md" fontWeight="semibold" color="gray.900">Metas Financeiras</Text>
+                                <Text fontSize="sm" color="gray.500" mt={2} maxW="xs" mx="auto">
+                                  Defina objetivos mensais e anuais para acompanhar o crescimento do seu negócio.
+                                </Text>
+                                <Button
+                                  as={Link}
+                                  to="/dashboard/configuracoes/assinatura"
+                                  variant="outline"
+                                  size="sm"
+                                  mt={4}
+                                  fontWeight="medium"
+                                  rounded="lg"
+                                  borderColor="orange.300"
+                                  color="orange.700"
+                                  _hover={{ bg: 'orange.50' }}
+                                >
+                                  <Icon as={FiStar} w={4} h={4} mr={1.5} />
+                                  Fazer Upgrade para o Pro
+                                </Button>
+                              </>
+                            ) : (
+                              <>
+                                <Flex w={16} h={16} bg="emerald.50" rounded="2xl" align="center" justify="center" mx="auto" mb={4}>
+                                  <Icon as={FiTarget} w={8} h={8} color="emerald.500" />
+                                </Flex>
+                                <Text fontSize="md" fontWeight="semibold" color="gray.900">Configure sua meta</Text>
+                                <Text fontSize="sm" color="gray.500" mt={2} maxW="xs" mx="auto">
+                                  Defina quanto deseja faturar este mês para acompanhar seu progresso.
+                                </Text>
+                                <Button
+                                  as={Link}
+                                  to="/dashboard/configuracoes/metas"
+                                  size="sm"
+                                  mt={4}
+                                  bg="emerald.500"
+                                  color="white"
+                                  _hover={{ bg: 'emerald.600' }}
+                                  fontWeight="medium"
+                                  rounded="lg"
+                                >
+                                  Definir meta mensal
+                                  <Icon as={FiArrowRight} w={4} h={4} ml={1.5} />
+                                </Button>
+                              </>
+                            )}
                           </Box>
                         ) : (
-                          <Box mt={3} bg="green.50" px={3} py={2} borderRadius="lg">
-                            <Text fontSize="sm" color="gray.900">
-                              <Text as="span" fontWeight="semibold" color="green.600">Parabéns!</Text>{' '}
-                              Você bateu a meta!
+                          // FILLED STATE
+                          <>
+                            <Text fontSize="sm" color="gray.900" mt={2}>
+                              Sua meta:{' '}
+                              <Text as="span" fontWeight="semibold">
+                                R$ {fmt(target)}
+                              </Text>
                             </Text>
-                          </Box>
+
+                            {/* Progress bar */}
+                            <Box mt={3}>
+                              <Box h={3} bg="gray.100" borderRadius="full" overflow="hidden">
+                                <Box
+                                  h="full"
+                                  borderRadius="full"
+                                  bg={progress >= 100 ? 'green.500' : 'emerald.500'}
+                                  transition="all 0.5s"
+                                  width={`${progress}%`}
+                                />
+                              </Box>
+                              <Flex justify="space-between" align="center" mt={2}>
+                                <Text fontSize="xs" color="gray.500">
+                                  {Math.round(progress)}% concluído
+                                </Text>
+                                <Text fontSize="xs" fontWeight="medium"
+                                  color={progress >= 100 ? 'green.500' : 'emerald.500'}>
+                                  R$ {fmt(revenue)}
+                                </Text>
+                              </Flex>
+                            </Box>
+
+                            {/* Motivational text */}
+                            {remaining > 0 ? (
+                              <Box mt={3} bg="emerald.50" px={3} py={2} borderRadius="lg">
+                                <Text fontSize="sm" color="gray.900">
+                                  Faltam apenas{' '}
+                                  <Text as="span" fontWeight="semibold" color="emerald.600">
+                                    R$ {fmt(remaining)}
+                                  </Text>{' '}
+                                  para bater a meta!
+                                </Text>
+                              </Box>
+                            ) : (
+                              <Box mt={3} bg="green.50" px={3} py={2} borderRadius="lg">
+                                <Text fontSize="sm" color="gray.900">
+                                  <Text as="span" fontWeight="semibold" color="green.600">Parabéns!</Text>{' '}
+                                  Você bateu a meta!
+                                </Text>
+                              </Box>
+                            )}
+                          </>
                         )}
                       </>
                     )}
@@ -432,8 +529,8 @@ const DashboardPage = () => {
                 </Flex>
               </CardBody>
 
-              {/* Annual Vision Footer - ONLY SHOW IF TARGET > 0 */}
-              {target > 0 && !isYearlyView && (
+              {/* Annual Vision Footer - ONLY SHOW FOR ADMINS AND IF TARGET > 0 */}
+              {isAdmin && target > 0 && !isYearlyView && (
                 <Box px={6} py={4} bg="gray.50" borderTop="1px" borderColor="gray.200">
                   <Flex align="center" gap={2}>
                     <Icon as={FiTrendingUp} w={4} h={4} color="gray.500" />

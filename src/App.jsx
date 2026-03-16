@@ -20,10 +20,12 @@ import ProposalSuccessPage from './pages/ProposalSuccessPage'
 import OnboardingCreateClientPage from './pages/onboarding/CreateClientPage'
 import OnboardingCreateProposalPage from './pages/onboarding/CreateProposalPage'
 import SendProposalPage from './pages/onboarding/SendProposalPage'
+import InviteAcceptPage from './pages/InviteAcceptPage'
 import PublicProposalView from './pages/PublicProposalView'
 
 // Settings pages
 import SettingsProfile from './pages/settings/SettingsProfile'
+import SettingsCompany from './pages/settings/SettingsCompany'
 import SettingsGoals from './pages/settings/SettingsGoals'
 import SettingsSubscription from './pages/settings/SettingsSubscription'
 import UsersPage from './pages/UsersPage'
@@ -56,6 +58,7 @@ function App() {
               <Route path="/onboarding/create-proposal" element={<OnboardingCreateProposalPage />} />
               <Route path="/onboarding/send-proposal" element={<SendProposalPage />} />
               <Route path="/share/proposta/:token" element={<PublicProposalView />} />
+              <Route path="/invite/:token" element={<InviteAcceptPage />} />
 
               {/* Institucional Routes */}
               <Route path="/termos" element={<TermosDeUsoPage />} />
@@ -74,6 +77,7 @@ function App() {
 
                 {/* Settings Routes */}
                 <Route path="/dashboard/configuracoes/perfil" element={<SettingsProfile />} />
+                <Route path="/dashboard/configuracoes/empresa" element={<SettingsCompany />} />
                 <Route path="/dashboard/configuracoes/metas" element={<SettingsGoals />} />
                 <Route path="/dashboard/configuracoes/assinatura" element={<SettingsSubscription />} />
                 <Route path="/dashboard/usuarios" element={<UsersPage />} />

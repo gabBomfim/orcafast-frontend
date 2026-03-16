@@ -1,6 +1,6 @@
 import { Navigate, Outlet, useLocation, useSearchParams } from 'react-router-dom'
 import { storage } from '../../utils/storage'
-import { Box, Button, Icon } from '@chakra-ui/react'
+import { Box, Button, Icon, Text } from '@chakra-ui/react'
 import { Link } from 'react-router-dom'
 import { useNavigate } from 'react-router-dom'
 import { FiPlus } from 'react-icons/fi'
@@ -165,6 +165,7 @@ const ProtectedRoute = () => {
             to="/dashboard/clientes/novo"
             leftIcon={<Icon as={FiPlus} />}
             variant="gradient"
+            display={{ base: 'none', md: 'inline-flex' }}
           >
             Novo Cliente
           </Button>
@@ -180,6 +181,7 @@ const ProtectedRoute = () => {
             onClick={handleCreateProposal}
             leftIcon={<Icon as={FiPlus} />}
             variant="gradient"
+            display={{ base: 'none', md: 'inline-flex' }}
           >
             Novo orçamento
           </Button>
@@ -216,6 +218,7 @@ const ProtectedRoute = () => {
         as="main"
         pl={{ base: 0, lg: isCollapsed ? '80px' : '280px' }}
         pt="73px"
+        pb={{ base: '100px', lg: '0' }}
         transition="padding-left 0.2s ease-in-out"
         minH="100vh"
         w="100%"
@@ -227,6 +230,32 @@ const ProtectedRoute = () => {
           planSlug={welcomePlanSlug}
         />
       </Box>
+
+      {/* Mobile FAB - High affordance action button */}
+      {(location.pathname === '/dashboard/clientes' || location.pathname === '/dashboard/propostas') && (
+        <Button
+          position="fixed"
+          bottom="24px"
+          right="24px"
+          zIndex={1200}
+          variant="gradient"
+          size="lg"
+          height="56px"
+          borderRadius="full"
+          boxShadow="0 12px 32px rgba(0, 217, 126, 0.4)"
+          display={{ base: 'flex', md: 'none' }}
+          leftIcon={<Icon as={FiPlus} boxSize={5} />}
+          onClick={location.pathname.includes('/clientes') 
+            ? () => navigate('/dashboard/clientes/novo')
+            : handleCreateProposal
+          }
+          px={6}
+          fontWeight="bold"
+          _active={{ transform: 'scale(0.95)' }}
+        >
+          {location.pathname.includes('/clientes') ? 'Novo Cliente' : 'Novo orçamento'}
+        </Button>
+      )}
     </Box>
   )
 }

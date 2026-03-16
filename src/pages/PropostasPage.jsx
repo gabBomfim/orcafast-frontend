@@ -29,6 +29,8 @@ import {
   InputGroup,
   InputLeftElement,
   Stack,
+  Avatar,
+  Tooltip,
 } from '@chakra-ui/react'
 import ReactSelect from 'react-select'
 import { appSelectStyles } from '../theme/selectStyles'
@@ -45,6 +47,7 @@ import {
   FiSearch,
   FiExternalLink,
   FiCheck,
+  FiChevronDown,
 } from 'react-icons/fi'
 import { FaWhatsapp } from 'react-icons/fa'
 
@@ -55,8 +58,9 @@ import DataCard from '../components/ui/DataCard'
 import StatusBadge from '../components/ui/StatusBadge'
 import Pagination from '../components/ui/Pagination'
 
-import { proposalService } from '../services'
+import { proposalService, teamUserService } from '../services'
 import { openWhatsApp } from '../utils/whatsapp'
+import { useAuth } from '../hooks/useAuth'
 
 const STATUS_MAP = {
   1: 'draft',
@@ -101,6 +105,12 @@ const PropostasPage = () => {
   const [proposals, setProposals] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
+  
+  const { getCurrentUser } = useAuth()
+  const user = getCurrentUser()
+  const isAdmin = user?.role === 3 || user?.role === 1
+  const [teamMembers, setTeamMembers] = useState([])
+  const [selectedUserIds, setSelectedUserIds] = useState([])
 
   // Date Filters
   const [datePreset, setDatePreset] = useState('all')
@@ -154,7 +164,8 @@ const PropostasPage = () => {
           search: debouncedSearchTerm || undefined,
           status: statusFilter === 'all' ? undefined : REVERSE_STATUS_MAP[statusFilter],
           beginDate: dateRange.start || undefined,
-          endDate: dateRange.end || undefined
+          endDate: dateRange.end || undefined,
+          'user_ids[]': selectedUserIds.length > 0 ? selectedUserIds : undefined
         }
 
         const { data } = await proposalService.list(params)
@@ -219,7 +230,22 @@ const PropostasPage = () => {
     if (!dateError) loadProposals()
 
     return () => { isCancelled = true }
-  }, [debouncedSearchTerm, statusFilter, dateRange.start, dateRange.end, dateError, pagination.currentPage, refreshTrigger])
+  }, [debouncedSearchTerm, statusFilter, dateRange.start, dateRange.end, dateError, pagination.currentPage, refreshTrigger, selectedUserIds])
+  
+  // Fetch team members if admin
+  useEffect(() => {
+    if (isAdmin) {
+      teamUserService.list().then(response => {
+        const membersList = response.data || []
+        setTeamMembers(membersList.map(m => ({
+          value: m.id,
+          label: m.name
+        })))
+      }).catch(err => {
+        console.error('Erro ao buscar membros da equipe:', err)
+      })
+    }
+  }, [isAdmin])
 
 
 
@@ -581,6 +607,25 @@ Qualquer dúvida, estou à disposição!`
               />
             </FormControl>
 
+            {isAdmin && teamMembers.length > 0 && (
+              <FormControl flex={1.5}>
+                <FormLabel>Filtrar por Equipe</FormLabel>
+                <ReactSelect
+                  isMulti
+                  placeholder="Membros da equipe"
+                  closeMenuOnSelect={false}
+                  styles={appSelectStyles}
+                  value={teamMembers.filter(m => selectedUserIds.includes(m.value))}
+                  options={teamMembers}
+                  onChange={(selected) => setSelectedUserIds(selected ? selected.map(s => s.value) : [])}
+                  noOptionsMessage={() => "Nenhum membro encontrado"}
+                  loadingMessage={() => "Carregando..."}
+                  menuPortalTarget={document.body}
+                  menuPosition="fixed"
+                />
+              </FormControl>
+            )}
+
             {(datePreset === 'custom') && (
               <>
                 <FormControl w={{ base: 'full', lg: 'auto' }} isInvalid={!!dateError}>
@@ -702,18 +747,35 @@ Qualquer dúvida, estou à disposição!`
                           >
                             R$ {(proposal.value || 0).toLocaleString('pt-BR')}
                           </Text>
+                          
+                          {isAdmin && proposal.user && (
+                            <HStack spacing={2} mt={1}>
+                              <Tooltip label={`Criado por ${proposal.user.name}`}>
+                                <Avatar size="xs" name={proposal.user.name} />
+                              </Tooltip>
+                              <Text fontSize="xs" color="gray.500">
+                                {proposal.user.name.split(' ')[0]}
+                              </Text>
+                            </HStack>
+                          )}
                         </Box>
 
-                        <HStack spacing={2}>
+                        <Flex
+                          direction={{ base: 'column', md: 'row' }}
+                          gap={2}
+                          w={{ base: 'full', md: 'auto' }}
+                          align="center"
+                        >
                           {/* Action Buttons */}
                           {(proposal.status === 'draft' || proposal.status === 'sent' || proposal.status === 'viewed') ? (
-                            <HStack spacing={1}>
+                            <Stack direction={{ base: 'column', md: 'row' }} spacing={2} w={{ base: 'full', md: 'auto' }}>
                               <Button
                                 size="sm"
                                 colorScheme="green"
                                 variant="outline"
                                 onClick={() => confirmAction('approve', proposal)}
                                 leftIcon={<Icon as={FiCheckCircle} />}
+                                w={{ base: 'full', md: 'auto' }}
                               >
                                 Aprovar orçamento
                               </Button>
@@ -724,10 +786,11 @@ Qualquer dúvida, estou à disposição!`
                                 onClick={() => confirmAction('reject', proposal)}
                                 leftIcon={<Icon as={FiXCircle} />}
                                 _hover={{ bg: 'red.50', borderColor: 'red.500', color: 'red.600' }}
+                                w={{ base: 'full', md: 'auto' }}
                               >
                                 Reprovar orçamento
                               </Button>
-                            </HStack>
+                            </Stack>
                           ) : proposal.status === 'approved' ? (
                             <Button
                               size="sm"
@@ -736,6 +799,7 @@ Qualquer dúvida, estou à disposição!`
                               onClick={() => confirmAction('reject', proposal)}
                               leftIcon={<Icon as={FiXCircle} />}
                               _hover={{ bg: 'red.50', borderColor: 'red.500', color: 'red.600' }}
+                              w={{ base: 'full', md: 'auto' }}
                             >
                               Reprovar orçamento
                             </Button>
@@ -746,6 +810,7 @@ Qualquer dúvida, estou à disposição!`
                               variant="outline"
                               onClick={() => confirmAction('approve', proposal)}
                               leftIcon={<Icon as={FiCheckCircle} />}
+                              w={{ base: 'full', md: 'auto' }}
                             >
                               Aprovar orçamento
                             </Button>
@@ -754,11 +819,16 @@ Qualquer dúvida, estou à disposição!`
                           <Menu>
                             <MenuButton
                               as={Button}
-                              variant="ghost"
+                              variant="outline"
                               size="sm"
+                              rightIcon={<Icon as={FiChevronDown} />}
+                              bg="gray.50"
+                              borderColor="gray.200"
+                              _hover={{ bg: 'gray.100' }}
                               isLoading={loadingAction[proposal.id] === 'whatsapp' || loadingAction[proposal.id] === 'download'}
+                              w={{ base: 'full', md: 'auto' }}
                             >
-                              <Icon as={FiMoreVertical} />
+                              Opções
                             </MenuButton>
                             <MenuList>
                               <MenuItem
@@ -803,7 +873,7 @@ Qualquer dúvida, estou à disposição!`
                               </MenuItem>
                             </MenuList>
                           </Menu>
-                        </HStack>
+                        </Flex>
                       </Stack>
                     </Flex>
                   </Box>
