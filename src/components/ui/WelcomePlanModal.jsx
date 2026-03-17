@@ -14,7 +14,7 @@ import {
 } from '@chakra-ui/react'
 import {
     FiAward, FiCheck, FiZap, FiStar, FiLock, FiMessageCircle,
-    FiTrendingUp, FiTarget, FiArrowRight,
+    FiTrendingUp, FiTarget, FiArrowRight, FiFilter
 } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
 
@@ -25,9 +25,9 @@ const PLAN_WELCOME = {
         title: 'Bem-vindo ao Profissional!',
         subtitle: 'Você desbloqueou ferramentas que vão transformar sua gestão de negócios.',
         features: [
-            { icon: FiZap, text: 'Orçamentos sem marca d\'água' },
-            { icon: FiStar, text: 'Metas financeiras ilimitadas' },
-            { icon: FiLock, text: 'Backup automático dos dados' },
+            { icon: FiZap, text: 'Orçamentos ilimitados com a cara da sua empresa' },
+            { icon: FiStar, text: 'Metas financeiras personalizadas' },
+            { icon: FiLock, text: 'Dashboard com métricas financeiras' },
             { icon: FiMessageCircle, text: 'Suporte prioritário por WhatsApp' },
         ],
         cta: 'Começar a usar',
@@ -40,12 +40,13 @@ const PLAN_WELCOME = {
         subtitle: 'Sua operação está pronta para crescer. Todos os recursos estão liberados.',
         features: [
             { icon: FiTrendingUp, text: 'Múltiplos usuários na mesma conta' },
-            { icon: FiStar, text: 'Relatórios avançados e exportação' },
-            { icon: FiLock, text: 'SLA de suporte empresarial' },
-            { icon: FiMessageCircle, text: 'Onboarding dedicado' },
+            { icon: FiStar, text: 'Relatórios avançados' },
+            { icon: FiLock, text: 'Dashboard com métricas financeiras' },
+            { icon: FiFilter, text: 'Acompanhe a evolução do seu negócio com filtros dinâmicos' },
+            { icon: FiMessageCircle, text: 'Suporte prioritário por WhatsApp' },
         ],
         cta: 'Começar a usar',
-        prompt: 'Comece agora configurando sua equipe e explorando os relatórios avançados. Escale sua operação com total controle.',
+        prompt: 'Comece agora configurando sua equipe e explorando as métricas do seu negócio. Escale sua operação com total controle.',
     },
 }
 

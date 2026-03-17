@@ -240,14 +240,15 @@ const UsersPage = () => {
         try {
             setIsSaving(true)
             if (selectedUser) {
-                await teamUserService.update(selectedUser.id, formData)
+                // Ao atualizar, enviamos apenas o nome (e-mail não é editável na listagem)
+                await teamUserService.update(selectedUser.id, { name: formData.name })
                 toast({ title: 'Membro atualizado com sucesso', status: 'success' })
             } else {
                 await teamUserService.store({ email: formData.email })
-                toast({ 
-                    title: 'Convite enviado com sucesso', 
+                toast({
+                    title: 'Convite enviado com sucesso',
                     description: 'Um e-mail com o link de acesso foi enviado para o colaborador.',
-                    status: 'success' 
+                    status: 'success'
                 })
             }
             onFormClose()
@@ -422,13 +423,15 @@ const UsersPage = () => {
                                                             >
                                                                 Editar
                                                             </MenuItem>
-                                                            <MenuItem
-                                                                icon={<Icon as={FiTrash2} />}
-                                                                color="red.500"
-                                                                onClick={() => openDeleteDialog(u)}
-                                                            >
-                                                                Remover
-                                                            </MenuItem>
+                                                            {u.id !== user?.id && (
+                                                                <MenuItem
+                                                                    icon={<Icon as={FiTrash2} />}
+                                                                    color="red.500"
+                                                                    onClick={() => openDeleteDialog(u)}
+                                                                >
+                                                                    Remover
+                                                                </MenuItem>
+                                                            )}
                                                         </MenuList>
                                                     </Menu>
                                                 </Td>
@@ -464,17 +467,23 @@ const UsersPage = () => {
                                 </FormControl>
                             )}
 
-                            <FormControl isInvalid={errors.email}>
+                            <FormControl isInvalid={errors.email} isReadOnly={!!selectedUser} variant={selectedUser ? 'filled' : 'outline'}>
                                 <FormLabel fontSize="sm" fontWeight="semibold">E-mail</FormLabel>
                                 <Input
                                     type="email"
                                     placeholder="email@empresa.com"
                                     value={formData.email}
+                                    style={{ backgroundColor: '#f5f5f5' }}
                                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                 />
+                                {selectedUser && (
+                                    <Text fontSize="xs" color="gray.500" mt={1}>
+                                        O e-mail não pode ser alterado após o convite.
+                                    </Text>
+                                )}
                                 <FormErrorMessage>{errors.email}</FormErrorMessage>
                             </FormControl>
-                            
+
                             {!selectedUser && (
                                 <Text fontSize="xs" color="gray.500" textAlign="center">
                                     O colaborador receberá um e-mail com um **link mágico** para criar sua própria conta e senha.

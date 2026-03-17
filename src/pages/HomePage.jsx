@@ -128,9 +128,9 @@ const HomePage = () => {
                 Começar teste grátis
                 <FiArrowRight />
               </Link>
-              <button className="cta-secondary">
+              {/* <button className="cta-secondary">
                 Ver demonstração
-              </button>
+              </button> */}
             </div>
 
             <div className="hero-trust">
@@ -154,7 +154,7 @@ const HomePage = () => {
             <div className="dashboard-card">
               <div className="dashboard-header">
                 <h3 className="dashboard-title">Dashboard</h3>
-                <span className="dashboard-time">Atualizado agora</span>
+                {/* <span className="dashboard-time">Atualizado agora</span> */}
               </div>
 
               <div className="dashboard-stats">
@@ -416,9 +416,13 @@ const HomePage = () => {
                 <li><FiCheck className="feature-check" /> Gerenciamento de equipe</li>
                 <li><FiCheck className="feature-check" /> Definição de metas para equipe</li>
               </ul>
-              <button className="pricing-btn-primary">
+              <Link
+                to="/register?plan=business"
+                className="pricing-btn-primary"
+                style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
                 Assinar plano Business
-              </button>
+              </Link>
             </CardContent>
           </Card>
         </div>

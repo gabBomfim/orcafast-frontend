@@ -20,8 +20,8 @@ import {
 } from 'react-icons/fi'
 import OrcafastLogo from '../components/ui/OrcafastLogo'
 import { FaApple } from 'react-icons/fa'
-import { Link as RouterLink, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
+import { useLocation, Link as RouterLink, useNavigate } from 'react-router-dom'
 import { authService, subscriptionService } from '../services'
 import { storage } from '../utils/storage'
 
@@ -59,6 +59,11 @@ const RegisterPage = () => {
   const [isLoading, setIsLoading] = useState(false)
   const toast = useToast()
   const navigate = useNavigate()
+  const location = useLocation()
+
+  // Get plan from URL (default to 'pro')
+  const queryParams = new URLSearchParams(location.search)
+  const selectedPlan = queryParams.get('plan') || 'pro'
 
   // Password strength indicator
   const getPasswordStrength = () => {
@@ -92,9 +97,9 @@ const RegisterPage = () => {
 
       try {
         const fullReturnUrl = window.location.origin + '/dashboard'
-        sessionStorage.setItem('show_welcome', 'pro')
+        sessionStorage.setItem('show_welcome', selectedPlan)
 
-        const { data: checkoutData } = await subscriptionService.checkout('pro', fullReturnUrl)
+        const { data: checkoutData } = await subscriptionService.checkout(selectedPlan, fullReturnUrl)
 
         if (checkoutData?.checkout_url) {
           window.location.href = checkoutData.checkout_url
