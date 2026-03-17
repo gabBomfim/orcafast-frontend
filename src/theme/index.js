@@ -216,7 +216,7 @@ const components = {
           color: 'gray.900',
           height: '48px',
           px: 4,
-          fontSize: 'sm',
+          fontSize: { base: '16px', md: 'sm' },
           _placeholder: { color: 'gray.400' },
           _hover: { borderColor: 'gray.300' },
           _focus: {
@@ -275,7 +275,7 @@ const components = {
         borderColor: 'gray.200',
         borderRadius: 'xl',
         color: 'gray.900',
-        fontSize: 'sm',
+        fontSize: { base: '16px', md: 'sm' },
         px: 4,
         py: 3,
         _placeholder: { color: 'gray.400' },
@@ -302,7 +302,7 @@ const components = {
           borderRadius: 'xl',
           color: 'gray.900',
           height: '48px',
-          fontSize: 'sm',
+          fontSize: { base: '16px', md: 'sm' },
           _hover: { borderColor: 'gray.300' },
           _focus: {
             bg: 'white',
@@ -327,6 +327,17 @@ const styles = {
   global: {
     body: {
       bg: 'gray.50',
+      WebkitTextSizeAdjust: '100%',
+      textSizeAdjust: '100%',
+    },
+    'input, textarea, select': {
+      fontSize: { base: '16px !important', md: 'sm' },
+    },
+    'input:focus, textarea:focus, select:focus': {
+      scrollMarginTop: '120px',
+    },
+    '*': {
+      WebkitOverflowScrolling: 'touch',
     },
     '*::placeholder': {
       color: 'gray.400',
