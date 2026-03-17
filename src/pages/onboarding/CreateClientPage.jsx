@@ -22,7 +22,7 @@ import { maskPhone, unmaskPhone } from '../../utils/mask'
 
 const CreateClientPage = () => {
   const navigate = useNavigate()
-  const { updateClientData } = useOnboarding()
+  const { updateClientData, guestData } = useOnboarding()
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -90,6 +90,7 @@ const CreateClientPage = () => {
             name="name"
             type="text"
             placeholder="Ex: João Silva"
+            defaultValue={guestData?.client?.name || ''}
             required
           />
         </Box>
@@ -112,6 +113,7 @@ const CreateClientPage = () => {
               name="phone"
               type="tel"
               placeholder="(11) 99999-9999"
+              defaultValue={guestData?.client?.phone ? maskPhone(guestData.client.phone) : ''}
               required
               onChange={(e) => {
                 e.target.value = maskPhone(e.target.value)
@@ -136,6 +138,7 @@ const CreateClientPage = () => {
               name="email"
               type="email"
               placeholder="cliente@email.com"
+              defaultValue={guestData?.client?.email || ''}
             />
           </Box>
         </SimpleGrid>

@@ -33,12 +33,20 @@ const CreateProposalPage = () => {
   const { updateProposalData, guestData } = useOnboarding()
   const clientData = guestData?.client || {}
 
-  const [title, setTitle] = useState('')
-  const [discount, setDiscount] = useState('')
-  const [validUntil, setValidUntil] = useState('')
-  const [items, setItems] = useState([
-    { id: 1, desc: '', qtd: 1, value: '' },
-  ])
+  const [title, setTitle] = useState(guestData?.proposal?.title || '')
+  const [discount, setDiscount] = useState(guestData?.proposal?.discount || '')
+  const [validUntil, setValidUntil] = useState(guestData?.proposal?.validUntil || '')
+  const [items, setItems] = useState(() => {
+    if (guestData?.proposal?.items?.length > 0) {
+      return guestData.proposal.items.map((item, index) => ({
+        id: index + 1,
+        desc: item.description || '',
+        qtd: item.quantity || 1,
+        value: item.unit_price || ''
+      }))
+    }
+    return [{ id: 1, desc: '', qtd: 1, value: '' }]
+  })
   const [isLoadingAI, setIsLoadingAI] = useState(false)
 
   const handleAddItem = () => {
