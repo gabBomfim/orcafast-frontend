@@ -236,7 +236,7 @@ const HomePage = () => {
             <CardContent className="stat-content">
               <FiDollarSign className="stat-icon" />
               <div className="stat-text">
-                <div className="stat-number">R$ 29</div>
+                <div className="stat-number">R$ 49,90</div>
                 <div className="stat-label">Plano mais popular</div>
               </div>
             </CardContent>
@@ -377,7 +377,7 @@ const HomePage = () => {
               <p className="pricing-description">Perfeito para freelancers e autônomos.</p>
               <div className="pricing-price">
                 <span className="price-currency">R$</span>
-                <span className="price-amount">29</span>
+                <span className="price-amount">49,90</span>
                 <span className="price-period">/mês</span>
               </div>
               <ul className="pricing-features">
@@ -403,7 +403,7 @@ const HomePage = () => {
               <p className="pricing-description">O poder total para equipes e agências.</p>
               <div className="pricing-price">
                 <span className="price-currency">R$</span>
-                <span className="price-amount">79</span>
+                <span className="price-amount">97,90</span>
                 <span className="price-period">/mês</span>
               </div>
               <ul className="pricing-features">

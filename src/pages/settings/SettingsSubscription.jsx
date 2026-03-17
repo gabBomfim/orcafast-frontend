@@ -521,7 +521,7 @@ const SettingsSubscription = () => {
                     benefits={FREE_TO_PRO_BENEFITS}
                     title="Comece seu teste de 7 dias"
                     subtitle="Desbloqueie todo o potencial do OrçaFast para o seu negócio. Você não será cobrado hoje."
-                    price="29"
+                    price="49,90"
                     buttonLabel="Começar teste de 7 dias"
                     bottomText="Cancele a qualquer momento antes de 7 dias e nada será cobrado."
                     isLoading={actionLoading === 'checkout-pro'}
@@ -536,7 +536,7 @@ const SettingsSubscription = () => {
                         benefits={PRO_TO_BUSINESS_BENEFITS}
                         title="Leve sua equipe ao próximo nível"
                         subtitle="Faça upgrade para o Business e escale sua operação com múltiplos usuários"
-                        price="79"
+                        price="97,90"
                         buttonLabel="Fazer Upgrade para Business"
                         isLoading={actionLoading === 'checkout-business'}
                         onCheckout={() => confirmUpgrade('business')}
