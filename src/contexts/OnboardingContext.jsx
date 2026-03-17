@@ -13,7 +13,7 @@ export const useOnboarding = () => {
 export const OnboardingProvider = ({ children }) => {
   const [guestData, setGuestData] = useState(() => {
     try {
-      const saved = sessionStorage.getItem('orcafast_onboarding_data')
+      const saved = localStorage.getItem('pending_onboarding')
       if (saved) return JSON.parse(saved)
     } catch (e) {
       console.error('Failed to parse onboarding data', e)
@@ -22,7 +22,7 @@ export const OnboardingProvider = ({ children }) => {
   })
 
   useEffect(() => {
-    sessionStorage.setItem('orcafast_onboarding_data', JSON.stringify(guestData))
+    localStorage.setItem('pending_onboarding', JSON.stringify(guestData))
   }, [guestData])
 
   const updateClientData = useCallback((clientData) => {
@@ -44,7 +44,7 @@ export const OnboardingProvider = ({ children }) => {
       client: null,
       proposal: null
     })
-    sessionStorage.removeItem('orcafast_onboarding_data')
+    localStorage.removeItem('pending_onboarding')
   }, [])
 
   const getGuestDataForAPI = useCallback(() => {

@@ -125,7 +125,7 @@ const HomePage = () => {
                 className="cta-primary"
                 style={{ textDecoration: 'none' }}
               >
-                Começar teste grátis
+                Começar grátis
                 <FiArrowRight />
               </Link>
               {/* <button className="cta-secondary">
@@ -210,7 +210,7 @@ const HomePage = () => {
       </section>
 
       {/* Stats Section */}
-      <section className="stats-section">
+      {/* <section className="stats-section">
         <div className="stats-container">
           <Card className="stat-card">
             <CardContent className="stat-content">
@@ -242,7 +242,7 @@ const HomePage = () => {
             </CardContent>
           </Card>
         </div>
-      </section>
+      </section> */}
 
       {/* How It Works Section */}
       <section id="como-funciona" className="how-section">
@@ -305,7 +305,7 @@ const HomePage = () => {
                   <FiDollarSign className="step-icon" />
                 </div>
               </div>
-              <h3 className="step-title">Feche</h3>
+              <h3 className="step-title">Fechar</h3>
               <p className="step-description">
                 Permita que seus clientes aprovem orçamentos com um único clique
               </p>
@@ -392,7 +392,7 @@ const HomePage = () => {
                 className="pricing-btn-primary"
                 style={{ textDecoration: 'none' }}
               >
-                Começar teste grátis (7 dias)
+                Começar grátis
               </Link>
             </CardContent>
           </Card>

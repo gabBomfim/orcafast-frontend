@@ -74,6 +74,7 @@ function App() {
                 <Route path="/dashboard/propostas" element={<PropostasPage />} />
                 <Route path="/dashboard/propostas/nova" element={<CreateProposalPage />} />
                 <Route path="/dashboard/propostas/sucesso" element={<ProposalSuccessPage />} />
+                <Route path="/dashboard/orcamentos/:id/enviar" element={<SendProposalPage />} />
 
                 {/* Settings Routes */}
                 <Route path="/dashboard/configuracoes/perfil" element={<SettingsProfile />} />

@@ -522,7 +522,7 @@ const SettingsSubscription = () => {
                     title="Comece seu teste de 7 dias"
                     subtitle="Desbloqueie todo o potencial do OrçaFast para o seu negócio. Você não será cobrado hoje."
                     price="49,90"
-                    buttonLabel="Começar teste de 7 dias"
+                    buttonLabel="Começar grátis"
                     bottomText="Cancele a qualquer momento antes de 7 dias e nada será cobrado."
                     isLoading={actionLoading === 'checkout-pro'}
                     onCheckout={() => handleCheckout('pro')}

@@ -198,12 +198,12 @@ const UsersPage = () => {
     const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose } = useDisclosure()
 
     useEffect(() => {
-        if (isBusiness) {
+        if (isBusiness && canManageTeam) {
             fetchUsers()
         } else {
             setLoading(false)
         }
-    }, [isBusiness])
+    }, [isBusiness, canManageTeam])
 
     const fetchUsers = async () => {
         try {

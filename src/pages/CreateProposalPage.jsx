@@ -127,7 +127,6 @@ const CreateProposalPage = () => {
   const [formData, setFormData] = useState({
     clientId: searchParams.get('client') || '',
     title: '',
-    description: '',
     discount: '',
     validUntil: '',
   })
@@ -151,7 +150,6 @@ const CreateProposalPage = () => {
         setFormData({
           clientId: String(data.client_id || data.clientId || ''),
           title: data.title || '',
-          description: data.description || '',
           discount: parseFloat(data.discount || 0),
           validUntil: data.valid_until ? new Date(data.valid_until).toISOString().split('T')[0] : '',
         })
@@ -205,6 +203,10 @@ const CreateProposalPage = () => {
   const handleQuickCreateClient = async () => {
     if (!newClient.name.trim()) {
       toast({ title: 'Nome é obrigatório', status: 'warning', duration: 3000, isClosable: true })
+      return
+    }
+    if (!newClient.phone.trim()) {
+      toast({ title: 'Telefone é obrigatório', status: 'warning', duration: 3000, isClosable: true })
       return
     }
     setIsSavingClient(true)
@@ -269,10 +271,10 @@ const CreateProposalPage = () => {
   }
 
   const handleAISuggestion = async () => {
-    if (!formData.title.trim() && !formData.description.trim() && !items.some(item => item.desc.trim())) {
+    if (!formData.title.trim() && !items.some(item => item.desc.trim())) {
       toast({
         title: 'Adicione mais detalhes',
-        description: 'Preencha o título, descrição ou itens para gerar uma sugestão.',
+        description: 'Preencha o título ou itens para gerar uma sugestão.',
         status: 'info',
         duration: 3000,
         isClosable: true,
@@ -296,10 +298,6 @@ const CreateProposalPage = () => {
       suggestedPrice = 1500
     }
 
-    // Ajustes baseados na descrição
-    if (formData.description.toLowerCase().includes('complexo') || formData.description.toLowerCase().includes('avançado')) {
-      suggestedPrice *= 1.5
-    }
 
     // Aplica no primeiro item
     if (items.length > 0) {
@@ -375,7 +373,6 @@ const CreateProposalPage = () => {
         company_id: user?.company_id,
         client_id: parseInt(formData.clientId),
         title: formData.title,
-        description: formData.description,
         discount: parseFloat(String(formData.discount).replace(',', '.')) || 0,
         valid_until: formData.validUntil,
         items: items.map(item => ({
@@ -509,27 +506,6 @@ const CreateProposalPage = () => {
                       />
                     </Box>
 
-                    <Box w="full">
-                      <Text
-                        as="label"
-                        htmlFor="description"
-                        display="block"
-                        fontSize="sm"
-                        fontWeight="medium"
-                        color="gray.900"
-                        mb={2}
-                      >
-                        Descrição (opcional)
-                      </Text>
-                      <Textarea
-                        id="description"
-                        name="description"
-                        placeholder="Descreva brevemente o projeto..."
-                        minH="120px"
-                        value={formData.description}
-                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                      />
-                    </Box>
 
                     <FormControl isRequired w="full">
                       <FormLabel
@@ -628,7 +604,7 @@ const CreateProposalPage = () => {
                       </Button>
 
                       {/* Botão IA - aparece quando há dados suficientes */}
-                      {(formData.title.trim() || formData.description.trim() || items.some(item => item.desc.trim())) && (
+                      {(formData.title.trim() || items.some(item => item.desc.trim())) && (
                         <Button
                           leftIcon={<Icon fontSize="24px" as={WiStars} />}
                           colorScheme="purple"
@@ -739,9 +715,6 @@ const CreateProposalPage = () => {
                   </Box>
 
                   <Heading size="lg" color="gray.900">{formData.title || 'Título do Orçamento'}</Heading>
-                  <Text color="gray.600">
-                    {formData.description || 'Descrição do orçamento aparecerá aqui...'}
-                  </Text>
                   <Box height="1px" bg="gray.200" />
                   {items.filter(item => item.desc.trim()).map((item) => {
                     const v = parseFloat(String(item.value).replace(',', '.')) || 0
@@ -819,9 +792,10 @@ const CreateProposalPage = () => {
                     onChange={(e) => setNewClient({ ...newClient, email: e.target.value })}
                   />
                 </FormControl>
-                <FormControl>
+                <FormControl isRequired>
                   <FormLabel fontSize="sm" fontWeight="medium" color="gray.700">Telefone</FormLabel>
                   <Input
+                    required
                     placeholder="(11) 99999-9999"
                     value={newClient.phone}
                     onChange={(e) => setNewClient({ ...newClient, phone: maskPhone(e.target.value) })}

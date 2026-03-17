@@ -34,7 +34,6 @@ const CreateProposalPage = () => {
   const clientData = guestData?.client || {}
 
   const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
   const [discount, setDiscount] = useState('')
   const [validUntil, setValidUntil] = useState('')
   const [items, setItems] = useState([
@@ -88,10 +87,10 @@ const CreateProposalPage = () => {
   const total = subtotal - discountAmount
 
   const handleAISuggestion = async () => {
-    if (!title.trim() && !description.trim() && !items.some(item => item.desc.trim())) {
+    if (!title.trim() && !items.some(item => item.desc.trim())) {
       toast({
         title: 'Adicione mais detalhes',
-        description: 'Preencha o título, descrição ou itens para gerar uma sugestão.',
+        description: 'Preencha o título ou itens para gerar uma sugestão.',
         status: 'info',
         duration: 3000,
         isClosable: true,
@@ -115,10 +114,6 @@ const CreateProposalPage = () => {
       suggestedPrice = 1500
     }
 
-    // Ajustes baseados na descrição
-    if (description.toLowerCase().includes('complexo') || description.toLowerCase().includes('avançado')) {
-      suggestedPrice *= 1.5
-    }
 
     // Aplica no primeiro item
     if (items.length > 0) {
@@ -140,7 +135,6 @@ const CreateProposalPage = () => {
 
     const proposalData = {
       title,
-      description,
       validUntil,
       discount: discountPct,
       items: items.map(item => ({
@@ -206,28 +200,6 @@ const CreateProposalPage = () => {
               />
             </Box>
 
-            <Box w="full">
-              <Text
-                as="label"
-                htmlFor="description"
-                display="block"
-                fontSize="sm"
-                fontWeight="medium"
-                color="gray.900"
-                mb={2}
-              >
-                Descrição <Text as="span" color="gray.500">(opcional)</Text>
-              </Text>
-              <Textarea
-                id="description"
-                name="description"
-                placeholder="Descreva brevemente o projeto..."
-                rows={3}
-                resize="none"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-            </Box>
 
             <Box w="full">
               <Text
@@ -354,7 +326,7 @@ const CreateProposalPage = () => {
               </Button>
 
               {/* Botão IA - aparece quando há dados suficientes */}
-              {(title.trim() || description.trim() || items.some(item => item.desc.trim())) && (
+              {(title.trim() || items.some(item => item.desc.trim())) && (
                 <Button
                   type="button"
                   leftIcon={<Icon fontSize="24px" as={WiStars} />}
@@ -472,9 +444,6 @@ const CreateProposalPage = () => {
               </Box>
 
               <Heading size="lg" color="gray.900">{title || 'Título do Orçamento'}</Heading>
-              <Text color="gray.600">
-                {description || 'Descrição do orçamento aparecerá aqui...'}
-              </Text>
               <Box height="1px" bg="gray.200" />
               {items.filter(item => item.desc.trim()).map((item) => {
                 const v = parseFloat(String(item.value).replace(',', '.')) || 0

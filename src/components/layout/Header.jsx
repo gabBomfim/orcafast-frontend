@@ -86,9 +86,9 @@ const Header = ({ title, showBackButton = false, rightContent }) => {
             left="50%"
             transform="translateX(-50%)"
           >
-            <OrcafastLogo 
-              variant="full" 
-              height="24px" 
+            <OrcafastLogo
+              variant="full"
+              height="24px"
               style={{ cursor: 'pointer' }}
               onClick={() => window.location.href = '/dashboard'}
             />
@@ -126,7 +126,7 @@ const Header = ({ title, showBackButton = false, rightContent }) => {
               </Button>
             </>
           )}
-          {!rightContent && isPro && isAdmin && (
+          {/* {!rightContent && isPro && isAdmin && (
             <>
               <Button
                 variant="outline"
@@ -150,7 +150,7 @@ const Header = ({ title, showBackButton = false, rightContent }) => {
                 <Icon as={FiCrop} />
               </Button>
             </>
-          )}
+          )} */}
 
           {/* User Menu — always visible on every page */}
           <Menu>

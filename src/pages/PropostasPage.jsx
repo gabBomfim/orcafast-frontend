@@ -61,6 +61,7 @@ import Pagination from '../components/ui/Pagination'
 import { proposalService, teamUserService } from '../services'
 import { openWhatsApp } from '../utils/whatsapp'
 import { useAuth } from '../hooks/useAuth'
+import { useSubscription } from '../hooks/useSubscription'
 
 const STATUS_MAP = {
   1: 'draft',
@@ -109,6 +110,7 @@ const PropostasPage = () => {
   const { getCurrentUser } = useAuth()
   const user = getCurrentUser()
   const isAdmin = user?.role === 3 || user?.role === 1
+  const { isBusiness } = useSubscription()
   const [teamMembers, setTeamMembers] = useState([])
   const [selectedUserIds, setSelectedUserIds] = useState([])
 
@@ -232,9 +234,9 @@ const PropostasPage = () => {
     return () => { isCancelled = true }
   }, [debouncedSearchTerm, statusFilter, dateRange.start, dateRange.end, dateError, pagination.currentPage, refreshTrigger, selectedUserIds])
   
-  // Fetch team members if admin
+  // Fetch team members if admin AND business
   useEffect(() => {
-    if (isAdmin) {
+    if (isAdmin && isBusiness) {
       teamUserService.list().then(response => {
         const membersList = response.data || []
         setTeamMembers(membersList.map(m => ({
@@ -245,7 +247,7 @@ const PropostasPage = () => {
         console.error('Erro ao buscar membros da equipe:', err)
       })
     }
-  }, [isAdmin])
+  }, [isAdmin, isBusiness])
 
 
 
@@ -297,6 +299,24 @@ const PropostasPage = () => {
     try {
       if (actionType === 'delete') {
         await proposalService.delete(selectedProposal.id)
+        
+        // Update local state for immediate feedback
+        setProposals(prev => prev.filter(p => p.id !== selectedProposal.id))
+        
+        // Update status counts manually
+        const statusToDelete = selectedProposal.status
+        setStatusCounts(prev => ({
+          ...prev,
+          all: Math.max(0, (prev.all || 0) - 1),
+          [statusToDelete]: Math.max(0, (prev[statusToDelete] || 0) - 1)
+        }))
+
+        // Update pagination total label
+        setPagination(prev => ({
+          ...prev,
+          total: Math.max(0, (prev.total || 0) - 1)
+        }))
+
         toast({
           title: 'Orçamento excluído',
           status: 'success',

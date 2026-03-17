@@ -22,7 +22,7 @@ import OrcafastLogo from '../components/ui/OrcafastLogo'
 import { FaApple } from 'react-icons/fa'
 import { useState } from 'react'
 import { useLocation, Link as RouterLink, useNavigate } from 'react-router-dom'
-import { authService, subscriptionService } from '../services'
+import { authService, subscriptionService, onboardingService } from '../services'
 import { storage } from '../utils/storage'
 
 // Componente SVG do Google inline
@@ -95,11 +95,29 @@ const RegisterPage = () => {
       storage.setToken(response.data.access_token)
       storage.setUser(response.data.user)
 
+      let targetProposalId = null
+      
+      // Verifica se há dados de onboarding pendentes
+      const pendingOnboarding = localStorage.getItem('pending_onboarding')
+      if (pendingOnboarding) {
+        try {
+          const guestData = JSON.parse(pendingOnboarding)
+          const { data: associateData } = await onboardingService.associate({ guest_data: guestData })
+          targetProposalId = associateData.proposal_id
+          localStorage.removeItem('pending_onboarding')
+        } catch (assocError) {
+          console.error('Erro ao associar dados onboarding:', assocError)
+        }
+      }
+
       try {
-        const fullReturnUrl = window.location.origin + '/dashboard'
+        const successUrl = targetProposalId 
+          ? `${window.location.origin}/dashboard/orcamentos/${targetProposalId}/enviar`
+          : `${window.location.origin}/dashboard`
+        
         sessionStorage.setItem('show_welcome', selectedPlan)
 
-        const { data: checkoutData } = await subscriptionService.checkout(selectedPlan, fullReturnUrl)
+        const { data: checkoutData } = await subscriptionService.checkout(selectedPlan, successUrl)
 
         if (checkoutData?.checkout_url) {
           window.location.href = checkoutData.checkout_url

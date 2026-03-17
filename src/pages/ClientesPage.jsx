@@ -53,6 +53,7 @@ import {
 import { FaWhatsapp } from 'react-icons/fa'
 import { useColorModeValue } from '@chakra-ui/react'
 import { useAuth } from '../hooks/useAuth'
+import { useSubscription } from '../hooks/useSubscription'
 
 // Components
 import Container from '../components/layout/Container'
@@ -73,6 +74,7 @@ const ClientesPage = () => {
   const { getCurrentUser } = useAuth()
   const user = getCurrentUser()
   const isAdmin = user?.role === 3 || user?.role === 1
+  const { isBusiness } = useSubscription()
   const [teamMembers, setTeamMembers] = useState([])
   const [selectedUserIds, setSelectedUserIds] = useState([])
 
@@ -137,9 +139,9 @@ const ClientesPage = () => {
     if (!dateError) fetchClients(pagination.currentPage)
   }, [debouncedSearchTerm, dateRange.start, dateRange.end, dateError, pagination.currentPage, selectedUserIds])
 
-  // Fetch team members if admin
+  // Fetch team members if admin AND business
   useEffect(() => {
-    if (isAdmin) {
+    if (isAdmin && isBusiness) {
       teamUserService.list().then(response => {
         const membersList = response.data || []
         setTeamMembers(membersList.map(m => ({
@@ -150,7 +152,7 @@ const ClientesPage = () => {
         console.error('Erro ao buscar membros da equipe:', err)
       })
     }
-  }, [isAdmin])
+  }, [isAdmin, isBusiness])
 
   const handleDatePresetChange = (preset) => {
     setDatePreset(preset)

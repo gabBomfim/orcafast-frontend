@@ -63,7 +63,7 @@ const DashboardPage = () => {
   const user = getCurrentUser()
   const isAdmin = user?.role === 3 || user?.role === 1
   const isMember = user?.role === 4
-  const { isFree, onTrial, trialEndsAt } = useSubscription()
+  const { isFree, onTrial, trialEndsAt, isBusiness } = useSubscription()
   const toast = useToast()
 
   const getDaysRemaining = (endDateStr) => {
@@ -131,9 +131,9 @@ const DashboardPage = () => {
     }
   }, [selectedPeriod, customDates.begin_date, customDates.end_date, selectedUserIds, fetchDashboard])
 
-  // Fetch team members if admin
+  // Fetch team members if admin AND business
   useEffect(() => {
-    if (isAdmin) {
+    if (isAdmin && isBusiness) {
       teamUserService.list().then(response => {
         const membersList = response.data || []
         setTeamMembers(membersList.map(m => ({
@@ -144,7 +144,7 @@ const DashboardPage = () => {
         console.error('Erro ao buscar membros da equipe:', err)
       })
     }
-  }, [isAdmin])
+  }, [isAdmin, isBusiness])
 
   // ─── Derived values ──────────────────────────────────────────────────────────
   const isYearlyView = selectedPeriod === 'this-year'
@@ -298,13 +298,18 @@ const DashboardPage = () => {
             {!isMember && (
               <Card borderRadius="2xl" boxShadow="sm" border="1px" borderColor="gray.200">
                 <CardBody p={6}>
-                  <Flex align="start" gap={4}>
+                  <Flex
+                    direction={{ base: 'column', md: 'row' }}
+                    align={{ base: 'center', md: 'start' }}
+                    gap={4}
+                    textAlign={{ base: 'center', md: 'left' }}
+                  >
                     <Box w={12} h={12} bg="emerald.50" borderRadius="xl"
                       display="flex" alignItems="center" justifyContent="center" flexShrink={0}>
                       <Icon as={FiTrendingUp} w={6} h={6} color="emerald.500" />
                     </Box>
 
-                    <Box flex={1}>
+                    <Box flex={1} w="full">
                       <Text fontSize="sm" fontWeight="medium" color="gray.600" mb={1}>
                         Faturamento Aprovado
                       </Text>
@@ -320,16 +325,29 @@ const DashboardPage = () => {
                       ) : (
                         <Box mt={3}>
                           <Text fontSize="3xl" fontWeight="bold" color="gray.300">R$ 0,00</Text>
-                          <Box mt={4} p={4} bg="emerald.50" rounded="xl" border="1px" borderColor="emerald.100">
-                            <Flex align="start" gap={3}>
-                              <Box w={10} h={10} bg="emerald.100" rounded="lg" display="flex" alignItems="center" justifyContent="center" flexShrink={0}>
-                                <Icon as={FiFileText} w={5} h={5} color="emerald.600" />
+                          <Box mt={4} p={5} bg="emerald.50" rounded="2xl" border="1px" borderColor="emerald.100">
+                            <Flex
+                              direction={{ base: 'column', md: 'row' }}
+                              align={{ base: 'center', md: 'start' }}
+                              textAlign={{ base: 'center', md: 'left' }}
+                              gap={4}
+                            >
+                              <Box
+                                w={12} h={12}
+                                bg="emerald.100"
+                                rounded="xl"
+                                display="flex"
+                                alignItems="center"
+                                justifyContent="center"
+                                flexShrink={0}
+                              >
+                                <Icon as={FiFileText} w={6} h={6} color="emerald.600" />
                               </Box>
                               <Box flex={1}>
-                                <Text fontSize="sm" fontWeight="medium" color="gray.900">
+                                <Text fontSize="md" fontWeight="bold" color="gray.900">
                                   {selectedUserIds.length > 0 ? 'Nenhum faturamento encontrado' : 'Comece a faturar agora'}
                                 </Text>
-                                <Text fontSize="xs" color="gray.500" mt={1}>
+                                <Text fontSize="sm" color="gray.600" mt={1}>
                                   {selectedUserIds.length > 0
                                     ? 'O(s) membro(s) selecionado(s) ainda não possui(em) orçamentos aprovados neste período.'
                                     : 'Crie seu primeiro orçamento e acompanhe seu faturamento em tempo real.'}
@@ -338,18 +356,19 @@ const DashboardPage = () => {
                                   <Button
                                     as={Link}
                                     to="/dashboard/propostas/nova"
-                                    mt={3}
-                                    size="sm"
+                                    mt={4}
+                                    size="md"
                                     bg="emerald.600"
                                     color="white"
                                     _hover={{ bg: 'emerald.700' }}
-                                    rounded="lg"
-                                    shadow="sm"
-                                    fontWeight="medium"
+                                    rounded="xl"
+                                    shadow="md"
+                                    fontWeight="bold"
+                                    w={{ base: 'full', md: 'auto' }}
+                                    leftIcon={<Icon as={FiZap} />}
+                                    rightIcon={<Icon as={FiArrowRight} />}
                                   >
-                                    <Icon as={FiZap} w={4} h={4} mr={1.5} />
                                     Criar primeiro orçamento
-                                    <Icon as={FiArrowRight} w={4} h={4} ml={1.5} />
                                   </Button>
                                 )}
                               </Box>
@@ -366,12 +385,17 @@ const DashboardPage = () => {
             {/* Card 2: Meta / Performance */}
             <Card borderRadius="2xl" boxShadow="sm" border="1px" borderColor="gray.200" overflow="hidden">
               <CardBody p={6}>
-                <Flex align="start" gap={4}>
+                <Flex
+                  direction={{ base: 'column', md: 'row' }}
+                  align={{ base: 'center', md: 'start' }}
+                  gap={4}
+                  textAlign={{ base: 'center', md: 'left' }}
+                >
                   <Box w={12} h={12} bg="emerald.50" borderRadius="xl"
                     display="flex" alignItems="center" justifyContent="center" flexShrink={0}>
                     <Icon as={isMember ? FiTrendingUp : FiTarget} w={6} h={6} color="emerald.500" />
                   </Box>
-                  <Box flex={1}>
+                  <Box flex={1} w="full">
                     <Text fontSize="sm" fontWeight="medium" color="gray.600" mb={1}>
                       {getMetaTitle()}
                     </Text>
@@ -550,12 +574,17 @@ const DashboardPage = () => {
             {/* Card 3: Funil */}
             <Card borderRadius="2xl" boxShadow="sm" border="1px" borderColor="gray.200">
               <CardBody p={6}>
-                <Flex align="start" gap={4}>
+                <Flex
+                  direction={{ base: 'column', md: 'row' }}
+                  align={{ base: 'center', md: 'start' }}
+                  gap={4}
+                  textAlign={{ base: 'center', md: 'left' }}
+                >
                   <Box w={12} h={12} bg="emerald.50" borderRadius="xl"
                     display="flex" alignItems="center" justifyContent="center" flexShrink={0}>
                     <Icon as={FiBarChart} w={6} h={6} color="emerald.500" />
                   </Box>
-                  <Box flex={1}>
+                  <Box flex={1} w="full">
                     <Text fontSize="sm" fontWeight="medium" color="gray.600" mb={4}>
                       Eficiência dos Orçamentos
                     </Text>

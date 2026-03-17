@@ -141,7 +141,7 @@ const CreateClientPage = () => {
         </SimpleGrid>
 
         {/* Tip */}
-        <Flex
+        {/* <Flex
           bg="emerald.50"
           border="1px"
           borderColor="emerald.100"
@@ -169,7 +169,7 @@ const CreateClientPage = () => {
               Adicione o telefone do WhatsApp para enviar o orçamento diretamente.
             </Text>
           </Box>
-        </Flex>
+        </Flex> */}
 
         {/* Navigation */}
         <Flex align="center" justify="space-between" w="full" mt={8} pt={6} borderTop="1px" borderColor="gray.200">

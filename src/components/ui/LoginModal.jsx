@@ -97,7 +97,10 @@ const LoginModal = ({ isOpen, onClose, onSuccess }) => {
       // Redirect to Stripe if registering
       if (!isLoginMode) {
         try {
-          const successUrl = `${window.location.origin}/dashboard/propostas/sucesso`
+          const successUrl = createdProposalId 
+            ? `${window.location.origin}/dashboard/orcamentos/${createdProposalId}/enviar`
+            : `${window.location.origin}/dashboard/propostas/sucesso`
+          
           sessionStorage.setItem('show_welcome', 'pro')
 
           const { data: checkoutData } = await subscriptionService.checkout('pro', successUrl)

@@ -147,9 +147,6 @@ const PublicProposalView = () => {
 
         <VStack align="start" spacing={2} mb={6}>
           <Heading size="md" color="gray.900">{title}</Heading>
-          {proposal.description && (
-            <Text color="gray.600">{proposal.description}</Text>
-          )}
         </VStack>
 
         {/* Itens */}
