@@ -104,18 +104,17 @@ const HomePage = () => {
                   <FiStar key={i} style={{ width: '1rem', height: '1rem', fill: 'var(--primary)', color: 'var(--primary)' }} />
                 ))}
               </div>
-              <span>O novo padrão em orçamentos</span>
+              <span>O jeito mais simples de enviar um orçamento profissional</span>
             </Badge>
 
             <div>
               <h1 className="hero-title">
                 Orça rápido,
-                <span className="hero-title-accent"> fecha fácil</span>
+                <span className="hero-title-accent"> fecha negócio fácil</span>
               </h1>
 
               <p className="hero-subtitle">
-                A plataforma mais simples para criar, enviar e acompanhar orçamentos profissionais.
-                Sem enrolação, sem complexidade.
+                Cria o orçamento, envia o link, acompanha a resposta. Direto ao ponto.
               </p>
             </div>
 
@@ -144,7 +143,7 @@ const HomePage = () => {
               </div>
               <div className="trust-item">
                 <FiCheck className="trust-icon" />
-                <span>Pronto em 2 minutos</span>
+                <span>É rápido, é direto</span>
               </div>
             </div>
           </div>
@@ -160,32 +159,32 @@ const HomePage = () => {
               <div className="dashboard-stats">
                 <div className="stat-box">
                   <div className="stat-label">
-                    <FiClock style={{ width: '1rem', height: '1rem' }} />
-                    <span>Tempo médio</span>
+                    <FiDollarSign style={{ width: '1rem', height: '1rem' }} />
+                    <span>Faturamento</span>
                   </div>
-                  <p className="stat-value">2 min</p>
+                  <p className="stat-value">R$ 7.300</p>
                 </div>
                 <div className="stat-box">
                   <div className="stat-label">
                     <FiTrendingUp style={{ width: '1rem', height: '1rem' }} />
-                    <span>Taxa aprovação</span>
+                    <span>Aprovados</span>
                   </div>
-                  <p className="stat-value">85%</p>
+                  <p className="stat-value">2 hoje</p>
                 </div>
               </div>
 
               <div className="dashboard-proposals">
                 <div className="proposal-item">
                   <div className="proposal-left">
-                    <div className="proposal-icon">
-                      <FiDollarSign style={{ width: '1.25rem', height: '1.25rem' }} />
+                    <div className="proposal-icon approved">
+                      <span style={{ fontSize: '0.75rem' }}>✓</span>
                     </div>
                     <div>
                       <p className="proposal-title">Orçamento #1234</p>
-                      <p className="proposal-status">Cliente visualizou</p>
+                      <p className="proposal-status">Aprovada</p>
                     </div>
                   </div>
-                  <span className="proposal-value">R$ 2.500</span>
+                  <span className="proposal-value approved">R$ 2.500</span>
                 </div>
                 <div className="proposal-item">
                   <div className="proposal-left">
@@ -202,7 +201,7 @@ const HomePage = () => {
               </div>
 
               <div className="floating-badge">
-                3 cliques para criar
+                Rápido de criar
               </div>
             </div>
           </div>
@@ -248,7 +247,7 @@ const HomePage = () => {
       <section id="como-funciona" className="how-section">
         <div className="section-header">
           <span className="section-category">Como funciona</span>
-          <h2 className="section-title">Processo simples em 4 etapas para fechar mais negócios</h2>
+          <h2 className="section-title">Processo simples em 3 etapas para fechar mais negócios</h2>
         </div>
 
         <div className="steps-container">
@@ -262,7 +261,7 @@ const HomePage = () => {
               </div>
               <h3 className="step-title">Criar</h3>
               <p className="step-description">
-                Monte seu orçamento em minutos com templates prontos e personalizáveis
+                Monte seu orçamento com itens, valores e descrições — do jeito que você trabalha.
               </p>
             </CardContent>
           </Card>
@@ -277,7 +276,7 @@ const HomePage = () => {
               </div>
               <h3 className="step-title">Enviar</h3>
               <p className="step-description">
-                Compartilhe por email, WhatsApp ou PDF em um único clique
+                Compartilhe por link, WhatsApp ou PDF em um único clique
               </p>
             </CardContent>
           </Card>
@@ -307,7 +306,7 @@ const HomePage = () => {
               </div>
               <h3 className="step-title">Fechar</h3>
               <p className="step-description">
-                Permita que seus clientes aprovem orçamentos com um único clique
+                Acompanhe a resposta e marque o orçamento como aprovado com um clique.
               </p>
             </CardContent>
           </Card>
@@ -318,8 +317,8 @@ const HomePage = () => {
       <section id="recursos" className="features-section">
         <div className="section-header">
           <span className="section-category">Recursos</span>
-          <h2 className="section-title">Controle absoluto sobre o seu funil de vendas</h2>
-          <p className="section-subtitle">Acompanhe taxas de conversão, identifique gargalos e status de cada orçamento</p>
+          <h2 className="section-title">Todos os seus orçamentos em um lugar só.</h2>
+          <p className="section-subtitle">Veja quantos orçamentos foram enviados, visualizados e aprovados. Simples assim.</p>
         </div>
 
         <div className="features-container">
@@ -328,9 +327,9 @@ const HomePage = () => {
               <div className="feature-icon-wrapper">
                 <FiBarChart className="feature-icon" />
               </div>
-              <h3 className="feature-title">Gestão centralizada</h3>
+              <h3 className="feature-title">Tudo no mesmo lugar</h3>
               <p className="feature-description">
-                Organize sua base de clientes e histórico de orçamentos de forma inteligente. Nunca mais perca um orçamento em planilhas ou PDFs antigos.
+                Seus clientes, orçamentos e histórico de envios organizados num só painel. Chega de perder orçamento em PDF esquecido no celular.
               </p>
             </CardContent>
           </Card>
@@ -338,11 +337,11 @@ const HomePage = () => {
           <Card className="feature-card">
             <CardContent className="feature-content">
               <div className="feature-icon-wrapper">
-                <FiSettings className="feature-icon" />
+                <FiEye className="feature-icon" />
               </div>
-              <h3 className="feature-title">Segurança e estabilidade</h3>
+              <h3 className="feature-title">Sabe quando o cliente abriu</h3>
               <p className="feature-description">
-                Seus dados financeiros e as informações dos seus clientes são protegidos com criptografia de ponta e infraestrutura robusta.
+                Quando você envia o link do orçamento, a OrçaFast te avisa assim que o destinatário visualizar. Chega de ficar no escuro esperando retorno.
               </p>
             </CardContent>
           </Card>
@@ -352,9 +351,9 @@ const HomePage = () => {
               <div className="feature-icon-wrapper">
                 <FiShield className="feature-icon" />
               </div>
-              <h3 className="feature-title">Dados seguros</h3>
+              <h3 className="feature-title">Seus dados estão aqui com a gente</h3>
               <p className="feature-description">
-                Seus dados e de seus clientes protegidos com criptografia de ponta a ponta
+                As informações dos seus clientes ficam guardadas com segurança. Você acessa de qualquer dispositivo, sem risco de perder nada.
               </p>
             </CardContent>
           </Card>
@@ -374,7 +373,7 @@ const HomePage = () => {
             <Badge className="popular-badge">MAIS POPULAR</Badge>
             <CardContent className="pricing-content">
               <h3 className="pricing-plan">Pro</h3>
-              <p className="pricing-description">Perfeito para freelancers e autônomos.</p>
+              <p className="pricing-description">Para quem trabalha por conta própria.</p>
               <div className="pricing-price">
                 <span className="price-currency">R$</span>
                 <span className="price-amount">49,90</span>
@@ -382,10 +381,10 @@ const HomePage = () => {
               </div>
               <ul className="pricing-features">
                 <li><FiCheck className="feature-check" /> Orçamentos ilimitados</li>
-                <li><FiCheck className="feature-check" /> Template profissional</li>
-                <li><FiCheck className="feature-check" /> Analytics avançado</li>
-                <li><FiCheck className="feature-check" /> Definição de metas</li>
-                <li><FiCheck className="feature-check" /> Suporte prioritário</li>
+                <li><FiCheck className="feature-check" /> Orçamento com a sua marca</li>
+                <li><FiCheck className="feature-check" /> Painel com seus números</li>
+                <li><FiCheck className="feature-check" /> Metas financeiras</li>
+                <li><FiCheck className="feature-check" /> Suporte rápido</li>
               </ul>
               <Link
                 to="/onboarding/create-client"
@@ -400,7 +399,7 @@ const HomePage = () => {
           <Card className="pricing-card">
             <CardContent className="pricing-content">
               <h3 className="pricing-plan">Business</h3>
-              <p className="pricing-description">O poder total para equipes e agências.</p>
+              <p className="pricing-description">Para negócios com equipe de vendas.</p>
               <div className="pricing-price">
                 <span className="price-currency">R$</span>
                 <span className="price-amount">97,90</span>
@@ -408,13 +407,14 @@ const HomePage = () => {
               </div>
               <ul className="pricing-features">
                 <li><FiCheck className="feature-check" /> Orçamentos ilimitados</li>
-                <li><FiCheck className="feature-check" /> Template profissional</li>
-                <li><FiCheck className="feature-check" /> Analytics avançado</li>
-                <li><FiCheck className="feature-check" /> Suporte prioritário</li>
-                <li><FiCheck className="feature-check" /> Múltiplos usuários</li>
-                <li><FiCheck className="feature-check" /> Relatórios de equipe</li>
-                <li><FiCheck className="feature-check" /> Gerenciamento de equipe</li>
-                <li><FiCheck className="feature-check" /> Definição de metas para equipe</li>
+                <li><FiCheck className="feature-check" /> Orçamento com a sua marca</li>
+                <li><FiCheck className="feature-check" /> Painel com seus números</li>
+                <li><FiCheck className="feature-check" /> Metas financeiras</li>
+                <li><FiCheck className="feature-check" /> Suporte rápido</li>
+                <li><FiCheck className="feature-check" /> Toda a equipe na mesma conta</li>
+                <li><FiCheck className="feature-check" /> Veja o desempenho de cada um</li>
+                <li><FiCheck className="feature-check" /> Gerencie sua equipe</li>
+                <li><FiCheck className="feature-check" /> Metas financeiras para a equipe</li>
               </ul>
               <Link
                 to="/register?plan=business"
@@ -431,9 +431,11 @@ const HomePage = () => {
       {/* CTA Section */}
       <section className="cta-section">
         <div className="cta-container">
-          <h2 className="cta-title">Pronto para elevar o nível do seu negócio?</h2>
+          <h2 className="cta-title">Feche negócios.
+            <br />
+            A OrçaFast cuida do resto.</h2>
           <p className="cta-subtitle">
-            Junte-se aos profissionais que usam a OrçaFast para modernizar a apresentação de seus serviços.
+            Cria sua conta agora. É rápido, é direto e você já sai com o primeiro orçamento pronto.
           </p>
           <Link
             to="/onboarding/create-client"
