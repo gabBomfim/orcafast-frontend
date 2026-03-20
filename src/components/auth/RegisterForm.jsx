@@ -18,6 +18,8 @@ import {
 } from 'react-icons/fi'
 import { FaApple } from 'react-icons/fa'
 import { useState } from 'react'
+import { FieldError } from '../ui/FormFeedback'
+import { formMessages } from '../../utils/formMessages'
 
 // Componente SVG do Google inline
 const GoogleIcon = () => (
@@ -41,11 +43,29 @@ const GoogleIcon = () => (
   </svg>
 )
 
+// Aplica máscara CPF (000.000.000-00) ou CNPJ (00.000.000/0000-00)
+const formatDocument = (value) => {
+  const digits = value.replace(/\D/g, '').slice(0, 14)
+  if (digits.length <= 11) {
+    return digits
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d{1,2})$/, '$1-$2')
+  }
+  return digits
+    .replace(/(\d{2})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d)/, '$1/$2')
+    .replace(/(\d{4})(\d{1,2})$/, '$1-$2')
+}
+
 const RegisterForm = ({ onSubmit, onGoogleLogin, onFacebookLogin, isLoading }) => {
   const [showPassword, setShowPassword] = useState(false)
   const [showPasswordConfirmation, setShowPasswordConfirmation] = useState(false)
   const [password, setPassword] = useState('')
   const [passwordConfirmation, setPasswordConfirmation] = useState('')
+  const [documentMasked, setDocumentMasked] = useState('')
+  const [errors, setErrors] = useState({})
 
   // Password strength indicator
   const getPasswordStrength = () => {
@@ -57,6 +77,55 @@ const RegisterForm = ({ onSubmit, onGoogleLogin, onFacebookLogin, isLoading }) =
 
   const strength = getPasswordStrength()
   const passwordsMatch = password && passwordConfirmation && password === passwordConfirmation
+
+  // ─── Validação ─────────────────────────────────────────────────────────────
+
+  const validate = (formData) => {
+    const next = {}
+
+    if (!formData.get('name')?.trim())
+      next.name = formMessages.required.name
+
+    if (!formData.get('company_name')?.trim())
+      next.company_name = formMessages.required.generic
+
+    const digits = (formData.get('document') || '').replace(/\D/g, '')
+    if (!digits)
+      next.document = formMessages.required.generic
+    else if (digits.length !== 11 && digits.length !== 14)
+      next.document = 'Digite um CPF (11 dígitos) ou CNPJ (14 dígitos) válido.'
+
+    const email = formData.get('email')?.trim()
+    if (!email)
+      next.email = formMessages.required.email
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+      next.email = formMessages.invalid.email
+
+    const pwd = formData.get('password') || ''
+    if (!pwd)
+      next.password = formMessages.required.password
+    else if (pwd.length < 8)
+      next.password = formMessages.length.tooShort(8)
+
+    const pwdConfirm = formData.get('password_confirmation') || ''
+    if (!pwdConfirm)
+      next.password_confirmation = formMessages.required.generic
+    else if (pwd !== pwdConfirm)
+      next.password_confirmation = formMessages.password.mismatch
+
+    setErrors(next)
+    return Object.keys(next).length === 0
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    const formData = new FormData(e.target)
+    if (!validate(formData)) return
+    onSubmit(e)
+  }
+
+  const clearError = (field) =>
+    setErrors((prev) => ({ ...prev, [field]: '' }))
 
   return (
     <VStack spacing={6} w="full">
@@ -76,20 +145,6 @@ const RegisterForm = ({ onSubmit, onGoogleLogin, onFacebookLogin, isLoading }) =
         >
           Continuar com Google
         </Button>
-        {/* <Button
-          w="full"
-          h={12}
-          bg="gray.900"
-          _hover={{ bg: 'gray.800' }}
-          borderRadius="xl"
-          fontWeight="medium"
-          color="white"
-          fontSize="sm"
-          leftIcon={<Icon as={FaApple} boxSize={5} />}
-          onClick={onFacebookLogin}
-        >
-          Continuar com Apple
-        </Button> */}
       </VStack>
 
       {/* Divider */}
@@ -102,52 +157,77 @@ const RegisterForm = ({ onSubmit, onGoogleLogin, onFacebookLogin, isLoading }) =
       </Flex>
 
       {/* Form */}
-      <VStack as="form" spacing={4} w="full" onSubmit={onSubmit}>
-        {/* Name field */}
-        <Input
-          type="text"
-          name="name"
-          placeholder="Nome completo"
-          required
-        />
+      <VStack as="form" spacing={4} w="full" onSubmit={handleSubmit} noValidate>
 
-        {/* Company Name field */}
-        <Input
-          type="text"
-          name="company_name"
-          placeholder="Nome da empresa"
-          required
-        />
+        {/* Name */}
+        <Box w="full">
+          <Input
+            type="text"
+            name="name"
+            placeholder="Seu nome"
+            isInvalid={!!errors.name}
+            onChange={() => clearError('name')}
+          />
+          <FieldError message={errors.name} />
+        </Box>
 
-        <Input
-          type="text"
-          name="document"
-          placeholder="CNPJ ou CPF"
-          required
-        />
+        {/* Company Name */}
+        <Box w="full">
+          <Input
+            type="text"
+            name="company_name"
+            placeholder="Nome da sua empresa (ou oficina, loja...)"
+            isInvalid={!!errors.company_name}
+            onChange={() => clearError('company_name')}
+          />
+          <FieldError message={errors.company_name} />
+        </Box>
 
-        {/* Email field */}
-        <Input
-          type="email"
-          name="email"
-          placeholder="Email"
-          required
-        />
+        {/* CPF / CNPJ */}
+        <Box w="full">
+          <Input
+            type="text"
+            name="document"
+            placeholder="CNPJ ou CPF"
+            value={documentMasked}
+            maxLength={18}
+            isInvalid={!!errors.document}
+            onChange={(e) => {
+              setDocumentMasked(formatDocument(e.target.value))
+              clearError('document')
+            }}
+          />
+          <FieldError message={errors.document} />
+        </Box>
 
-        {/* Password field */}
+        {/* Email */}
+        <Box w="full">
+          <Input
+            type="email"
+            name="email"
+            placeholder="Email"
+            isInvalid={!!errors.email}
+            onChange={() => clearError('email')}
+          />
+          <FieldError message={errors.email} />
+        </Box>
+
+        {/* Password */}
         <Box w="full">
           <InputGroup size="lg">
             <Input
               type={showPassword ? 'text' : 'password'}
               name="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value)
+                clearError('password')
+              }}
               placeholder="Senha (mínimo 8 caracteres)"
               minLength={8}
               pr={12}
-              _focus={{ outline: 'none', ring: 2, ringColor: 'emerald.200' }}
+              isInvalid={!!errors.password}
               transition="all"
-              required
             />
             <InputRightElement h={12}>
               <Button
@@ -191,28 +271,25 @@ const RegisterForm = ({ onSubmit, onGoogleLogin, onFacebookLogin, isLoading }) =
               </Text>
             </Box>
           )}
+          <FieldError message={errors.password} />
         </Box>
 
-        {/* Password confirmation field */}
+        {/* Password confirmation */}
         <Box w="full">
           <InputGroup size="lg">
             <Input
               type={showPasswordConfirmation ? 'text' : 'password'}
               name="password_confirmation"
               value={passwordConfirmation}
-              onChange={(e) => setPasswordConfirmation(e.target.value)}
+              onChange={(e) => {
+                setPasswordConfirmation(e.target.value)
+                clearError('password_confirmation')
+              }}
               placeholder="Confirmar senha"
               minLength={8}
               pr={12}
-              _focus={{
-                outline: 'none',
-                ring: 2,
-                ringColor: passwordConfirmation && !passwordsMatch ? 'red.200' : 'emerald.200'
-              }}
-              ring={passwordConfirmation ? 2 : undefined}
-              ringColor={passwordConfirmation && !passwordsMatch ? 'red.200' : passwordsMatch ? 'emerald.200' : undefined}
+              isInvalid={!!errors.password_confirmation}
               transition="all"
-              required
             />
             <InputRightElement h={12}>
               <Button
@@ -233,7 +310,7 @@ const RegisterForm = ({ onSubmit, onGoogleLogin, onFacebookLogin, isLoading }) =
           </InputGroup>
 
           {/* Match indicator */}
-          {passwordConfirmation && (
+          {passwordConfirmation && !errors.password_confirmation && (
             <Flex align="center" gap={1.5} mt={2}>
               {passwordsMatch ? (
                 <>
@@ -248,6 +325,7 @@ const RegisterForm = ({ onSubmit, onGoogleLogin, onFacebookLogin, isLoading }) =
               )}
             </Flex>
           )}
+          <FieldError message={errors.password_confirmation} />
         </Box>
 
         {/* Submit button */}
@@ -264,7 +342,7 @@ const RegisterForm = ({ onSubmit, onGoogleLogin, onFacebookLogin, isLoading }) =
           boxShadow="lg"
           isLoading={isLoading}
         >
-          Criar conta grátis
+          Continuar para o teste grátis
         </Button>
       </VStack>
 
@@ -274,14 +352,19 @@ const RegisterForm = ({ onSubmit, onGoogleLogin, onFacebookLogin, isLoading }) =
           color="emerald.600"
           fontWeight="medium"
           textDecoration="underline"
+          href="/termos"
+          target="_blank"
         >
           Termos de Uso
+
         </ChakraLink>{' '}
         e{' '}
         <ChakraLink
           color="emerald.600"
           fontWeight="medium"
           textDecoration="underline"
+          href="/privacidade"
+          target="_blank"
         >
           Política de Privacidade
         </ChakraLink>

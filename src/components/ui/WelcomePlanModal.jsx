@@ -14,39 +14,39 @@ import {
 } from '@chakra-ui/react'
 import {
     FiAward, FiCheck, FiZap, FiStar, FiLock, FiMessageCircle,
-    FiTrendingUp, FiTarget, FiArrowRight, FiFilter
+    FiTrendingUp, FiTarget, FiArrowRight, FiFilter, FiUsers
 } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
 
 const PLAN_WELCOME = {
     pro: {
-        badge: 'PRO',
+        badge: 'AUTÔNOMO',
         badgeColor: 'yellow',
-        title: 'Bem-vindo ao Profissional!',
-        subtitle: 'Você desbloqueou ferramentas que vão transformar sua gestão de negócios.',
+        title: 'Tudo pronto! O Plano Autônomo tá ativo.',
+        subtitle: 'Agora você tem tudo o que precisa para profissionalizar seus orçamentos e ganhar tempo.',
         features: [
-            { icon: FiZap, text: 'Orçamentos ilimitados com a cara da sua empresa' },
-            { icon: FiStar, text: 'Metas financeiras personalizadas' },
-            { icon: FiLock, text: 'Dashboard com métricas financeiras' },
+            { icon: FiZap, text: 'Mande quantos orçamentos quiser, com a sua logo.' },
+            { icon: FiStar, text: 'Defina suas metas e acompanhe seu lucro.' },
+            { icon: FiLock, text: 'Veja o dinheiro entrando direto no seu painel.' },
             { icon: FiMessageCircle, text: 'Suporte prioritário por WhatsApp' },
         ],
         cta: 'Começar a usar',
-        prompt: 'Comece agora definindo suas metas financeiras. Com o plano PRO você pode criar metas ilimitadas e acompanhar o crescimento do seu negócio em tempo real.',
+        prompt: 'Dica: comece definindo suas metas financeiras. Assim, a gente te ajuda a acompanhar o crescimento do seu negócio em tempo real.',
     },
     business: {
-        badge: 'BUSINESS',
+        badge: 'EQUIPE',
         badgeColor: 'purple',
-        title: 'Bem-vindo ao Business!',
-        subtitle: 'Sua operação está pronta para crescer. Todos os recursos estão liberados.',
+        title: 'Show de bola! O Plano Equipe tá liberado.',
+        subtitle: 'Agora seu time tem a ferramenta certa pra parar de bater cabeça e fechar mais negócios.',
         features: [
-            { icon: FiTrendingUp, text: 'Múltiplos usuários na mesma conta' },
-            { icon: FiStar, text: 'Relatórios avançados' },
-            { icon: FiLock, text: 'Dashboard com métricas financeiras' },
-            { icon: FiFilter, text: 'Acompanhe a evolução do seu negócio com filtros dinâmicos' },
-            { icon: FiMessageCircle, text: 'Suporte prioritário por WhatsApp' },
+            { icon: FiTrendingUp, text: 'Traga sua equipe: todo mundo na mesma página.' },
+            { icon: FiStar, text: 'Relatórios prontos: veja onde seu lucro está de verdade.' },
+            { icon: FiLock, text: 'Painel completo: controle total do que entra e sai.' },
+            { icon: FiFilter, text: 'Busca rápida: ache qualquer orçamento num piscar de olhos.' },
+            { icon: FiMessageCircle, text: 'Suporte VIP por WhatsApp (fale direto com a gente).' },
         ],
         cta: 'Começar a usar',
-        prompt: 'Comece agora configurando sua equipe e explorando as métricas do seu negócio. Escale sua operação com total controle.',
+        prompt: 'Dica: comece cadastrando seus ajudantes ou sócios. Assim, todo mundo fala a mesma língua e você foca em fazer a empresa crescer.',
     },
 }
 
@@ -90,7 +90,7 @@ const WelcomePlanModal = ({ isOpen, onClose, planSlug }) => {
                             mx="auto"
                             mb={4}
                         >
-                            <Icon as={FiAward} boxSize={8} color="green.500" />
+                            <Icon as={planSlug === 'business' ? FiUsers : FiAward} boxSize={8} color="green.500" />
                         </Flex>
 
                         <Badge

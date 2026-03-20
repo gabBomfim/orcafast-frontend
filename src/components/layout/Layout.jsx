@@ -32,12 +32,13 @@ const Layout = ({
       
       <Sidebar />
       
-      <Box 
+      <Box
         as="main"
         ml={{ base: 0, lg: isCollapsed ? '80px' : '280px' }}
-        pt="73px"
         transition="margin-left 0.2s ease-in-out"
-        p={{ base: 4, md: 6 }}
+        pt="73px"
+        px={{ base: 4, md: 6 }}
+        pb={{ base: 'calc(env(safe-area-inset-bottom) + 24px)', md: 6 }}
       >
         {children}
       </Box>

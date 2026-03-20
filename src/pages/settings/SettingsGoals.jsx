@@ -155,7 +155,7 @@ const SettingsGoals = () => {
             if (err.response?.status === 403 && err.response?.data?.upgrade_required) {
                 toast({
                     title: 'Plano não inclui este recurso',
-                    description: 'Faça upgrade para o plano Pro ou Business para definir metas financeiras.',
+                    description: 'Faça upgrade para o plano Autônomo ou Equipe para definir metas financeiras.',
                     status: 'warning',
                     duration: 6000,
                     isClosable: true,
@@ -271,7 +271,7 @@ const SettingsGoals = () => {
                                     Metas Financeiras
                                 </Text>
                                 <Text fontSize="sm" color="gray.600">
-                                    Acesse o plano Pro ou Business para definir metas de faturamento e acompanhar seu progresso.
+                                    Acesse o plano Autônomo ou Equipe para definir metas de faturamento e acompanhar seu progresso.
                                 </Text>
                             </Box>
                             <Button

@@ -90,6 +90,8 @@ const components = {
       fontWeight: '600',
       borderRadius: '12px',
       letterSpacing: '-0.2px',
+      touchAction: 'manipulation', // elimina delay de 300ms no toque em iOS/Android
+      userSelect: 'none',
     },
     variants: {
       solid: {
@@ -329,12 +331,25 @@ const styles = {
       bg: 'gray.50',
       WebkitTextSizeAdjust: '100%',
       textSizeAdjust: '100%',
+      // Safe area para iPhone (notch + home bar)
+      paddingBottom: 'env(safe-area-inset-bottom)',
+    },
+    '#root': {
+      // dvh (dynamic viewport height) resolve 100vh no iOS Safari
+      minHeight: '100dvh',
     },
     'input, textarea, select': {
+      // font-size mínimo 16px previne zoom automático no iOS
       fontSize: { base: '16px !important', md: 'sm' },
+      touchAction: 'manipulation',
     },
     'input:focus, textarea:focus, select:focus': {
+      // scroll para deixar o campo visível acima do teclado virtual
       scrollMarginTop: '120px',
+    },
+    'button, a, [role="button"]': {
+      // elimina delay de 300ms no toque em toda área clicável
+      touchAction: 'manipulation',
     },
     '*': {
       WebkitOverflowScrolling: 'touch',

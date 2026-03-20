@@ -31,14 +31,16 @@ import { useOnboarding } from '../../contexts/OnboardingContext'
 import { storage } from '../../utils/storage'
 import { openWhatsApp } from '../../utils/whatsapp'
 import { proposalService } from '../../services/proposal.service'
+import { FieldHint } from '../../components/ui/FormFeedback'
 import { Spinner, Center } from '@chakra-ui/react'
+import { maskPhone } from '../../utils/mask'
 
 const SendProposalPage = () => {
   const navigate = useNavigate()
   const { id } = useParams()
   const { isOpen: isLoginModalOpen, onOpen: onLoginModalOpen, onClose: onLoginModalClose } = useDisclosure()
   const { guestData } = useOnboarding()
-  
+
   const [loading, setLoading] = useState(!!id)
   const [proposal, setProposal] = useState(null)
   const [linkCopied, setLinkCopied] = useState(false)
@@ -55,7 +57,10 @@ const SendProposalPage = () => {
             clientName: data.client?.name || data.client_name,
             clientPhone: data.client?.phone || data.client_phone,
             title: data.title,
+            subtotal: data.subtotal,
+            discount: data.discount,
             totalValue: data.total_value,
+            items: data.items,
             sharingToken: data.sharing_token
           })
         })
@@ -72,8 +77,8 @@ const SendProposalPage = () => {
   const clientName = proposal?.clientName || guestData.client?.name || 'Cliente'
   const clientPhone = proposal?.clientPhone || guestData.client?.phone || '(00) 00000-0000'
   const proposalTitle = proposal?.title || guestData.proposal?.title || 'Título do Orçamento'
-  
-  const subtotal = guestData.proposal?.items?.reduce((acc, item) => {
+
+  const subtotal = proposal?.subtotal || guestData.proposal?.items?.reduce((acc, item) => {
     return acc + (item.quantity * item.unit_price)
   }, 0) || 0
   const totalValue = proposal?.totalValue || (subtotal - (guestData.proposal?.discount || 0))
@@ -105,16 +110,16 @@ const SendProposalPage = () => {
         proposalService.updateStatus(id, 2)
       } else if (method === 'pdf') {
         proposalService.downloadPDF(id).then(response => {
-           const blob = new Blob([response.data], { type: 'application/pdf' })
-           const url = window.URL.createObjectURL(blob)
-           const link = document.createElement('a')
-           link.href = url
-           link.download = `proposta-${id}.pdf`
-           document.body.appendChild(link)
-           link.click()
-           document.body.removeChild(link)
-           window.URL.revokeObjectURL(url)
-           proposalService.updateStatus(id, 2)
+          const blob = new Blob([response.data], { type: 'application/pdf' })
+          const url = window.URL.createObjectURL(blob)
+          const link = document.createElement('a')
+          link.href = url
+          link.download = `proposta-${id}.pdf`
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
+          window.URL.revokeObjectURL(url)
+          proposalService.updateStatus(id, 2)
         })
       } else if (method === 'finalize' || method === 'list') {
         navigate('/dashboard/propostas')
@@ -157,52 +162,105 @@ const SendProposalPage = () => {
           <Icon as={FiShare2} w={8} h={8} color="emerald.500" />
         </Flex>
         <Heading as="h1" fontSize="3xl" fontWeight="bold" color="gray.900" mb={2}>
-          Orçamento criado!
+          Orçamento pronto! 🎉
         </Heading>
         <Text fontSize="lg" color="gray.600">
-          Seu orçamento foi criado e está pronto para ser enviado.
+          Tudo certo! Agora é só escolher como enviar pro cliente.
         </Text>
       </VStack>
 
       <VStack spacing={4}>
-        {/* Details card standardized with ProposalSuccessPage */}
-        <VStack spacing={4} align="stretch" bg="emerald.50" p={6} borderRadius="xl" w="full" mb={6}>
-          <HStack spacing={3}>
-            <Icon as={FiUser} color="emerald.600" boxSize={5} />
-            <VStack align="start" spacing={0} flex={1}>
-              <Text fontSize="sm" color="gray.600" fontWeight="medium">
-                Cliente
-              </Text>
-              <Text fontSize="md" color="gray.900" fontWeight="semibold">
-                {clientName}
-              </Text>
-            </VStack>
-          </HStack>
+        {/* Full preview — same pattern as CreateProposalPage */}
+        {(() => {
+          const rawItems = proposal?.items || guestData.proposal?.items || []
+          const previewItems = rawItems.map((item, i) => ({
+            id: item.id || i,
+            desc: item.description || '',
+            qtd: item.quantity || 1,
+            value: item.unit_price || 0,
+          }))
+          const previewSubtotal = parseFloat(proposal?.subtotal) || previewItems.reduce((acc, item) => {
+            return acc + (parseFloat(item.value) || 0) * (parseFloat(item.qtd) || 0)
+          }, 0)
+          const discountPct = parseFloat(proposal?.discount || guestData.proposal?.discount) || 0
+          const discountAmount = previewSubtotal * (discountPct / 100)
+          const previewTotal = parseFloat(proposal?.totalValue) || (previewSubtotal - discountAmount)
+          const fmt = (n) => Number(n).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
-          <HStack spacing={3}>
-            <Icon as={FiFileText} color="emerald.600" boxSize={5} />
-            <VStack align="start" spacing={0} flex={1}>
-              <Text fontSize="sm" color="gray.600" fontWeight="medium">
-                Título
-              </Text>
-              <Text fontSize="md" color="gray.900" fontWeight="semibold">
-                {proposalTitle}
-              </Text>
-            </VStack>
-          </HStack>
+          return (
+            <Box
+              bg="white"
+              borderRadius="2xl"
+              p={6}
+              boxShadow="sm"
+              border="1px"
+              borderColor="gray.200"
+              w="full"
+              mb={6}
+            >
+              <HStack justify="space-between" mb={6}>
+                <Heading size="md" color="gray.900">Resumo do Orçamento</Heading>
+                <Icon as={FiFileText} color="gray.400" />
+              </HStack>
 
-          <HStack spacing={3}>
-            <Icon as={FiDollarSign} color="emerald.600" boxSize={5} />
-            <VStack align="start" spacing={0} flex={1}>
-              <Text fontSize="sm" color="gray.600" fontWeight="medium">
-                Valor Total
-              </Text>
-              <Text fontSize="lg" color="emerald.600" fontWeight="bold">
-                R$ {totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-              </Text>
-            </VStack>
-          </HStack>
-        </VStack>
+              <VStack spacing={4} align="stretch">
+                {/* Cabeçalho do cliente */}
+                <Box bg="emerald.50" p={4} borderRadius="lg" borderWidth="1px" borderColor="emerald.200">
+                  <Text fontSize="sm" color="emerald.700" fontWeight="semibold" mb={2}>
+                    ORÇAMENTO PARA:
+                  </Text>
+                  <VStack align="start" spacing={1}>
+                    <Text fontWeight="bold" color="gray.900">{clientName}</Text>
+                    {clientPhone && (
+                      <Text fontSize="sm" color="gray.600">{maskPhone(clientPhone)}</Text>
+                    )}
+                  </VStack>
+                </Box>
+
+                <Heading size="lg" color="gray.900">{proposalTitle}</Heading>
+                <Box height="1px" bg="gray.200" />
+
+                {/* Lista de itens */}
+                {previewItems.filter(item => item.desc.trim()).map((item) => {
+                  const v = parseFloat(item.value) || 0
+                  const q = parseInt(item.qtd) || 1
+                  return (
+                    <HStack key={item.id} justify="space-between">
+                      <VStack align="start" spacing={0}>
+                        <Text fontWeight="medium" color="gray.900">{item.desc}</Text>
+                        <Text fontSize="sm" color="gray.600">
+                          {q}x R$ {fmt(v)}
+                        </Text>
+                      </VStack>
+                      <Text fontWeight="bold" color="gray.900">R$ {fmt(v * q)}</Text>
+                    </HStack>
+                  )
+                })}
+
+                <Box height="1px" bg="gray.200" />
+
+                {/* Totais */}
+                <VStack spacing={2} align="stretch">
+                  <HStack justify="space-between">
+                    <Text color="gray.900">Subtotal:</Text>
+                    <Text fontWeight="medium" color="gray.900">R$ {fmt(previewSubtotal)}</Text>
+                  </HStack>
+                  {discountPct > 0 && (
+                    <HStack justify="space-between">
+                      <Text color="gray.900">Desconto ({discountPct}%):</Text>
+                      <Text fontWeight="medium" color="red.500">- R$ {fmt(discountAmount)}</Text>
+                    </HStack>
+                  )}
+                  <Box height="1px" bg="gray.200" />
+                  <HStack justify="space-between">
+                    <Text fontSize="xl" fontWeight="bold" color="gray.900">Total</Text>
+                    <Text fontSize="xl" fontWeight="bold" color="emerald.600">R$ {fmt(previewTotal)}</Text>
+                  </HStack>
+                </VStack>
+              </VStack>
+            </Box>
+          )
+        })()}
 
         {/* Send options standardized */}
         <VStack spacing={6} w="full">
@@ -223,9 +281,6 @@ const SendProposalPage = () => {
             >
               Enviar via WhatsApp
             </Button>
-            <Text fontSize="xs" color="emerald.600" fontWeight="medium" textAlign="center">
-              Acompanhe quando o cliente visualizar e aprovar a proposta.
-            </Text>
           </VStack>
 
           <VStack spacing={2} w="full">
@@ -241,13 +296,10 @@ const SendProposalPage = () => {
               leftIcon={linkCopied ? <Icon as={FiCheck} /> : <Icon as={FiLink} />}
               onClick={() => handleSend('link')}
             >
-              {linkCopied ? 'Link Copiado!' : 'Copiar link para o cliente'}
+              {linkCopied ? 'Link Copiado!' : 'Copiar link para compartilhar'}
             </Button>
-            <Text fontSize="xs" color="emerald.600" fontWeight="medium" textAlign="center">
-              Ideal para enviar em outras redes sociais com rastreamento.
-            </Text>
           </VStack>
-          <VStack spacing={2} w="full">
+          {/* <VStack spacing={2} w="full">
             <Button
               type="button"
               w="full"
@@ -263,10 +315,12 @@ const SendProposalPage = () => {
             >
               Baixar PDF
             </Button>
-            <Text fontSize="xs" color="gray.500" textAlign="center">
-              Atenção: O rastreamento de visualização não funciona em arquivos PDF.
-            </Text>
-          </VStack>
+            <FieldHint message={
+              <>
+                <b>Dica:</b> Se enviar por PDF, não conseguimos te avisar quando ele abrir.
+              </>
+            } />
+          </VStack> */}
 
           {isAuthenticated && (
             <Button
@@ -280,7 +334,7 @@ const SendProposalPage = () => {
               leftIcon={<Icon as={FiList} w={5} h={5} />}
               onClick={() => handleSend('list')}
             >
-              Ver todos os orçamentos
+              Ir para meus orçamentos
             </Button>
           )}
         </VStack>
@@ -311,7 +365,7 @@ const SendProposalPage = () => {
             rightIcon={<Icon as={FiCheck} w={4} h={4} />}
             onClick={() => handleSend('finalize')}
           >
-            Finalizar
+            Feito
           </Button>
         </Flex>
       </VStack>

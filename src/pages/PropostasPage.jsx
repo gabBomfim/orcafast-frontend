@@ -790,47 +790,51 @@ Qualquer dúvida, estou à disposição!`
                           {(proposal.status === 'draft' || proposal.status === 'sent' || proposal.status === 'viewed') ? (
                             <Stack direction={{ base: 'column', md: 'row' }} spacing={2} w={{ base: 'full', md: 'auto' }}>
                               <Button
-                                size="sm"
+                                size={{ base: 'md', md: 'sm' }}
                                 colorScheme="green"
                                 variant="outline"
                                 onClick={() => confirmAction('approve', proposal)}
                                 leftIcon={<Icon as={FiCheckCircle} />}
                                 w={{ base: 'full', md: 'auto' }}
+                                h={{ base: '44px', md: 'auto' }}
                               >
                                 Aprovar orçamento
                               </Button>
                               <Button
-                                size="sm"
+                                size={{ base: 'md', md: 'sm' }}
                                 colorScheme="red"
                                 variant="outline"
                                 onClick={() => confirmAction('reject', proposal)}
                                 leftIcon={<Icon as={FiXCircle} />}
                                 _hover={{ bg: 'red.50', borderColor: 'red.500', color: 'red.600' }}
                                 w={{ base: 'full', md: 'auto' }}
+                                h={{ base: '44px', md: 'auto' }}
                               >
                                 Reprovar orçamento
                               </Button>
                             </Stack>
                           ) : proposal.status === 'approved' ? (
                             <Button
-                              size="sm"
+                              size={{ base: 'md', md: 'sm' }}
                               colorScheme="red"
                               variant="outline"
                               onClick={() => confirmAction('reject', proposal)}
                               leftIcon={<Icon as={FiXCircle} />}
                               _hover={{ bg: 'red.50', borderColor: 'red.500', color: 'red.600' }}
                               w={{ base: 'full', md: 'auto' }}
+                              h={{ base: '44px', md: 'auto' }}
                             >
                               Reprovar orçamento
                             </Button>
                           ) : proposal.status === 'rejected' && (
                             <Button
-                              size="sm"
+                              size={{ base: 'md', md: 'sm' }}
                               colorScheme="green"
                               variant="outline"
                               onClick={() => confirmAction('approve', proposal)}
                               leftIcon={<Icon as={FiCheckCircle} />}
                               w={{ base: 'full', md: 'auto' }}
+                              h={{ base: '44px', md: 'auto' }}
                             >
                               Aprovar orçamento
                             </Button>
@@ -840,13 +844,14 @@ Qualquer dúvida, estou à disposição!`
                             <MenuButton
                               as={Button}
                               variant="outline"
-                              size="sm"
+                              size={{ base: 'md', md: 'sm' }}
                               rightIcon={<Icon as={FiChevronDown} />}
                               bg="gray.50"
                               borderColor="gray.200"
                               _hover={{ bg: 'gray.100' }}
                               isLoading={loadingAction[proposal.id] === 'whatsapp' || loadingAction[proposal.id] === 'download'}
                               w={{ base: 'full', md: 'auto' }}
+                              h={{ base: '44px', md: 'auto' }}
                             >
                               Opções
                             </MenuButton>

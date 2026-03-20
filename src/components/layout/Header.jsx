@@ -120,7 +120,10 @@ const Header = ({ title, showBackButton = false, rightContent }) => {
                 to="/dashboard/configuracoes/assinatura"
                 display={{ base: 'inline-flex', md: 'none' }}
                 colorScheme="emerald"
+                minW="44px"
+                h="44px"
                 px={2}
+                aria-label="Upgrade de plano"
               >
                 <Icon as={FiCrop} />
               </Button>

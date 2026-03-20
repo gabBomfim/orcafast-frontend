@@ -492,9 +492,10 @@ const ClientesPage = () => {
                             as={Link}
                             to={`/dashboard/propostas/nova?client=${client.id}`}
                             variant="outline"
-                            size="sm"
+                            size={{ base: 'md', md: 'sm' }}
                             leftIcon={<Icon as={FiFileText} />}
                             w={{ base: 'full', md: 'auto' }}
+                            h={{ base: '44px', md: 'auto' }}
                           >
                             Novo Orçamento
                           </Button>
@@ -503,12 +504,13 @@ const ClientesPage = () => {
                             <MenuButton
                               as={Button}
                               variant="outline"
-                              size="sm"
+                              size={{ base: 'md', md: 'sm' }}
                               rightIcon={<Icon as={FiChevronDown} />}
                               bg="gray.50"
                               borderColor="gray.200"
                               _hover={{ bg: 'gray.100' }}
                               w={{ base: 'full', md: 'auto' }}
+                              h={{ base: '44px', md: 'auto' }}
                             >
                               Opções
                             </MenuButton>

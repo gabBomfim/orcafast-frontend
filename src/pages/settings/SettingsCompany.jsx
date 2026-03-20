@@ -152,7 +152,7 @@ const SettingsCompany = () => {
             if (err.response?.status === 403 && err.response?.data?.upgrade_required) {
                 toast({
                     title: 'Plano não inclui este recurso',
-                    description: 'Faça upgrade para o plano Pro ou Business para personalizar os dados da empresa.',
+                    description: 'Faça upgrade para o plano Autônomo ou Equipe para personalizar os dados da empresa.',
                     status: 'warning',
                     duration: 6000,
                     isClosable: true,
@@ -228,7 +228,7 @@ const SettingsCompany = () => {
                                     Personalização da Marca
                                 </Text>
                                 <Text fontSize="sm" color="gray.600">
-                                    Destaque sua empresa com logo e informações personalizadas nos orçamentos. Disponível no plano Pro e Business.
+                                    Destaque sua empresa com logo e informações personalizadas nos orçamentos. Disponível no plano Autônomo e Equipe.
                                 </Text>
                             </Box>
                             <Button

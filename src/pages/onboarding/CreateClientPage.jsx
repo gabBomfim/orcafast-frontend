@@ -19,6 +19,9 @@ import { Link as RouterLink, useNavigate } from 'react-router-dom'
 import OnboardingLayout from '../../components/layout/OnboardingLayout'
 import { useOnboarding } from '../../contexts/OnboardingContext'
 import { maskPhone, unmaskPhone } from '../../utils/mask'
+import { useState } from 'react'
+import { FieldError } from '../../components/ui/FormFeedback'
+import { formMessages } from '../../utils/formMessages'
 
 const CreateClientPage = () => {
   const navigate = useNavigate()
@@ -31,21 +34,33 @@ const CreateClientPage = () => {
     const phone = unmaskPhone(formData.get('phone'))
     const email = formData.get('email')
 
-    // Validação: pelo menos telefone ou email deve ser fornecido
-    if (!phone && !email) {
-      alert('Adicione pelo menos o telefone ou e-mail do cliente.')
-      return
-    }
-
     const clientData = {
       name: formData.get('name'),
       phone: phone || null,
       email: email || null
     }
 
+    if (!validate()) return
     updateClientData(clientData)
     navigate('/onboarding/create-proposal')
   }
+
+  const [name, setName] = useState(guestData?.client?.name || '')
+  const [phone, setPhone] = useState(guestData?.client?.phone ? maskPhone(guestData.client.phone) : '')
+  const [errors, setErrors] = useState({})
+
+  const validate = () => {
+    const next = {}
+    if (!name.trim()) next.name = formMessages.required.name
+    const digits = phone.replace(/\D/g, '')
+    if (!digits) next.phone = formMessages.required.phone
+    else if (digits.length < 10) next.phone = formMessages.invalid.phone
+    setErrors(next)
+    return Object.keys(next).length === 0
+  }
+
+  // Botão habilitado quando nome tem texto e telefone tem pelo menos 10 dígitos
+  const isFormValid = name.trim().length > 0 && phone.replace(/\D/g, '').length >= 10
 
   return (
     <OnboardingLayout currentStep={1} totalSteps={3}>
@@ -64,10 +79,10 @@ const CreateClientPage = () => {
           <Icon as={FiUser} w={8} h={8} color="emerald.500" />
         </Flex>
         <Heading as="h1" fontSize="2xl" fontWeight="bold" color="gray.900" mb={2}>
-          Cadastrar cliente
+          Quem é o cliente?
         </Heading>
         <Text color="gray.600">
-          Vamos começar cadastrando seu primeiro cliente
+          Vamos colocar os dados de quem vai receber o orçamento.
         </Text>
       </VStack>
 
@@ -83,7 +98,7 @@ const CreateClientPage = () => {
             color="gray.900"
             mb={2}
           >
-            Nome do cliente
+            Nome do cliente <Text as="span" color="red.500">*</Text>
           </Text>
           <Input
             id="name"
@@ -91,11 +106,16 @@ const CreateClientPage = () => {
             type="text"
             placeholder="Ex: João Silva"
             defaultValue={guestData?.client?.name || ''}
-            required
+            isInvalid={!!errors.name}
+            onChange={(e) => {
+              setName(e.target.value)
+              if (errors.name) setErrors(prev => ({ ...prev, name: '' }))
+            }}
           />
+          <FieldError message={errors.name} />
         </Box>
 
-        <SimpleGrid columns={2} spacing={4} w="full">
+        <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={4} w="full">
           <Box>
             <Text
               as="label"
@@ -106,7 +126,7 @@ const CreateClientPage = () => {
               color="gray.900"
               mb={2}
             >
-              Telefone <Text as="span" color="emerald.500">*</Text>
+              Telefone <Text as="span" color="red.500">*</Text>
             </Text>
             <Input
               id="phone"
@@ -114,11 +134,15 @@ const CreateClientPage = () => {
               type="tel"
               placeholder="(11) 99999-9999"
               defaultValue={guestData?.client?.phone ? maskPhone(guestData.client.phone) : ''}
-              required
+              isInvalid={!!errors.phone}
               onChange={(e) => {
-                e.target.value = maskPhone(e.target.value)
+                const masked = maskPhone(e.target.value)
+                e.target.value = masked
+                setPhone(masked)
+                if (errors.phone) setErrors(prev => ({ ...prev, phone: '' }))
               }}
             />
+            <FieldError message={errors.phone} />
           </Box>
 
           <Box>
@@ -197,9 +221,11 @@ const CreateClientPage = () => {
             fontSize="sm"
             borderRadius="xl"
             boxShadow="lg"
+            //isDisabled={name === '' || phone === ''}
+            isDisabled={!isFormValid}
             rightIcon={<Icon as={FiChevronRight} w={4} h={4} />}
           >
-            Próximo
+            Continuar
           </Button>
         </Flex>
       </VStack>

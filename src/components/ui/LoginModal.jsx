@@ -28,12 +28,13 @@ const LoginModal = ({ isOpen, onClose, onSuccess }) => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsLoading(true)
+    let createdProposalId = null
 
     const formData = new FormData(e.target)
     const data = {
       name: formData.get('name'),
       company_name: formData.get('company_name'),
-      document: formData.get('document'),
+      document: (formData.get('document') || '').replace(/\D/g, ''),
       email: formData.get('email'),
       password: formData.get('password'),
       password_confirmation: formData.get('password_confirmation'),
@@ -62,7 +63,6 @@ const LoginModal = ({ isOpen, onClose, onSuccess }) => {
         storage.setToken(response.data.access_token)
         storage.setUser(response.data.user)
 
-        let createdProposalId = null
         if (response.data.user?.clients?.length > 0) {
           const clients = response.data.user.clients
           const lastClient = clients[clients.length - 1]
@@ -85,7 +85,7 @@ const LoginModal = ({ isOpen, onClose, onSuccess }) => {
 
       toast({
         title: isLoginMode ? 'Login realizado!' : 'Conta criada com sucesso!',
-        description: isLoginMode ? 'Redirecionando para o dashboard...' : 'Você está a 1 passo de enviar sua proposta 🚀',
+        description: isLoginMode ? 'Redirecionando para o dashboard...' : 'Você está a 1 passo de enviar seu orçamento 🚀',
         status: 'success',
         duration: 3000,
         isClosable: true,
@@ -97,10 +97,10 @@ const LoginModal = ({ isOpen, onClose, onSuccess }) => {
       // Redirect to Stripe if registering
       if (!isLoginMode) {
         try {
-          const successUrl = createdProposalId 
+          const successUrl = createdProposalId
             ? `${window.location.origin}/dashboard/orcamentos/${createdProposalId}/enviar`
             : `${window.location.origin}/dashboard/propostas/sucesso`
-          
+
           sessionStorage.setItem('show_welcome', 'pro')
 
           const { data: checkoutData } = await subscriptionService.checkout('pro', successUrl)
@@ -158,12 +158,12 @@ const LoginModal = ({ isOpen, onClose, onSuccess }) => {
         <ModalHeader textAlign="center" pt={8} pb={2}>
           <VStack spacing={1}>
             <Text fontSize="2xl" fontWeight="bold" color="gray.900">
-              {isLoginMode ? 'Entrar na sua conta' : 'Criar sua conta'}
+              {isLoginMode ? 'Entrar na sua conta' : 'Ative seu teste grátis'}
             </Text>
             <Text fontSize="sm" color="gray.600" fontWeight="normal">
               {isLoginMode
                 ? 'Digite seus dados para continuar.'
-                : 'Crie sua conta para enviar e acompanhar sua proposta'
+                : 'Comece a usar a OrçaFast agora.'
               }
             </Text>
           </VStack>
@@ -205,7 +205,7 @@ const LoginModal = ({ isOpen, onClose, onSuccess }) => {
 
             {!isLoginMode && (
               <Text fontSize="xs" color="gray.500" textAlign="center" mt={2}>
-                Sem cartão de crédito • Você está a 1 clique de enviar sua proposta 🚀
+                7 dias por nossa conta • Você vai ativar o teste na Stripe. Não cobraremos nada hoje. 🚀
               </Text>
             )}
           </VStack>

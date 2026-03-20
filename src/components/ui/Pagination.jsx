@@ -50,20 +50,22 @@ const Pagination = ({
   }
 
   return (
-    <HStack justify="center" spacing={2}>
+    <HStack justify="center" spacing={{ base: 1, md: 2 }}>
       <IconButton
         icon={<FiChevronLeft />}
-        size="sm"
+        size={{ base: 'md', md: 'sm' }}
         variant="outline"
         onClick={() => onPageChange(currentPage - 1)}
         isDisabled={currentPage === 1 || isLoading}
         aria-label="Página anterior"
+        minW={{ base: '44px', md: '32px' }}
+        h={{ base: '44px', md: '32px' }}
       />
 
       {getPageNumbers().map((page, index) => {
         if (page === '...') {
           return (
-            <Text key={`ellipsis-${index}`} px={2} color="gray.500">
+            <Text key={`ellipsis-${index}`} px={1} color="gray.500" display={{ base: 'none', sm: 'block' }}>
               ...
             </Text>
           )
@@ -72,12 +74,22 @@ const Pagination = ({
         return (
           <Button
             key={page}
-            size="sm"
+            size={{ base: 'md', md: 'sm' }}
             onClick={() => onPageChange(page)}
             colorScheme={currentPage === page ? 'emerald' : 'gray'}
             variant={currentPage === page ? 'solid' : 'outline'}
             isDisabled={isLoading}
-            minW="40px"
+            minW={{ base: '44px', md: '40px' }}
+            h={{ base: '44px', md: '32px' }}
+            display={
+              // Em mobile, esconde páginas que não sejam a atual, anterior, próxima ou as extremas
+              typeof page === 'number' &&
+              page !== 1 &&
+              page !== lastPage &&
+              Math.abs(page - currentPage) > 1
+                ? { base: 'none', sm: 'flex' }
+                : 'flex'
+            }
           >
             {page}
           </Button>
@@ -86,11 +98,13 @@ const Pagination = ({
 
       <IconButton
         icon={<FiChevronRight />}
-        size="sm"
+        size={{ base: 'md', md: 'sm' }}
         variant="outline"
         onClick={() => onPageChange(currentPage + 1)}
         isDisabled={currentPage === lastPage || isLoading}
         aria-label="Próxima página"
+        minW={{ base: '44px', md: '32px' }}
+        h={{ base: '44px', md: '32px' }}
       />
     </HStack>
   )

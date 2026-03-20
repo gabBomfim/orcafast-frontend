@@ -114,7 +114,7 @@ const HomePage = () => {
               </h1>
 
               <p className="hero-subtitle">
-                Cria o orçamento, envia o link, acompanha a resposta. Direto ao ponto.
+                Crie o orçamento, envie e acompanhe a resposta. Direto ao ponto.
               </p>
             </div>
 
@@ -135,7 +135,7 @@ const HomePage = () => {
             <div className="hero-trust">
               <div className="trust-item">
                 <FiCheck className="trust-icon" />
-                <span>Teste grátis de 7 dias</span>
+                <span>Teste grátis por 7 dias</span>
               </div>
               <div className="trust-item">
                 <FiCheck className="trust-icon" />
@@ -247,7 +247,7 @@ const HomePage = () => {
       <section id="como-funciona" className="how-section">
         <div className="section-header">
           <span className="section-category">Como funciona</span>
-          <h2 className="section-title">Processo simples em 3 etapas para fechar mais negócios</h2>
+          <h2 className="section-title">Processo simples em 3 etapas para fechar mais negócios.</h2>
         </div>
 
         <div className="steps-container">
@@ -276,7 +276,7 @@ const HomePage = () => {
               </div>
               <h3 className="step-title">Enviar</h3>
               <p className="step-description">
-                Compartilhe por link, WhatsApp ou PDF em um único clique
+                Compartilhe por link, WhatsApp ou PDF em um único clique.
               </p>
             </CardContent>
           </Card>
@@ -291,7 +291,7 @@ const HomePage = () => {
               </div>
               <h3 className="step-title">Acompanhar</h3>
               <p className="step-description">
-                Saiba em tempo real quando seu orçamento foi visualizado
+                Saiba em tempo real quando seu orçamento foi visualizado.
               </p>
             </CardContent>
           </Card>
@@ -329,7 +329,7 @@ const HomePage = () => {
               </div>
               <h3 className="feature-title">Tudo no mesmo lugar</h3>
               <p className="feature-description">
-                Seus clientes, orçamentos e histórico de envios organizados num só painel. Chega de perder orçamento em PDF esquecido no celular.
+                Seus clientes, orçamentos e histórico de envios organizados num só painel.
               </p>
             </CardContent>
           </Card>
@@ -339,7 +339,7 @@ const HomePage = () => {
               <div className="feature-icon-wrapper">
                 <FiEye className="feature-icon" />
               </div>
-              <h3 className="feature-title">Sabe quando o cliente abriu</h3>
+              <h3 className="feature-title">Saiba quando o cliente abriu</h3>
               <p className="feature-description">
                 Quando você envia o link do orçamento, a OrçaFast te avisa assim que o destinatário visualizar. Chega de ficar no escuro esperando retorno.
               </p>
@@ -351,7 +351,7 @@ const HomePage = () => {
               <div className="feature-icon-wrapper">
                 <FiShield className="feature-icon" />
               </div>
-              <h3 className="feature-title">Seus dados estão aqui com a gente</h3>
+              <h3 className="feature-title">Seus dados seguros com a OrçaFast</h3>
               <p className="feature-description">
                 As informações dos seus clientes ficam guardadas com segurança. Você acessa de qualquer dispositivo, sem risco de perder nada.
               </p>
@@ -365,14 +365,14 @@ const HomePage = () => {
         <div className="section-header">
           <span className="section-category">Preços</span>
           <h2 className="section-title">Preços simples, sem surpresas.</h2>
-          <p className="section-subtitle">Comece grátis e evolua conforme seu negócio cresce</p>
+          <p className="section-subtitle">Comece grátis e evolua conforme seu negócio cresce.</p>
         </div>
 
         <div className="pricing-container">
           <Card className="pricing-card pricing-card-popular">
             <Badge className="popular-badge">MAIS POPULAR</Badge>
             <CardContent className="pricing-content">
-              <h3 className="pricing-plan">Pro</h3>
+              <h3 className="pricing-plan">Autônomo</h3>
               <p className="pricing-description">Para quem trabalha por conta própria.</p>
               <div className="pricing-price">
                 <span className="price-currency">R$</span>
@@ -398,7 +398,7 @@ const HomePage = () => {
 
           <Card className="pricing-card">
             <CardContent className="pricing-content">
-              <h3 className="pricing-plan">Business</h3>
+              <h3 className="pricing-plan">Equipe</h3>
               <p className="pricing-description">Para negócios com equipe de vendas.</p>
               <div className="pricing-price">
                 <span className="price-currency">R$</span>
@@ -445,12 +445,19 @@ const HomePage = () => {
             Começar agora
             <FiArrowRight />
           </Link>
-          <div className="cta-trust">
-            <span>✓ Comece grátis</span>
-            <span>•</span>
-            <span>✓ Crie seu primeiro orçamento em minutos</span>
-            <span>•</span>
-            <span>✓ Aumente suas aprovações</span>
+          <div className="cta-trust flex flex-col">
+            <div className="trust-item">
+              <FiCheck className="trust-icon" />
+              <span>Comece grátis</span>
+            </div>
+            <div className="trust-item">
+              <FiCheck className="trust-icon" />
+              <span>Crie seu primeiro orçamento em minutos</span>
+            </div>
+            <div className="trust-item">
+              <FiCheck className="trust-icon" />
+              <span>Aumente suas aprovações</span>
+            </div>
           </div>
         </div>
       </section>

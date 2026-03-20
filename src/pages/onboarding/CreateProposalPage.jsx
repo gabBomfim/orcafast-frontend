@@ -26,6 +26,8 @@ import { Link as RouterLink, useNavigate } from 'react-router-dom'
 import OnboardingLayout from '../../components/layout/OnboardingLayout'
 import { useOnboarding } from '../../contexts/OnboardingContext'
 import { useState } from 'react'
+import { FieldError } from '../../components/ui/FormFeedback'
+import { formMessages } from '../../utils/formMessages'
 
 const CreateProposalPage = () => {
   const navigate = useNavigate()
@@ -48,6 +50,7 @@ const CreateProposalPage = () => {
     return [{ id: 1, desc: '', qtd: 1, value: '' }]
   })
   const [isLoadingAI, setIsLoadingAI] = useState(false)
+  const [errors, setErrors] = useState({})
 
   const handleAddItem = () => {
     setItems([...items, { id: Date.now(), desc: '', qtd: 1, value: '' }])
@@ -66,18 +69,22 @@ const CreateProposalPage = () => {
     setItems(items.filter((item) => item.id !== id))
   }
 
-  const handleItemChange = (id, field, value) => {
+  const handleItemChange = (id, field, rawValue) => {
     // Limites de entrada
     if (field === 'qtd') {
-      if (value.length > 6) return
+      if (rawValue.length > 6) return
     }
     if (field === 'value') {
-      if (value.length > 10) return
+      // Aceita vírgula como separador decimal
+      const normalized = rawValue.replace(',', '.')
+      // Permite apenas números e um ponto decimal
+      if (!/^\d*\.?\d{0,2}$/.test(normalized) && rawValue !== '') return
+      if (normalized.length > 10) return
     }
 
     const newItems = items.map((item) => {
       if (item.id === id) {
-        return { ...item, [field]: value }
+        return { ...item, [field]: rawValue }
       }
       return item
     })
@@ -138,8 +145,30 @@ const CreateProposalPage = () => {
     setIsLoadingAI(false)
   }
 
+  const validate = () => {
+    const next = {}
+    if (!title.trim()) next.title = formMessages.required.title
+    if (!validUntil.trim()) next.validUntil = formMessages.required.validUntil
+    const firstItem = items[0]
+    if (!firstItem?.desc?.trim()) next.itemDesc = formMessages.required.generic
+    const itemVal = parseFloat(String(firstItem?.value || '').replace(',', '.')) || 0
+    if (itemVal <= 0) next.itemValue = formMessages.value.zero
+    setErrors(next)
+    return Object.keys(next).length === 0
+  }
+
+  // Botão Próximo habilitado quando: título preenchido + 1º item tem descrição + 1º item tem valor > 0
+  const isFormValid = (() => {
+    if (!title.trim()) return false
+    const first = items[0]
+    if (!first?.desc?.trim()) return false
+    const val = parseFloat(String(first?.value || '').replace(',', '.')) || 0
+    return val > 0
+  })()
+
   const handleSubmit = (e) => {
     e.preventDefault()
+    if (!validate()) return
 
     const proposalData = {
       title,
@@ -173,10 +202,10 @@ const CreateProposalPage = () => {
           <Icon as={FiFileText} w={8} h={8} color="emerald.500" />
         </Flex>
         <Heading as="h1" fontSize="2xl" fontWeight="bold" color="gray.900" mb={2}>
-          Criar orçamento
+          O que vamos orçar?
         </Heading>
         <Text color="gray.600">
-          Agora vamos montar seu orçamento
+          Preencha o que você vai cobrar. É jogo rápido.
         </Text>
       </VStack>
 
@@ -195,17 +224,23 @@ const CreateProposalPage = () => {
                 color="gray.900"
                 mb={2}
               >
-                Título do orçamento
+                Nome do serviço, projeto ou produto <Text as="span" color="red.500">*</Text>
               </Text>
               <Input
                 id="title"
                 name="title"
                 type="text"
-                placeholder="Ex: Desenvolvimento de Website"
+                placeholder="Ex: Revisão Geral de Mecânica"
+                isInvalid={!!errors.title}
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
+                onChange={(e) => {
+                  setTitle(e.target.value)
+                  if (errors.title) setErrors(prev => ({ ...prev, title: '' }))
+                }}
+
+
               />
+              <FieldError message={errors.title} />
             </Box>
 
 
@@ -219,7 +254,7 @@ const CreateProposalPage = () => {
                 color="gray.900"
                 mb={2}
               >
-                Válido até
+                Validade do preço <Text as="span" color="red.500">*</Text>
               </Text>
               <Input
                 id="validUntil"
@@ -227,8 +262,13 @@ const CreateProposalPage = () => {
                 type="date"
                 min={new Date().toISOString().split('T')[0]}
                 value={validUntil}
-                onChange={(e) => setValidUntil(e.target.value)}
+                isInvalid={!!errors.validUntil}
+                onChange={(e) => {
+                  setValidUntil(e.target.value)
+                  if (errors.validUntil) setErrors(prev => ({ ...prev, validUntil: '' }))
+                }}
               />
+              <FieldError message={errors.validUntil} />
             </Box>
 
             {/* Items */}
@@ -240,7 +280,7 @@ const CreateProposalPage = () => {
                 color="gray.900"
                 mb={3}
               >
-                Itens do orçamento
+                Itens do orçamento <Text as="span" color="red.500">*</Text>
               </Text>
               <VStack spacing={3} w="full">
                 {items.map((item) => (
@@ -257,13 +297,24 @@ const CreateProposalPage = () => {
                       <Input
                         type="text"
                         value={item.desc}
-                        onChange={(e) => handleItemChange(item.id, 'desc', e.target.value)}
+                        onChange={(e) => {
+                          handleItemChange(item.id, 'desc', e.target.value)
+                          if (errors.itemDesc) setErrors(prev => ({ ...prev, itemDesc: '' }))
+                        }}
                         placeholder="Ex: Mão de obra"
                         h={10}
                         px={3}
                         borderRadius="lg"
-                        required
+                        isInvalid={!!errors.itemDesc && item.id === items[0]?.id}
                       />
+                      {errors.itemDesc && item.id === items[0]?.id && (
+                        <>
+                          <Box h={2} alignSelf="start" >
+                            <FieldError message={errors.itemDesc} />
+                          </Box>
+                        </>
+
+                      )}
                       <Flex align="center" gap={3} w="full">
                         <Box flex={1}>
                           <Text fontSize="xs" color="gray.600" mb={1}>
@@ -281,19 +332,26 @@ const CreateProposalPage = () => {
                         </Box>
                         <Box flex={1}>
                           <Text fontSize="xs" color="gray.600" mb={1}>
-                            Valor (R$)
+                            Valor (R$) <Text as="span" color="red.500">*</Text>
                           </Text>
                           <Input
-                            type="number"
-                            placeholder="1500.00"
-                            step="0.01"
+                            type="text"
+                            inputMode="decimal"
+                            placeholder="0,00"
                             value={item.value}
                             onFocus={(e) => { if (e.target.value === '0') handleItemChange(item.id, 'value', '') }}
-                            onChange={(e) => handleItemChange(item.id, 'value', e.target.value)}
+                            onChange={(e) => {
+                              handleItemChange(item.id, 'value', e.target.value)
+                              if (errors.itemValue && item.id === items[0]?.id) setErrors(prev => ({ ...prev, itemValue: '' }))
+                            }}
                             h={10}
                             px={3}
                             borderRadius="lg"
+                            isInvalid={!!errors.itemValue && item.id === items[0]?.id}
                           />
+                          {errors.itemValue && item.id === items[0]?.id && (
+                            <FieldError message={errors.itemValue} />
+                          )}
                         </Box>
                         <IconButton
                           aria-label="Remover item"
@@ -317,24 +375,20 @@ const CreateProposalPage = () => {
                 mt={3}
                 w="full"
                 h={10}
-                border="1px dashed"
-                borderColor="gray.300"
                 borderRadius="xl"
-                bg="transparent"
-                color="gray.500"
+                boxShadow="lg"
+                bg="emerald.500"
+                color="white"
                 fontWeight="normal"
                 fontSize="sm"
                 leftIcon={<Icon as={FiPlus} w={4} h={4} />}
-                _hover={{
-                  color: 'gray.900',
-                  borderColor: 'emerald.300'
-                }}
+                _hover={{ bg: 'emerald.600' }}
               >
-                Adicionar item
+                Incluir serviço ou peça
               </Button>
 
               {/* Botão IA - aparece quando há dados suficientes */}
-              {(title.trim() || items.some(item => item.desc.trim())) && (
+              {/* {(title.trim() || items.some(item => item.desc.trim())) && (
                 <Button
                   type="button"
                   leftIcon={<Icon fontSize="24px" as={WiStars} />}
@@ -350,7 +404,7 @@ const CreateProposalPage = () => {
                 >
                   {isLoadingAI ? 'Calculando...' : 'Sugerir preço com IA'}
                 </Button>
-              )}
+              )} */}
             </Box>
 
             <Box w="full">
@@ -369,9 +423,9 @@ const CreateProposalPage = () => {
                 id="discount"
                 name="discount"
                 type="number"
+                placeholder="%"
                 min="0"
                 max="100"
-                placeholder="0"
                 value={discount}
                 onFocus={(e) => { if (e.target.value === '0' || e.target.value === 0) setDiscount('') }}
                 onBlur={(e) => { if (e.target.value === '') setDiscount('') }}
@@ -384,8 +438,17 @@ const CreateProposalPage = () => {
               />
             </Box>
 
-            {/* Navigation */}
-            <Flex align="center" justify="space-between" w="full" mt={8} pt={6} borderTop="1px" borderColor="gray.200">
+            {/* Navigation — inside the form, hidden on mobile (rendered below preview) */}
+            <Flex
+              align="center"
+              justify="space-between"
+              w="full"
+              mt={8}
+              pt={6}
+              borderTop="1px"
+              borderColor="gray.200"
+              display={{ base: 'none', lg: 'flex' }}
+            >
               <Button
                 as={RouterLink}
                 to="/onboarding/create-client"
@@ -407,9 +470,10 @@ const CreateProposalPage = () => {
                 fontSize="sm"
                 borderRadius="xl"
                 boxShadow="lg"
+                //isDisabled={!isFormValid}
                 rightIcon={<Icon as={FiChevronRight} w={4} h={4} />}
               >
-                Próximo
+                Continuar
               </Button>
             </Flex>
           </VStack>
@@ -428,7 +492,7 @@ const CreateProposalPage = () => {
             borderColor="gray.200"
           >
             <HStack justify="space-between" mb={6}>
-              <Heading size="md" color="gray.900">Preview do Orçamento</Heading>
+              <Heading size="md" color="gray.900">Olhe como seu cliente vai ver:</Heading>
               <Icon as={FiEye} color="gray.400" />
             </HStack>
 
@@ -499,6 +563,61 @@ const CreateProposalPage = () => {
           </Box>
         </Box>
       </SimpleGrid>
+
+      {/* Navigation mobile — below preview so user sees everything first */}
+      <Flex
+        align="center"
+        justify="space-between"
+        w="full"
+        mt={8}
+        pt={6}
+        borderTop="1px"
+        borderColor="gray.200"
+        display={{ base: 'flex', lg: 'none' }}
+        as="div"
+      >
+        <Button
+          as={RouterLink}
+          to="/onboarding/create-client"
+          variant="ghost"
+          leftIcon={<Icon as={FiChevronLeft} w={4} h={4} />}
+          color="gray.600"
+          _hover={{ color: 'gray.900' }}
+        >
+          Voltar
+        </Button>
+        <Button
+          onClick={() => {
+            // Dispara validação e submit manualmente no mobile
+            if (!validate()) return
+            const proposalData = {
+              title,
+              validUntil,
+              discount: discountPct,
+              items: items.map(item => ({
+                description: item.desc,
+                quantity: parseFloat(item.qtd) || 0,
+                unit_price: parseFloat(String(item.value).replace(',', '.')) || 0
+              }))
+            }
+            updateProposalData(proposalData)
+            navigate('/onboarding/send-proposal')
+          }}
+          h={12}
+          px={8}
+          bg="emerald.500"
+          _hover={{ bg: 'emerald.600' }}
+          color="white"
+          fontWeight="semibold"
+          fontSize="sm"
+          borderRadius="xl"
+          boxShadow="lg"
+          //isDisabled={!isFormValid}
+          rightIcon={<Icon as={FiChevronRight} w={4} h={4} />}
+        >
+          Continuar
+        </Button>
+      </Flex>
     </OnboardingLayout>
   )
 }

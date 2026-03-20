@@ -187,7 +187,7 @@ const InitialDashboardPage = () => {
               <SimpleGrid columns={{ base: 1, md: 3 }} gap={6}>
                 <ActionCard icon={FiPlus} title="Novo Orçamento" subtitle="Criar outro orçamento" to="/onboarding/create-client" variant="dashed" />
                 <ActionCard icon={FiUsers} title="Clientes" subtitle="Gerenciar seus contatos" to="/dashboard/clientes" />
-                <ActionCard icon={FiZap} title="Plano Pro" subtitle="Desbloquear recursos" to="/planos" />
+                <ActionCard icon={FiZap} title="Plano Autônomo" subtitle="Desbloquear recursos" to="/planos" />
               </SimpleGrid>
             </VStack>
           </CardBody>

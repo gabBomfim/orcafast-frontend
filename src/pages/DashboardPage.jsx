@@ -32,7 +32,7 @@ import {
 } from 'react-icons/fi'
 
 import Container from '../components/layout/Container'
-import { dashboardService, teamUserService } from '../services'
+import { dashboardService, teamUserService, proposalService } from '../services'
 import { useAuth } from '../hooks/useAuth'
 import { useSubscription } from '../hooks/useSubscription'
 
@@ -85,6 +85,8 @@ const DashboardPage = () => {
   const [teamMembers, setTeamMembers] = useState([])
   const [selectedUserIds, setSelectedUserIds] = useState([])
   const [periodLabel, setPeriodLabel] = useState('')
+  // Verifica se o usuário tem QUALQUER orçamento (incluindo rascunhos do onboarding)
+  const [hasAnyProposal, setHasAnyProposal] = useState(null)
 
   // ─── Fetch ──────────────────────────────────────────────────────────────────
   const fetchDashboard = useCallback(async (period, dates = {}, userIds = []) => {
@@ -130,6 +132,16 @@ const DashboardPage = () => {
       fetchDashboard(selectedPeriod, {}, selectedUserIds)
     }
   }, [selectedPeriod, customDates.begin_date, customDates.end_date, selectedUserIds, fetchDashboard])
+
+  // Verifica se existe ao menos 1 orçamento (qualquer status, inclusive rascunho do onboarding)
+  useEffect(() => {
+    proposalService.list({ per_page: 1 })
+      .then(({ data }) => {
+        const total = data?.meta?.total ?? data?.total ?? data?.data?.length ?? 0
+        setHasAnyProposal(total > 0)
+      })
+      .catch(() => setHasAnyProposal(false))
+  }, [])
 
   // Fetch team members if admin AND business
   useEffect(() => {
@@ -344,32 +356,58 @@ const DashboardPage = () => {
                                 <Icon as={FiFileText} w={6} h={6} color="emerald.600" />
                               </Box>
                               <Box flex={1}>
-                                <Text fontSize="md" fontWeight="bold" color="gray.900">
-                                  {selectedUserIds.length > 0 ? 'Nenhum faturamento encontrado' : 'Comece a faturar agora'}
-                                </Text>
-                                <Text fontSize="sm" color="gray.600" mt={1}>
-                                  {selectedUserIds.length > 0
-                                    ? 'O(s) membro(s) selecionado(s) ainda não possui(em) orçamentos aprovados neste período.'
-                                    : 'Crie seu primeiro orçamento e acompanhe seu faturamento em tempo real.'}
-                                </Text>
-                                {selectedUserIds.length === 0 && (
-                                  <Button
-                                    as={Link}
-                                    to="/dashboard/propostas/nova"
-                                    mt={4}
-                                    size="md"
-                                    bg="emerald.600"
-                                    color="white"
-                                    _hover={{ bg: 'emerald.700' }}
-                                    rounded="xl"
-                                    shadow="md"
-                                    fontWeight="bold"
-                                    w={{ base: 'full', md: 'auto' }}
-                                    leftIcon={<Icon as={FiZap} />}
-                                    rightIcon={<Icon as={FiArrowRight} />}
-                                  >
-                                    Criar primeiro orçamento
-                                  </Button>
+                                {selectedUserIds.length > 0 ? (
+                                  <>
+                                    <Text fontSize="md" fontWeight="bold" color="gray.900">
+                                      Nenhum faturamento encontrado
+                                    </Text>
+                                    <Text fontSize="sm" color="gray.600" mt={1}>
+                                      O(s) membro(s) selecionado(s) ainda não possui(em) orçamentos aprovados neste período.
+                                    </Text>
+                                  </>
+                                ) : hasAnyProposal === null ? (
+                                  // ainda checando — mostra estado neutro sem piscar
+                                  <Box h="60px" />
+                                ) : hasAnyProposal ? (
+                                  <>
+                                    <Text fontSize="md" fontWeight="bold" color="gray.900">
+                                      Nenhum faturamento neste período
+                                    </Text>
+                                    <Text fontSize="sm" color="gray.600" mt={1}>
+                                      Você tem orçamentos criados. Envie-os para os clientes e acompanhe o faturamento aqui.
+                                    </Text>
+                                    <Button
+                                      as={Link}
+                                      to="/dashboard/propostas"
+                                      variant="solid"
+                                      mt={4}
+                                      w={{ base: 'full', md: 'auto' }}
+                                      leftIcon={<Icon as={FiFileText} />}
+                                      rightIcon={<Icon as={FiArrowRight} />}
+                                    >
+                                      Ver meus orçamentos
+                                    </Button>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Text fontSize="md" fontWeight="bold" color="gray.900">
+                                      Comece a faturar agora
+                                    </Text>
+                                    <Text fontSize="sm" color="gray.600" mt={1}>
+                                      Crie seu primeiro orçamento e acompanhe seu faturamento em tempo real.
+                                    </Text>
+                                    <Button
+                                      as={Link}
+                                      to="/dashboard/propostas/nova"
+                                      variant="solid"
+                                      mt={4}
+                                      w={{ base: 'full', md: 'auto' }}
+                                      leftIcon={<Icon as={FiZap} />}
+                                      rightIcon={<Icon as={FiArrowRight} />}
+                                    >
+                                      Criar primeiro orçamento
+                                    </Button>
+                                  </>
                                 )}
                               </Box>
                             </Flex>

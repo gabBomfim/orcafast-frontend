@@ -136,7 +136,7 @@ const SidebarContent = ({ isCollapsed = false, onItemClick = () => { } }) => {
         pl={isCollapsed ? 0 : 4}
         pr={isCollapsed ? 0 : 4}
         fontSize="sm"
-        leftIconSpacing={isCollapsed ? 0 : 3}
+        iconSpacing={isCollapsed ? 0 : 3}
         minW={isCollapsed ? '60px' : 'auto'}
       >
         {!isCollapsed && (
@@ -318,7 +318,7 @@ const SidebarContent = ({ isCollapsed = false, onItemClick = () => { } }) => {
               pl={4}
               pr={4}
               fontSize="sm"
-              leftIconSpacing={3}
+              iconSpacing={3}
             >
               Configurações
             </Button>
@@ -349,7 +349,7 @@ const SidebarContent = ({ isCollapsed = false, onItemClick = () => { } }) => {
                       pl={3}
                       pr={3}
                       fontSize="sm"
-                      leftIconSpacing={3}
+                      iconSpacing={3}
                     >
                       {item.label}
                       {item.isLocked && (
@@ -404,7 +404,7 @@ const SidebarContent = ({ isCollapsed = false, onItemClick = () => { } }) => {
             pl={isCollapsed ? 0 : 4}
             pr={isCollapsed ? 0 : 4}
             fontSize="sm"
-            leftIconSpacing={isCollapsed ? 0 : 3}
+            iconSpacing={isCollapsed ? 0 : 3}
           >
             {!isCollapsed && (isCollapsed ? 'Expandir' : 'Recolher')}
           </Button>

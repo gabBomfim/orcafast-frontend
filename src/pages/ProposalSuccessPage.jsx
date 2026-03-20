@@ -296,9 +296,6 @@ Qualquer dúvida, estou à disposição!`
                   >
                     Enviar via WhatsApp
                   </Button>
-                  <Text fontSize="xs" color="emerald.600" fontWeight="medium" textAlign="center">
-                    Acompanhe quando o cliente visualizar e aprovar a proposta.
-                  </Text>
                 </VStack>
 
                 <VStack spacing={2} w="full">
@@ -314,7 +311,7 @@ Qualquer dúvida, estou à disposição!`
                     isDisabled={linkCopied}
                     h={14}
                   >
-                    {linkCopied ? 'Link Copiado!' : 'Copiar link para o cliente'}
+                    {linkCopied ? 'Link Copiado!' : 'Copiar link para compartilhar'}
                   </Button>
                   {!linkCopied && (
                     <Text fontSize="xs" color="emerald.600" fontWeight="medium" textAlign="center">
@@ -350,7 +347,7 @@ Qualquer dúvida, estou à disposição!`
                   w="full"
                   onClick={handleGoToList}
                 >
-                  Ver todos os orçamentos
+                  Ir para meus orçamentos
                 </Button>
               </VStack>
             </VStack>
