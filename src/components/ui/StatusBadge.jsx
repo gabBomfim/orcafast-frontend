@@ -14,31 +14,31 @@ const StatusBadge = ({ status, customLabel }) => {
         return {
           colorScheme: 'green',
           icon: FiCheckCircle,
-          text: 'Aprovado'
+          text: 'Fechado'
         }
       case 'viewed':
         return {
           colorScheme: 'blue',
           icon: FiEye,
-          text: 'Visualizado'
+          text: 'O cliente já viu'
         }
       case 'sent':
         return {
           colorScheme: 'yellow',
           icon: FiSend,
-          text: 'Enviado'
+          text: 'Já mandou'
         }
       case 'rejected':
         return {
           colorScheme: 'red',
           icon: FiXCircle,
-          text: 'Rejeitado'
+          text: 'Não fechou'
         }
       case 'draft':
         return {
           colorScheme: 'gray',
           icon: FiClock,
-          text: 'Pendente de Envio'
+          text: 'Pra mandar'
         }
       default:
         return {

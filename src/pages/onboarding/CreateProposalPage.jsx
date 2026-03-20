@@ -492,7 +492,7 @@ const CreateProposalPage = () => {
             borderColor="gray.200"
           >
             <HStack justify="space-between" mb={6}>
-              <Heading size="md" color="gray.900">Olhe como seu cliente vai ver:</Heading>
+              <Heading size="md" color="gray.900">Olha como seu cliente vai ver:</Heading>
               <Icon as={FiEye} color="gray.400" />
             </HStack>
 

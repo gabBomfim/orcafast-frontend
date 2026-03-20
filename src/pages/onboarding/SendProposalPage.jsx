@@ -199,7 +199,7 @@ const SendProposalPage = () => {
               mb={6}
             >
               <HStack justify="space-between" mb={6}>
-                <Heading size="md" color="gray.900">Resumo do Orçamento</Heading>
+                <Heading size="md" color="gray.900">Resumo do orçamento</Heading>
                 <Icon as={FiFileText} color="gray.400" />
               </HStack>
 
@@ -322,7 +322,7 @@ const SendProposalPage = () => {
             } />
           </VStack> */}
 
-          {isAuthenticated && (
+          {/* {isAuthenticated && (
             <Button
               type="button"
               w="full"
@@ -336,7 +336,7 @@ const SendProposalPage = () => {
             >
               Ir para meus orçamentos
             </Button>
-          )}
+          )} */}
         </VStack>
 
         {/* Navigation */}

@@ -26,7 +26,7 @@ const PLAN_WELCOME = {
         subtitle: 'Agora você tem tudo o que precisa para profissionalizar seus orçamentos e ganhar tempo.',
         features: [
             { icon: FiZap, text: 'Mande quantos orçamentos quiser, com a sua logo.' },
-            { icon: FiStar, text: 'Defina suas metas e acompanhe seu lucro.' },
+            { icon: FiStar, text: 'Defina suas metas e acompanhe seu faturamento.' },
             { icon: FiLock, text: 'Veja o dinheiro entrando direto no seu painel.' },
             { icon: FiMessageCircle, text: 'Suporte prioritário por WhatsApp' },
         ],
@@ -40,7 +40,7 @@ const PLAN_WELCOME = {
         subtitle: 'Agora seu time tem a ferramenta certa pra parar de bater cabeça e fechar mais negócios.',
         features: [
             { icon: FiTrendingUp, text: 'Traga sua equipe: todo mundo na mesma página.' },
-            { icon: FiStar, text: 'Relatórios prontos: veja onde seu lucro está de verdade.' },
+            { icon: FiStar, text: 'Relatórios prontos: veja onde seu faturamento está de verdade.' },
             { icon: FiLock, text: 'Painel completo: controle total do que entra e sai.' },
             { icon: FiFilter, text: 'Busca rápida: ache qualquer orçamento num piscar de olhos.' },
             { icon: FiMessageCircle, text: 'Suporte VIP por WhatsApp (fale direto com a gente).' },

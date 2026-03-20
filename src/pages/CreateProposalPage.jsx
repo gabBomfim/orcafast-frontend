@@ -6,11 +6,8 @@ import {
   HStack,
   Icon,
   Input,
-  InputGroup,
-  InputLeftElement,
   Text,
   VStack,
-  Textarea,
   IconButton,
   SimpleGrid,
   useToast,
@@ -35,16 +32,15 @@ import {
   FiChevronLeft,
   FiPlus,
   FiTrash2,
-  FiDollarSign,
   FiEye,
-  FiPercent,
-  FiCalendar,
 } from 'react-icons/fi'
-import { WiStars } from 'react-icons/wi'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { proposalService, clientService } from '../services'
 import { storage } from '../utils/storage'
 import { maskPhone, unmaskPhone } from '../utils/mask'
+import { FieldError } from '../components/ui/FormFeedback'
+import { formMessages } from '../utils/formMessages'
+import { appSelectStyles } from '../theme/selectStyles'
 
 const CreateProposalPage = () => {
   const navigate = useNavigate()
@@ -53,76 +49,17 @@ const CreateProposalPage = () => {
   const editId = searchParams.get('edit')
   const isEditMode = !!editId
   const [isLoading, setIsLoading] = useState(false)
-  const [isLoadingAI, setIsLoadingAI] = useState(false)
   const [isLoadingData, setIsLoadingData] = useState(isEditMode)
   const [clients, setClients] = useState([])
   const [loadingClients, setLoadingClients] = useState(true)
   const fetching = useRef(false)
+  const [errors, setErrors] = useState({})
 
   // Quick Create Client modal
   const { isOpen: isClientModalOpen, onOpen: onClientModalOpen, onClose: onClientModalClose } = useDisclosure()
-  const [newClient, setNewClient] = useState({ name: '', email: '', phone: '', company: '' })
+  const [newClient, setNewClient] = useState({ name: '', phone: '', email: '' })
+  const [clientErrors, setClientErrors] = useState({})
   const [isSavingClient, setIsSavingClient] = useState(false)
-
-  // Estilos customizados para o React Select
-  const customSelectStyles = {
-    control: (provided, state) => ({
-      ...provided,
-      backgroundColor: 'white',
-      borderColor: state.isFocused ? '#00d97e' : '#E5E7EB', // gray.200 at rest, emerald on focus
-      borderWidth: '1.5px',
-      borderRadius: '0.75rem', // xl
-      padding: '0.3rem',
-      minHeight: '48px',
-      boxShadow: state.isFocused ? '0 0 0 2px #00d97e' : 'none',
-      '&:hover': {
-        borderColor: '#D1D5DB', // gray.300
-      },
-    }),
-    menu: (provided) => ({
-      ...provided,
-      backgroundColor: 'white',
-      borderRadius: '0.75rem',
-      zIndex: 10,
-      border: '1px solid #E5E7EB',
-      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-    }),
-    option: (provided, state) => ({
-      ...provided,
-      backgroundColor: state.data?.isCreate
-        ? state.isFocused ? '#F0FDF4' : 'transparent'
-        : state.isSelected
-          ? '#00d97e'
-          : state.isFocused
-            ? '#ECFDF5'
-            : 'transparent',
-      color: state.data?.isCreate
-        ? '#059669'
-        : state.isSelected
-          ? 'white'
-          : state.isFocused
-            ? '#059669'
-            : '#374151',
-      cursor: 'pointer',
-      fontWeight: state.data?.isCreate ? '600' : state.isSelected ? '600' : 'normal',
-      '&:active': {
-        backgroundColor: state.data?.isCreate ? '#DCFCE7' : '#00d97e',
-        color: state.data?.isCreate ? '#059669' : 'white',
-      },
-    }),
-    input: (provided) => ({
-      ...provided,
-      color: '#111827', // gray.900
-    }),
-    singleValue: (provided) => ({
-      ...provided,
-      color: '#111827', // gray.900
-    }),
-    placeholder: (provided) => ({
-      ...provided,
-      color: '#9CA3AF', // gray.400
-    }),
-  }
 
   const [formData, setFormData] = useState({
     clientId: searchParams.get('client') || '',
@@ -138,7 +75,6 @@ const CreateProposalPage = () => {
   useEffect(() => {
     loadClients()
   }, [])
-
 
   useEffect(() => {
     if (!isEditMode || fetching.current) return
@@ -182,137 +118,37 @@ const CreateProposalPage = () => {
   const loadClients = async () => {
     try {
       const response = await clientService.list()
-      // Extrai o array de clientes da resposta paginada
       const clientsData = response.data.data || response.data
       setClients(Array.isArray(clientsData) ? clientsData : [])
-    } catch (error) {
-      toast({
-        title: 'Erro ao carregar clientes',
-        description: 'Não foi possível carregar a lista de clientes',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      })
+    } catch {
       setClients([])
     } finally {
       setLoadingClients(false)
     }
   }
 
-  // ─── Quick Create Client ──────────────────────────────────────────────────
-  const handleQuickCreateClient = async () => {
-    if (!newClient.name.trim()) {
-      toast({ title: 'Nome é obrigatório', status: 'warning', duration: 3000, isClosable: true })
-      return
-    }
-    if (!newClient.phone.trim()) {
-      toast({ title: 'Telefone é obrigatório', status: 'warning', duration: 3000, isClosable: true })
-      return
-    }
-    setIsSavingClient(true)
-    try {
-      const { data } = await clientService.create({
-        ...newClient,
-        phone: unmaskPhone(newClient.phone)
-      })
-      // Add to local list immediately
-      setClients((prev) => [...prev, data])
-      // Auto-select the new client
-      setFormData((prev) => ({ ...prev, clientId: String(data.id) }))
-      toast({ title: `Cliente "${data.name}" cadastrado!`, status: 'success', duration: 3000, isClosable: true })
-      setNewClient({ name: '', email: '', phone: '', company: '' })
-      onClientModalClose()
-    } catch (err) {
-      toast({
-        title: 'Erro ao cadastrar cliente',
-        description: err.response?.data?.message || 'Tente novamente',
-        status: 'error',
-        duration: 4000,
-        isClosable: true,
-      })
-    } finally {
-      setIsSavingClient(false)
-    }
-  }
+  // ─── Itens ────────────────────────────────────────────────────────────────
 
   const handleAddItem = () => {
     setItems([...items, { id: Date.now(), desc: '', qtd: 1, value: '' }])
   }
 
   const handleRemoveItem = (id) => {
-    if (items.length <= 1) {
-      toast({
-        title: 'O orçamento deve ter pelo menos um item.',
-        status: 'warning',
-        duration: 3000,
-        isClosable: true,
-      })
-      return
-    }
+    if (items.length <= 1) return
     setItems(items.filter((item) => item.id !== id))
   }
 
-  const handleItemChange = (id, field, value) => {
-    // Limites de entrada
-    if (field === 'qtd') {
-      if (value.length > 6) return
-    }
+  const handleItemChange = (id, field, rawValue) => {
+    if (field === 'qtd' && rawValue.length > 6) return
     if (field === 'value') {
-      if (value.length > 10) return
+      const normalized = rawValue.replace(',', '.')
+      if (!/^\d*\.?\d{0,2}$/.test(normalized) && rawValue !== '') return
+      if (normalized.length > 10) return
     }
-
-    const newItems = items.map((item) => {
-      if (item.id === id) {
-        return { ...item, [field]: value }
-      }
-      return item
-    })
-    setItems(newItems)
+    setItems(items.map((item) => item.id === id ? { ...item, [field]: rawValue } : item))
   }
 
-  const handleAISuggestion = async () => {
-    if (!formData.title.trim() && !items.some(item => item.desc.trim())) {
-      toast({
-        title: 'Adicione mais detalhes',
-        description: 'Preencha o título ou itens para gerar uma sugestão.',
-        status: 'info',
-        duration: 3000,
-        isClosable: true,
-      })
-      return
-    }
-
-    setIsLoadingAI(true)
-
-    // Simulação da IA baseada nos dados do formulário
-    await new Promise(resolve => setTimeout(resolve, 2000))
-
-    // Lógica simples de precificação baseada nos dados
-    let suggestedPrice = 500 // base
-
-    if (formData.title.toLowerCase().includes('website') || formData.title.toLowerCase().includes('site')) {
-      suggestedPrice = 2500
-    } else if (formData.title.toLowerCase().includes('logo') || formData.title.toLowerCase().includes('design')) {
-      suggestedPrice = 800
-    } else if (formData.title.toLowerCase().includes('consultoria') || formData.title.toLowerCase().includes('consultor')) {
-      suggestedPrice = 1500
-    }
-
-
-    // Aplica no primeiro item
-    if (items.length > 0) {
-      handleItemChange(items[0].id, 'value', suggestedPrice)
-      toast({
-        title: 'Preço sugerido aplicado!',
-        description: `Valor de R$ ${suggestedPrice.toFixed(2)} foi aplicado ao primeiro item.`,
-        status: 'success',
-        duration: 4000,
-        isClosable: true,
-      })
-    }
-
-    setIsLoadingAI(false)
-  }
+  // ─── Cálculos ─────────────────────────────────────────────────────────────
 
   const subtotal = items.reduce((acc, item) => {
     const value = parseFloat(String(item.value).replace(',', '.')) || 0
@@ -324,11 +160,12 @@ const CreateProposalPage = () => {
   const discountAmount = subtotal * (discountPct / 100)
   const total = subtotal - discountAmount
 
+  // ─── Select de clientes ───────────────────────────────────────────────────
+
   const selectedClient = Array.isArray(clients)
     ? clients.find(c => c.id === parseInt(formData.clientId))
     : null
 
-  // Special "create" option pinned at the top of the dropdown
   const CREATE_OPTION = { value: '__create__', label: '+ Cadastrar novo cliente', isCreate: true }
 
   const clientOptions = [
@@ -346,9 +183,9 @@ const CreateProposalPage = () => {
     if (!option) { setFormData({ ...formData, clientId: '' }); return }
     if (option.isCreate) { onClientModalOpen(); return }
     setFormData({ ...formData, clientId: String(option.value) })
+    if (errors.clientId) setErrors(prev => ({ ...prev, clientId: '' }))
   }
 
-  // Custom renderer so the "create" option stands out visually
   const formatOptionLabel = (option) => {
     if (option.isCreate) {
       return (
@@ -363,8 +200,72 @@ const CreateProposalPage = () => {
     return option.label
   }
 
+  // ─── Validação do formulário principal ────────────────────────────────────
+
+  const validate = () => {
+    const next = {}
+    if (!formData.clientId) next.clientId = formMessages.required.client
+    if (!formData.title.trim()) next.title = formMessages.required.title
+    if (!formData.validUntil) next.validUntil = formMessages.required.validUntil
+    const firstItem = items[0]
+    if (!firstItem?.desc?.trim()) next.itemDesc = formMessages.required.generic
+    const itemVal = parseFloat(String(firstItem?.value || '').replace(',', '.')) || 0
+    if (itemVal <= 0) next.itemValue = formMessages.value.zero
+    setErrors(next)
+    return Object.keys(next).length === 0
+  }
+
+  // ─── Validação do modal de cliente ────────────────────────────────────────
+
+  const validateClient = () => {
+    const next = {}
+    if (!newClient.name.trim()) next.name = formMessages.required.name
+    const digits = newClient.phone.replace(/\D/g, '')
+    if (!digits) next.phone = formMessages.required.phone
+    else if (digits.length < 10) next.phone = formMessages.invalid.phone
+    setClientErrors(next)
+    return Object.keys(next).length === 0
+  }
+
+  const handleQuickCreateClient = async () => {
+    if (!validateClient()) return
+    setIsSavingClient(true)
+    try {
+      const { data } = await clientService.create({
+        ...newClient,
+        phone: unmaskPhone(newClient.phone),
+      })
+      setClients((prev) => [...prev, data])
+      setFormData((prev) => ({ ...prev, clientId: String(data.id) }))
+      if (errors.clientId) setErrors(prev => ({ ...prev, clientId: '' }))
+      toast({ title: `Cliente "${data.name}" cadastrado!`, status: 'success', duration: 3000, isClosable: true })
+      setNewClient({ name: '', phone: '', email: '' })
+      setClientErrors({})
+      onClientModalClose()
+    } catch (err) {
+      toast({
+        title: 'Erro ao cadastrar cliente',
+        description: err.response?.data?.message || 'Tente novamente',
+        status: 'error',
+        duration: 4000,
+        isClosable: true,
+      })
+    } finally {
+      setIsSavingClient(false)
+    }
+  }
+
+  const handleCloseClientModal = () => {
+    setNewClient({ name: '', phone: '', email: '' })
+    setClientErrors({})
+    onClientModalClose()
+  }
+
+  // ─── Submit ───────────────────────────────────────────────────────────────
+
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if (!validate()) return
     setIsLoading(true)
 
     try {
@@ -378,8 +279,8 @@ const CreateProposalPage = () => {
         items: items.map(item => ({
           description: item.desc,
           quantity: parseInt(item.qtd, 10),
-          unit_price: parseFloat(String(item.value).replace(',', '.')) || 0
-        }))
+          unit_price: parseFloat(String(item.value).replace(',', '.')) || 0,
+        })),
       }
 
       let response
@@ -389,7 +290,6 @@ const CreateProposalPage = () => {
         response = await proposalService.create(dataToSend)
       }
 
-      // Navega para página de sucesso com os dados do orçamento
       navigate('/dashboard/propostas/sucesso', {
         state: {
           proposalId: response.data.id || editId,
@@ -404,10 +304,9 @@ const CreateProposalPage = () => {
         },
       })
     } catch (error) {
-      const message = error.response?.data?.message || 'Erro ao criar orçamento'
       toast({
         title: 'Erro',
-        description: message,
+        description: error.response?.data?.message || 'Erro ao salvar orçamento',
         status: 'error',
         duration: 4000,
         isClosable: true,
@@ -417,415 +316,556 @@ const CreateProposalPage = () => {
     }
   }
 
+  // ─── Preview formatação ───────────────────────────────────────────────────
+
+  const fmtBRL = (n) => n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+
+  // ─── Render ───────────────────────────────────────────────────────────────
+
   return (
     <Flex minH="100vh" bg="gray.50" direction="column" py={8}>
       <Flex flex={1} justify="center" px={4}>
         <Box w="full" maxW="container.xl">
-          <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={8}>
-            {/* Lado Esquerdo: Formulário */}
-            <Box
-              bg="white"
+
+          {/* Icon e título */}
+          <VStack textAlign="center" mb={8}>
+            <Flex
+              w={16} h={16}
+              bg="emerald.50"
               borderRadius="2xl"
-              p={8}
-              boxShadow="sm"
+              align="center" justify="center"
+              mx="auto" mb={4}
             >
-              <VStack spacing={6} as="form" onSubmit={handleSubmit}>
-                {/* Icon and title */}
-                <VStack textAlign="center" w="full">
-                  <Flex
-                    w={16}
-                    h={16}
-                    bg="emerald.50"
-                    borderRadius="2xl"
-                    align="center"
-                    justify="center"
-                    mx="auto"
-                    mb={4}
-                  >
-                    <Icon as={FiFileText} w={8} h={8} color="emerald.500" />
-                  </Flex>
-                  <Heading as="h1" fontSize="2xl" fontWeight="bold" color="gray.900" mb={2}>
-                    {isEditMode ? 'Editar orçamento' : 'Criar orçamento'}
-                  </Heading>
-                  <Text color="gray.600" mb={6}>
-                    {isEditMode ? 'Atualize os dados do orçamento' : 'Crie um novo orçamento para seu cliente'}
-                  </Text>
-                </VStack>
+              <Icon as={FiFileText} w={8} h={8} color="emerald.500" />
+            </Flex>
+            <Heading as="h1" fontSize="2xl" fontWeight="bold" color="gray.900" mb={2}>
+              {isEditMode ? 'Editar orçamento' : 'O que vamos orçar?'}
+            </Heading>
+            <Text color="gray.600">
+              {isEditMode ? 'Atualize os dados do orçamento.' : 'Preencha o que você vai cobrar. É jogo rápido.'}
+            </Text>
+          </VStack>
 
-                {isLoadingData ? (
-                  <Center py={12} w="full">
-                    <Spinner size="lg" color="emerald.500" />
-                  </Center>
-                ) : (
-                  <VStack spacing={6} w="full">
-                    <FormControl isRequired w="full">
-                      <FormLabel
-                        fontSize="sm"
-                        fontWeight="medium"
-                        color="gray.900"
-                      >
-                        Cliente
-                      </FormLabel>
-                      <ReactSelect
-                        name="clientId"
-                        value={clientOptions.find(option => option.value === parseInt(formData.clientId)) || null}
-                        onChange={handleClientSelectChange}
-                        options={clientOptions}
-                        placeholder={loadingClients ? 'Carregando clientes...' : 'Selecione ou busque um cliente...'}
-                        isDisabled={loadingClients}
-                        isClearable
-                        isSearchable
-                        isLoading={loadingClients}
-                        styles={customSelectStyles}
-                        formatOptionLabel={formatOptionLabel}
-                        noOptionsMessage={() => 'Nenhum cliente encontrado'}
-                        loadingMessage={() => 'Carregando...'}
-                      />
-                    </FormControl>
+          {isLoadingData ? (
+            <Center py={16}>
+              <Spinner size="xl" color="emerald.500" thickness="3px" />
+            </Center>
+          ) : (
+            <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={8} w="full">
 
-                    <Box w="full">
-                      <Text
-                        as="label"
-                        htmlFor="title"
-                        display="block"
-                        fontSize="sm"
-                        fontWeight="medium"
-                        color="gray.900"
-                        mb={2}
-                      >
-                        Título do orçamento
-                      </Text>
-                      <Input
-                        id="title"
-                        name="title"
-                        type="text"
-                        placeholder="Ex: Desenvolvimento de Website"
-                        value={formData.title}
-                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                        required
-                      />
-                    </Box>
+              {/* ── Formulário ─────────────────────────────────────────── */}
+              <Box>
+                <VStack as="form" onSubmit={handleSubmit} spacing={4}>
 
-
-                    <FormControl isRequired w="full">
-                      <FormLabel
-                        fontSize="sm"
-                        fontWeight="medium"
-                        color="gray.900"
-                      >
-                        Válida até
-                      </FormLabel>
-                      <Input
-                        name="validUntil"
-                        type="date"
-                        min={new Date().toISOString().split('T')[0]}
-                        value={formData.validUntil}
-                        onChange={(e) => setFormData({ ...formData, validUntil: e.target.value })}
-                      />
-                    </FormControl>
-
-                    <VStack spacing={4} w="full" align="start">
-                      <Heading as="h3" size="sm" color="gray.900">
-                        Itens do orçamento
-                      </Heading>
-                      {items.map((item, index) => (
-                        <VStack
-                          key={item.id}
-                          spacing={3}
-                          w="full"
-                          p={4}
-                          bg="white"
-                          borderRadius="xl"
-                          boxShadow="sm"
-                        >
-                          <Box w="full">
-                            <Text fontSize="sm" fontWeight="medium" color="gray.900" mb={2}>
-                              Descrição do item
-                            </Text>
-                            <Input
-                              placeholder="Ex: Criação de logo"
-                              value={item.desc}
-                              onChange={(e) =>
-                                handleItemChange(item.id, 'desc', e.target.value)
-                              }
-                            />
-                          </Box>
-                          <HStack w="full" spacing={3}>
-                            <Box flex={1}>
-                              <Text fontSize="sm" fontWeight="medium" color="gray.900" mb={2}>
-                                Quantidade
-                              </Text>
-                              <Input
-                                type="number"
-                                value={item.qtd}
-                                min="0"
-                                onChange={(e) =>
-                                  handleItemChange(item.id, 'qtd', e.target.value)
-                                }
-                              />
-                            </Box>
-                            <Box flex={1}>
-                              <Text fontSize="sm" fontWeight="medium" color="gray.900" mb={2}>
-                                Valor (R$)
-                              </Text>
-                              <Input
-                                type="number"
-                                placeholder="1500.00"
-                                step="0.01"
-                                value={item.value}
-                                onFocus={(e) => { if (e.target.value === '0') handleItemChange(item.id, 'value', '') }}
-                                onChange={(e) =>
-                                  handleItemChange(item.id, 'value', e.target.value)
-                                }
-                              />
-                            </Box>
-                          </HStack>
-                          {items.length > 1 && (
-                            <IconButton
-                              aria-label="Remover item"
-                              icon={<FiTrash2 />}
-                              variant="ghost"
-                              colorScheme="red"
-                              size="sm"
-                              alignSelf="flex-end"
-                              onClick={() => handleRemoveItem(item.id)}
-                            />
-                          )}
-                        </VStack>
-                      ))}
-                      <Button
-                        leftIcon={<FiPlus />}
-                        variant="ghost"
-                        colorScheme="emerald"
-                        onClick={handleAddItem}
-                        size="sm"
-                      >
-                        Adicionar item
-                      </Button>
-
-                      {/* Botão IA - aparece quando há dados suficientes */}
-                      {(formData.title.trim() || items.some(item => item.desc.trim())) && (
-                        <Button
-                          leftIcon={<Icon fontSize="24px" as={WiStars} />}
-                          colorScheme="purple"
-                          variant="outline"
-                          onClick={handleAISuggestion}
-                          isLoading={isLoadingAI}
-                          loadingText="Calculando..."
-                          size="sm"
-                        >
-                          {isLoadingAI ? 'Calculando...' : 'Sugerir preço com IA'}
-                        </Button>
-                      )}
-                    </VStack>
-
-                    {/* Campo de Desconto */}
-                    <FormControl w="full">
-                      <FormLabel
-                        fontSize="sm"
-                        fontWeight="medium"
-                        color="gray.900"
-                      >
-                        Desconto (opcional)
-                      </FormLabel>
-                      <Input
-                        name="discount"
-                        type="number"
-                        min="0"
-                        max="100"
-                        placeholder="0"
-                        value={formData.discount}
-                        onFocus={(e) => { if (e.target.value === '0' || e.target.value === 0) setFormData({ ...formData, discount: '' }) }}
-                        onBlur={(e) => { if (e.target.value === '') setFormData({ ...formData, discount: '' }) }}
-                        onChange={(e) => {
-                          const val = e.target.value
-                          if (val.length > 3) return
-                          if (parseFloat(val) > 100) return
-                          setFormData({ ...formData, discount: val })
-                        }}
-                      />
-                    </FormControl>
-
-                    {/* Navigation */}
-                    <Flex align="center" justify="space-between" w="full" mt={8} pt={6} borderTop="1px" borderColor="gray.200">
-                      <Button
-                        onClick={() => navigate('/dashboard/propostas')}
-                        variant="ghost"
-                        leftIcon={<Icon as={FiChevronLeft} w={4} h={4} />}
-                        color="gray.600"
-                        _hover={{ color: 'gray.900' }}
-                      >
-                        Cancelar
-                      </Button>
-                      <Button
-                        type="submit"
-                        h={12}
-                        px={8}
-                        bg="emerald.500"
-                        _hover={{ bg: 'emerald.600' }}
-                        color="white"
-                        fontWeight="semibold"
-                        fontSize="sm"
-                        borderRadius="xl"
-                        boxShadow="lg"
-                        rightIcon={<Icon as={FiChevronRight} w={4} h={4} />}
-                        isLoading={isLoading}
-                        loadingText="Salvando..."
-                      >
-                        {isEditMode ? 'Atualizar Orçamento' : 'Salvar Orçamento'}
-                      </Button>
-                    </Flex>
-                  </VStack>
-                )}
-              </VStack>
-            </Box>
-
-            {/* Lado Direito: Preview */}
-            <Box display={{ base: 'none', lg: 'block' }}>
-              <Box
-                bg="white"
-                borderRadius="2xl"
-                position="sticky"
-                top="100px"
-                p={6}
-                boxShadow="sm"
-              >
-                <HStack justify="space-between" mb={6}>
-                  <Heading size="md" color="gray.900">Preview do Orçamento</Heading>
-                  <Icon as={FiEye} color="gray.400" />
-                </HStack>
-
-                <VStack spacing={4} align="stretch">
-                  {/* Cabeçalho da Proposta */}
-                  <Box bg="emerald.50" p={4} borderRadius="lg" borderWidth="1px" borderColor="emerald.200">
-                    <Text fontSize="sm" color="emerald.700" fontWeight="semibold" mb={2}>
-                      ORÇAMENTO PARA:
+                  {/* Cliente */}
+                  <Box w="full">
+                    <Text
+                      as="label"
+                      display="block"
+                      fontSize="sm"
+                      fontWeight="medium"
+                      color="gray.900"
+                      mb={2}
+                    >
+                      Cliente <Text as="span" color="red.500">*</Text>
                     </Text>
-                    <VStack align="start" spacing={1}>
-                      <Text fontWeight="bold" color="gray.900">
-                        {selectedClient?.name || 'Selecione um cliente'}
-                      </Text>
-                      {selectedClient?.phone && (
-                        <Text fontSize="sm" color="gray.600">{selectedClient.phone}</Text>
-                      )}
-                      {selectedClient?.email && (
-                        <Text fontSize="sm" color="gray.600">{selectedClient.email}</Text>
-                      )}
-                    </VStack>
+                    <ReactSelect
+                      value={clientOptions.find(o => o.value === parseInt(formData.clientId)) || null}
+                      onChange={handleClientSelectChange}
+                      options={clientOptions}
+                      placeholder={loadingClients ? 'Carregando clientes...' : 'Selecione ou busque um cliente...'}
+                      isDisabled={loadingClients}
+                      isClearable
+                      isSearchable
+                      isLoading={loadingClients}
+                      styles={{
+                        ...appSelectStyles,
+                        control: (provided, state) => ({
+                          ...appSelectStyles.control(provided, state),
+                          borderColor: errors.clientId ? '#E53E3E' : state.isFocused ? '#00d97e' : '#e2e8f0',
+                          boxShadow: errors.clientId
+                            ? '0 0 0 2px #E53E3E'
+                            : state.isFocused
+                              ? '0 0 0 2px #00d97e'
+                              : 'none',
+                        }),
+                        option: (provided, state) => ({
+                          ...appSelectStyles.option(provided, state),
+                          backgroundColor: state.data?.isCreate
+                            ? state.isFocused ? '#F0FDF4' : 'transparent'
+                            : appSelectStyles.option(provided, state).backgroundColor,
+                          color: state.data?.isCreate ? '#059669' : appSelectStyles.option(provided, state).color,
+                          fontWeight: state.data?.isCreate ? '600' : appSelectStyles.option(provided, state).fontWeight,
+                        }),
+                      }}
+                      formatOptionLabel={formatOptionLabel}
+                      noOptionsMessage={() => 'Nenhum cliente encontrado'}
+                      loadingMessage={() => 'Carregando...'}
+                    />
+                    <FieldError message={errors.clientId} />
                   </Box>
 
-                  <Heading size="lg" color="gray.900">{formData.title || 'Título do Orçamento'}</Heading>
-                  <Box height="1px" bg="gray.200" />
-                  {items.filter(item => item.desc.trim()).map((item) => {
-                    const v = parseFloat(String(item.value).replace(',', '.')) || 0
-                    const q = parseInt(item.qtd || 1)
-                    const fmt = (n) => n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                    return (
-                      <HStack key={item.id} justify="space-between">
-                        <VStack align="start" spacing={0}>
-                          <Text fontWeight="medium" color="gray.900">{item.desc}</Text>
-                          <Text fontSize="sm" color="gray.600">
-                            {q}x R$ {fmt(v)}
-                          </Text>
-                        </VStack>
-                        <Text fontWeight="bold" color="gray.900">
-                          R$ {fmt(v * q)}
-                        </Text>
-                      </HStack>
-                    )
-                  })}
-                  <Box height="1px" bg="gray.200" />
-                  <VStack spacing={2} align="stretch">
-                    <HStack justify="space-between">
-                      <Text color="gray.900">Subtotal:</Text>
-                      <Text fontWeight="medium" color="gray.900">R$ {subtotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Text>
-                    </HStack>
-                    {discountPct > 0 && (
-                      <HStack justify="space-between">
-                        <Text color="gray.900">Desconto ({discountPct}%):</Text>
-                        <Text fontWeight="medium" color="red.500">
-                          - R$ {discountAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </Text>
-                      </HStack>
-                    )}
-                    <Box height="1px" bg="gray.200" />
-                    <HStack justify="space-between">
-                      <Text fontSize="xl" fontWeight="bold" color="gray.900">Total</Text>
-                      <Text fontSize="xl" fontWeight="bold" color="emerald.600">
-                        R$ {total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      </Text>
-                    </HStack>
-                  </VStack>
+                  {/* Título */}
+                  <Box w="full">
+                    <Text
+                      as="label"
+                      htmlFor="title"
+                      display="block"
+                      fontSize="sm"
+                      fontWeight="medium"
+                      color="gray.900"
+                      mb={2}
+                    >
+                      Nome do serviço, projeto ou produto <Text as="span" color="red.500">*</Text>
+                    </Text>
+                    <Input
+                      id="title"
+                      name="title"
+                      type="text"
+                      placeholder="Ex: Revisão Geral de Mecânica"
+                      value={formData.title}
+                      isInvalid={!!errors.title}
+                      onChange={(e) => {
+                        setFormData({ ...formData, title: e.target.value })
+                        if (errors.title) setErrors(prev => ({ ...prev, title: '' }))
+                      }}
+                    />
+                    <FieldError message={errors.title} />
+                  </Box>
+
+                  {/* Validade */}
+                  <Box w="full">
+                    <Text
+                      as="label"
+                      htmlFor="validUntil"
+                      display="block"
+                      fontSize="sm"
+                      fontWeight="medium"
+                      color="gray.900"
+                      mb={2}
+                    >
+                      Validade do preço <Text as="span" color="red.500">*</Text>
+                    </Text>
+                    <Input
+                      id="validUntil"
+                      name="validUntil"
+                      type="date"
+                      min={new Date().toISOString().split('T')[0]}
+                      value={formData.validUntil}
+                      isInvalid={!!errors.validUntil}
+                      onChange={(e) => {
+                        setFormData({ ...formData, validUntil: e.target.value })
+                        if (errors.validUntil) setErrors(prev => ({ ...prev, validUntil: '' }))
+                      }}
+                    />
+                    <FieldError message={errors.validUntil} />
+                  </Box>
+
+                  {/* Itens */}
+                  <Box w="full">
+                    <Text
+                      display="block"
+                      fontSize="sm"
+                      fontWeight="medium"
+                      color="gray.900"
+                      mb={3}
+                    >
+                      Itens do orçamento <Text as="span" color="red.500">*</Text>
+                    </Text>
+
+                    <VStack spacing={3} w="full">
+                      {items.map((item) => (
+                        <Box
+                          key={item.id}
+                          w="full"
+                          bg="gray.50"
+                          border="1px solid"
+                          borderColor="gray.200"
+                          borderRadius="xl"
+                          p={4}
+                        >
+                          <VStack spacing={3} w="full">
+                            <Input
+                              type="text"
+                              value={item.desc}
+                              placeholder="Ex: Mão de obra"
+                              h={10}
+                              px={3}
+                              borderRadius="lg"
+                              isInvalid={!!errors.itemDesc && item.id === items[0]?.id}
+                              onChange={(e) => {
+                                handleItemChange(item.id, 'desc', e.target.value)
+                                if (errors.itemDesc) setErrors(prev => ({ ...prev, itemDesc: '' }))
+                              }}
+                            />
+                            {errors.itemDesc && item.id === items[0]?.id && (
+                              <Box alignSelf="start">
+                                <FieldError message={errors.itemDesc} />
+                              </Box>
+                            )}
+
+                            <Flex align="center" gap={3} w="full">
+                              <Box flex={1}>
+                                <Text fontSize="xs" color="gray.600" mb={1}>Quantidade</Text>
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  value={item.qtd}
+                                  h={10}
+                                  px={3}
+                                  borderRadius="lg"
+                                  onChange={(e) => handleItemChange(item.id, 'qtd', e.target.value)}
+                                />
+                              </Box>
+
+                              <Box flex={1}>
+                                <Text fontSize="xs" color="gray.600" mb={1}>
+                                  Valor (R$) <Text as="span" color="red.500">*</Text>
+                                </Text>
+                                <Input
+                                  type="text"
+                                  inputMode="decimal"
+                                  placeholder="0,00"
+                                  value={item.value}
+                                  h={10}
+                                  px={3}
+                                  borderRadius="lg"
+                                  isInvalid={!!errors.itemValue && item.id === items[0]?.id}
+                                  onFocus={(e) => { if (e.target.value === '0') handleItemChange(item.id, 'value', '') }}
+                                  onChange={(e) => {
+                                    handleItemChange(item.id, 'value', e.target.value)
+                                    if (errors.itemValue && item.id === items[0]?.id) setErrors(prev => ({ ...prev, itemValue: '' }))
+                                  }}
+                                />
+                                {errors.itemValue && item.id === items[0]?.id && (
+                                  <FieldError message={errors.itemValue} />
+                                )}
+                              </Box>
+
+                              <IconButton
+                                aria-label="Remover item"
+                                icon={<FiTrash2 />}
+                                variant="ghost"
+                                color="gray.500"
+                                _hover={{ color: 'red.500' }}
+                                mt={5}
+                                size="sm"
+                                onClick={() => handleRemoveItem(item.id)}
+                                isDisabled={items.length === 1}
+                              />
+                            </Flex>
+                          </VStack>
+                        </Box>
+                      ))}
+                    </VStack>
+
+                    <Button
+                      type="button"
+                      onClick={handleAddItem}
+                      mt={3}
+                      w="full"
+                      h={10}
+                      borderRadius="xl"
+                      variant="solid"
+                      leftIcon={<Icon as={FiPlus} w={4} h={4} />}
+                    >
+                      Incluir serviço ou peça
+                    </Button>
+                  </Box>
+
+                  {/* Desconto */}
+                  <Box w="full">
+                    <Text
+                      as="label"
+                      htmlFor="discount"
+                      display="block"
+                      fontSize="sm"
+                      fontWeight="medium"
+                      color="gray.900"
+                      mb={2}
+                    >
+                      Desconto <Text as="span" color="gray.500">(opcional)</Text>
+                    </Text>
+                    <Input
+                      id="discount"
+                      name="discount"
+                      type="number"
+                      placeholder="%"
+                      min="0"
+                      max="100"
+                      value={formData.discount}
+                      onFocus={(e) => { if (e.target.value === '0' || e.target.value === 0) setFormData({ ...formData, discount: '' }) }}
+                      onBlur={(e) => { if (e.target.value === '') setFormData({ ...formData, discount: '' }) }}
+                      onChange={(e) => {
+                        const val = e.target.value
+                        if (val.length > 3) return
+                        if (parseFloat(val) > 100) return
+                        setFormData({ ...formData, discount: val })
+                      }}
+                    />
+                  </Box>
+
+                  {/* Navegação desktop */}
+                  <Flex
+                    align="center"
+                    justify="space-between"
+                    w="full"
+                    mt={8}
+                    pt={6}
+                    borderTop="1px"
+                    borderColor="gray.200"
+                    display={{ base: 'none', lg: 'flex' }}
+                  >
+                    <Button
+                      onClick={() => navigate('/dashboard/propostas')}
+                      variant="ghost"
+                      leftIcon={<Icon as={FiChevronLeft} w={4} h={4} />}
+                      color="gray.600"
+                      _hover={{ color: 'gray.900' }}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      type="submit"
+                      h={12}
+                      px={8}
+                      variant="solid"
+                      rightIcon={<Icon as={FiChevronRight} w={4} h={4} />}
+                      isLoading={isLoading}
+                      loadingText="Salvando..."
+                    >
+                      {isEditMode ? 'Atualizar Orçamento' : 'Salvar Orçamento'}
+                    </Button>
+                  </Flex>
                 </VStack>
               </Box>
-            </Box>
-          </SimpleGrid>
+
+              {/* ── Preview ────────────────────────────────────────────── */}
+              <Box>
+                <Box
+                  bg="white"
+                  borderRadius="2xl"
+                  position={{ base: 'relative', lg: 'sticky' }}
+                  top={{ base: '0', lg: '100px' }}
+                  p={6}
+                  boxShadow="sm"
+                  border="1px"
+                  borderColor="gray.200"
+                >
+                  <HStack justify="space-between" mb={6}>
+                    <Heading size="md" color="gray.900">Olha como seu cliente vai ver:</Heading>
+                    <Icon as={FiEye} color="gray.400" />
+                  </HStack>
+
+                  <VStack spacing={4} align="stretch">
+                    <Box bg="emerald.50" p={4} borderRadius="lg" borderWidth="1px" borderColor="emerald.200">
+                      <Text fontSize="sm" color="emerald.700" fontWeight="semibold" mb={2}>
+                        ORÇAMENTO PARA:
+                      </Text>
+                      <VStack align="start" spacing={1}>
+                        <Text fontWeight="bold" color="gray.900">
+                          {selectedClient?.name || 'Selecione um cliente'}
+                        </Text>
+                        {selectedClient?.phone && (
+                          <Text fontSize="sm" color="gray.600">{selectedClient.phone}</Text>
+                        )}
+                        {selectedClient?.email && (
+                          <Text fontSize="sm" color="gray.600">{selectedClient.email}</Text>
+                        )}
+                      </VStack>
+                    </Box>
+
+                    <Heading size="lg" color="gray.900">
+                      {formData.title || 'Título do Orçamento'}
+                    </Heading>
+
+                    <Box height="1px" bg="gray.200" />
+
+                    {items.filter(item => item.desc.trim()).map((item) => {
+                      const v = parseFloat(String(item.value).replace(',', '.')) || 0
+                      const q = parseInt(item.qtd || 1)
+                      return (
+                        <HStack key={item.id} justify="space-between">
+                          <VStack align="start" spacing={0}>
+                            <Text fontWeight="medium" color="gray.900">{item.desc}</Text>
+                            <Text fontSize="sm" color="gray.600">
+                              {q}x R$ {fmtBRL(v)}
+                            </Text>
+                          </VStack>
+                          <Text fontWeight="bold" color="gray.900">
+                            R$ {fmtBRL(v * q)}
+                          </Text>
+                        </HStack>
+                      )
+                    })}
+
+                    <Box height="1px" bg="gray.200" />
+
+                    <VStack spacing={2} align="stretch">
+                      <HStack justify="space-between">
+                        <Text color="gray.900">Subtotal:</Text>
+                        <Text fontWeight="medium" color="gray.900">R$ {fmtBRL(subtotal)}</Text>
+                      </HStack>
+                      {discountPct > 0 && (
+                        <HStack justify="space-between">
+                          <Text color="gray.900">Desconto ({discountPct}%):</Text>
+                          <Text fontWeight="medium" color="red.500">
+                            - R$ {fmtBRL(discountAmount)}
+                          </Text>
+                        </HStack>
+                      )}
+                      <Box height="1px" bg="gray.200" />
+                      <HStack justify="space-between">
+                        <Text fontSize="xl" fontWeight="bold" color="gray.900">Total</Text>
+                        <Text fontSize="xl" fontWeight="bold" color="emerald.600">
+                          R$ {fmtBRL(total)}
+                        </Text>
+                      </HStack>
+                    </VStack>
+                  </VStack>
+                </Box>
+              </Box>
+
+            </SimpleGrid>
+          )}
+
+          {/* ── Navegação mobile — abaixo do preview ───────────────────── */}
+          {!isLoadingData && (
+            <Flex
+              align="center"
+              justify="space-between"
+              w="full"
+              mt={8}
+              pt={6}
+              borderTop="1px"
+              borderColor="gray.200"
+              display={{ base: 'flex', lg: 'none' }}
+            >
+              <Button
+                onClick={() => navigate('/dashboard/propostas')}
+                variant="ghost"
+                leftIcon={<Icon as={FiChevronLeft} w={4} h={4} />}
+                color="gray.600"
+                _hover={{ color: 'gray.900' }}
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleSubmit}
+                h={12}
+                px={8}
+                variant="solid"
+                rightIcon={<Icon as={FiChevronRight} w={4} h={4} />}
+                isLoading={isLoading}
+                loadingText="Salvando..."
+              >
+                {isEditMode ? 'Atualizar Orçamento' : 'Salvar Orçamento'}
+              </Button>
+            </Flex>
+          )}
+
         </Box>
       </Flex>
 
-      {/* ── Quick Create Client Modal ───────────────────────────────────── */}
-      <Modal isOpen={isClientModalOpen} onClose={onClientModalClose} isCentered size="md">
+      {/* ── Modal: Cadastrar novo cliente ──────────────────────────────────── */}
+      <Modal isOpen={isClientModalOpen} onClose={handleCloseClientModal} isCentered size="md">
         <ModalOverlay backdropFilter="blur(4px)" />
-        <ModalContent borderRadius="2xl" shadow="2xl">
-          <ModalHeader fontSize="lg" fontWeight="bold" color="gray.800" pb={2}>
+        <ModalContent borderRadius="2xl" shadow="2xl" mx={4}>
+          <ModalHeader fontSize="lg" fontWeight="bold" color="gray.900" pb={2}>
             Cadastrar novo cliente
           </ModalHeader>
           <ModalCloseButton top={4} right={4} />
+
           <ModalBody>
             <VStack spacing={4}>
-              <FormControl isRequired>
-                <FormLabel fontSize="sm" fontWeight="medium" color="gray.700">Nome</FormLabel>
+              {/* Nome */}
+              <Box w="full">
+                <Text
+                  as="label"
+                  htmlFor="modal-name"
+                  display="block"
+                  fontSize="sm"
+                  fontWeight="medium"
+                  color="gray.900"
+                  mb={2}
+                >
+                  Nome do cliente <Text as="span" color="red.500">*</Text>
+                </Text>
                 <Input
-                  placeholder="Nome completo"
+                  id="modal-name"
+                  placeholder="Ex: João Silva"
                   value={newClient.name}
-                  onChange={(e) => setNewClient({ ...newClient, name: e.target.value })}
+                  isInvalid={!!clientErrors.name}
+                  onChange={(e) => {
+                    setNewClient({ ...newClient, name: e.target.value })
+                    if (clientErrors.name) setClientErrors(prev => ({ ...prev, name: '' }))
+                  }}
                 />
-              </FormControl>
+                <FieldError message={clientErrors.name} />
+              </Box>
 
-              <SimpleGrid columns={2} spacing={3} w="full">
-                <FormControl>
-                  <FormLabel fontSize="sm" fontWeight="medium" color="gray.700">E-mail</FormLabel>
+              {/* Telefone e E-mail */}
+              <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={4} w="full">
+                <Box>
+                  <Text
+                    as="label"
+                    htmlFor="modal-phone"
+                    display="block"
+                    fontSize="sm"
+                    fontWeight="medium"
+                    color="gray.900"
+                    mb={2}
+                  >
+                    Telefone <Text as="span" color="red.500">*</Text>
+                  </Text>
                   <Input
+                    id="modal-phone"
+                    type="tel"
+                    placeholder="(11) 99999-9999"
+                    value={newClient.phone}
+                    isInvalid={!!clientErrors.phone}
+                    onChange={(e) => {
+                      setNewClient({ ...newClient, phone: maskPhone(e.target.value) })
+                      if (clientErrors.phone) setClientErrors(prev => ({ ...prev, phone: '' }))
+                    }}
+                  />
+                  <FieldError message={clientErrors.phone} />
+                </Box>
+
+                <Box>
+                  <Text
+                    as="label"
+                    htmlFor="modal-email"
+                    display="block"
+                    fontSize="sm"
+                    fontWeight="medium"
+                    color="gray.900"
+                    mb={2}
+                  >
+                    E-mail
+                  </Text>
+                  <Input
+                    id="modal-email"
                     type="email"
-                    placeholder="email@exemplo.com"
+                    placeholder="cliente@email.com"
                     value={newClient.email}
                     onChange={(e) => setNewClient({ ...newClient, email: e.target.value })}
                   />
-                </FormControl>
-                <FormControl isRequired>
-                  <FormLabel fontSize="sm" fontWeight="medium" color="gray.700">Telefone</FormLabel>
-                  <Input
-                    required
-                    placeholder="(11) 99999-9999"
-                    value={newClient.phone}
-                    onChange={(e) => setNewClient({ ...newClient, phone: maskPhone(e.target.value) })}
-                  />
-                </FormControl>
+                </Box>
               </SimpleGrid>
-
-              <FormControl>
-                <FormLabel fontSize="sm" fontWeight="medium" color="gray.700">Empresa</FormLabel>
-                <Input
-                  placeholder="Nome da empresa (opcional)"
-                  value={newClient.company}
-                  onChange={(e) => setNewClient({ ...newClient, company: e.target.value })}
-                />
-              </FormControl>
             </VStack>
           </ModalBody>
 
           <ModalFooter gap={3} pt={2}>
-            <Button variant="ghost" rounded="xl" onClick={onClientModalClose} isDisabled={isSavingClient}>
+            <Button
+              variant="ghost"
+              onClick={handleCloseClientModal}
+              isDisabled={isSavingClient}
+            >
               Cancelar
             </Button>
             <Button
-              colorScheme="green"
-              bg="green.400"
-              color="white"
-              rounded="xl"
-              fontWeight="medium"
-              px={6}
-              _hover={{ bg: 'green.500' }}
+              variant="solid"
               onClick={handleQuickCreateClient}
               isLoading={isSavingClient}
               loadingText="Salvando..."

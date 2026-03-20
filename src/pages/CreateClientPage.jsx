@@ -206,7 +206,7 @@ const CreateClientPage = () => {
                   />
                 </Box>
 
-                <Box w="full">
+                {/* <Box w="full">
                   <Text
                     as="label"
                     htmlFor="company"
@@ -226,7 +226,7 @@ const CreateClientPage = () => {
                     value={formData.company}
                     onChange={(e) => setFormData({ ...formData, company: e.target.value })}
                   />
-                </Box>
+                </Box> */}
 
                 <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6} w="full">
                   <Box>

@@ -318,7 +318,7 @@ const PropostasPage = () => {
         }))
 
         toast({
-          title: 'Orçamento excluído',
+          title: 'Orçamento apagado',
           status: 'success',
           duration: 3000,
           isClosable: true,
@@ -329,7 +329,7 @@ const PropostasPage = () => {
           p.id === selectedProposal.id ? { ...p, status: 'approved' } : p
         ))
         toast({
-          title: 'Orçamento aprovado!',
+          title: 'Negócio fechado! 🎉',
           status: 'success',
           duration: 3000,
           isClosable: true,
@@ -340,7 +340,7 @@ const PropostasPage = () => {
           p.id === selectedProposal.id ? { ...p, status: 'rejected' } : p
         ))
         toast({
-          title: 'Orçamento reprovado',
+          title: 'Marcado como não fechado',
           status: 'success',
           duration: 3000,
           isClosable: true,
@@ -470,38 +470,50 @@ Qualquer dúvida, estou à disposição!`
   }
 
   const handleCopyLink = async (proposal) => {
-    const proposalUrl = proposal.sharing_token
-      ? `${window.location.origin}/share/proposta/${proposal.sharing_token}`
-      : `${window.location.origin}/proposta/${proposal.id}`
+    setLoadingAction({ ...loadingAction, [proposal.id]: 'copy' })
 
-    navigator.clipboard.writeText(proposalUrl)
-    setCopiedProposalId(proposal.id)
-    
-    setTimeout(() => {
-      setCopiedProposalId(null)
-    }, 2000)
-    
-    toast({
-      title: 'Link copiado!',
-      status: 'success',
-      duration: 2000,
-      isClosable: true,
-      position: 'top',
-      variant: 'subtle',
-    })
-
-    // Se é rascunho, marca como enviado
-    if (proposal.status === 'draft') {
-      try {
+    try {
+      // Atualiza status para "enviado" (mesmo comportamento do WhatsApp)
+      if (proposal.status !== 'approved') {
         await proposalService.updateStatus(proposal.id, 2)
-        // Update local state
-        setProposals(prev => prev.map(p => 
+        setProposals(prev => prev.map(p =>
           p.id === proposal.id ? { ...p, status: 'sent' } : p
         ))
-        await reloadData()
-      } catch (error) {
-        console.error("Erro ao atualizar status após copiar link", error)
       }
+
+      const proposalUrl = proposal.sharing_token
+        ? `${window.location.origin}/share/proposta/${proposal.sharing_token}`
+        : `${window.location.origin}/proposta/${proposal.id}`
+
+      try {
+        await navigator.clipboard.writeText(proposalUrl)
+      } catch (e) {
+        // silencia — clipboard pode falhar em HTTP
+      }
+
+      setCopiedProposalId(proposal.id)
+      setTimeout(() => setCopiedProposalId(null), 3000)
+
+      toast({
+        title: '🔗 Link copiado!',
+        description: 'Cola no WhatsApp, e-mail ou onde preferir.',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+        position: 'top',
+      })
+
+      reloadData()
+    } catch (error) {
+      toast({
+        title: 'Erro ao copiar link',
+        description: error.response?.data?.message || 'Tente novamente',
+        status: 'error',
+        duration: 4000,
+        isClosable: true,
+      })
+    } finally {
+      setLoadingAction({ ...loadingAction, [proposal.id]: null })
     }
   }
 
@@ -509,24 +521,24 @@ Qualquer dúvida, estou à disposição!`
     switch (actionType) {
       case 'approve':
         return {
-          title: 'Aprovar Orçamento',
-          body: `Tem certeza que deseja marcar o orçamento para ${selectedProposal?.client} como APROVADO? Esta ação impactará os relatórios.`,
-          confirmText: 'Aprovar Orçamento',
+          title: 'Negócio fechado? 🎉',
+          body: `O cliente deu o OK? Marcar como fechado ajuda a gente a organizar suas metas e o seu faturamento.`,
+          confirmText: 'Sim, fechamos!',
           confirmColor: 'green'
         }
       case 'reject':
         return {
-          title: 'Reprovar Orçamento',
-          body: `Tem certeza que deseja marcar o orçamento para ${selectedProposal?.client} como REPROVADO? Esta ação impactará os relatórios.`,
-          confirmText: 'Reprovar Orçamento',
+          title: 'O cliente não fechou?',
+          body: `Acontece. Vamos marcar como "Não fechado" para manter seu painel organizado para os próximos.`,
+          confirmText: 'Marcar como não fechado',
           confirmColor: 'red'
         }
       case 'delete':
       default:
         return {
-          title: 'Excluir Orçamento',
-          body: `Tem certeza que deseja excluir o orçamento para ${selectedProposal?.client}? Esta ação não pode ser desfeita.`,
-          confirmText: 'Excluir',
+          title: 'Apagar orçamento?',
+          body: `Quer mesmo apagar o orçamento do ${selectedProposal?.client}? Depois que apagar não tem como recuperar, tá bom?`,
+          confirmText: 'Pode apagar',
           confirmColor: 'red'
         }
     }
@@ -539,7 +551,7 @@ Qualquer dúvida, estou à disposição!`
       <VStack align="stretch" spacing={8}>
         {/* Stats */}
         <Box>
-          <Text fontSize="lg" fontWeight="semibold" mb={4}>Filtrar por Status</Text>
+          <Text fontSize="lg" fontWeight="semibold" mb={4}>Como estão seus negócios?</Text>
           <Grid
             templateColumns={{
               base: 'repeat(2, 1fr)',
@@ -548,35 +560,35 @@ Qualquer dúvida, estou à disposição!`
             gap={4}
           >
             <StatsCard
-              title="Total"
+              title="Todos"
               value={getStatusCount('all')}
               colorScheme="primary"
               isActive={statusFilter === 'all'}
               onClick={() => setStatusFilter('all')}
             />
             <StatsCard
-              title="Aprovadas"
+              title="Fechados"
               value={getStatusCount('approved')}
               colorScheme="green"
               isActive={statusFilter === 'approved'}
               onClick={() => setStatusFilter('approved')}
             />
             <StatsCard
-              title="Visualizadas"
+              title="O cliente já viu"
               value={getStatusCount('viewed')}
               colorScheme="blue"
               isActive={statusFilter === 'viewed'}
               onClick={() => setStatusFilter('viewed')}
             />
             <StatsCard
-              title="Enviadas"
+              title="Já mandou"
               value={getStatusCount('sent')}
               colorScheme="yellow"
               isActive={statusFilter === 'sent'}
               onClick={() => setStatusFilter('sent')}
             />
             <StatsCard
-              title="Pendentes de Envio"
+              title="Pra mandar"
               value={getStatusCount('draft')}
               colorScheme="gray"
               isActive={statusFilter === 'draft'}
@@ -586,7 +598,7 @@ Qualquer dúvida, estou à disposição!`
         </Box>
 
         {/* Filters */}
-        <DataCard title="Filtros e Busca">
+        <DataCard title="Encontre um orçamento">
           <Stack direction={{ base: 'column', lg: 'row' }} spacing={4} align={{ lg: 'flex-end' }}>
             <FormControl flex={2}>
               <FormLabel>Buscar</FormLabel>
@@ -595,7 +607,9 @@ Qualquer dúvida, estou à disposição!`
                   <Icon as={FiSearch} color="gray.400" />
                 </InputLeftElement>
                 <Input
-                  placeholder="Buscar por cliente ou serviço..."
+                  variant="app"
+                  pl={10}
+                  placeholder="Quem ou o que você procura?"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -603,23 +617,23 @@ Qualquer dúvida, estou à disposição!`
             </FormControl>
 
             <FormControl flex={1}>
-              <FormLabel>Período</FormLabel>
+              <FormLabel>De quando?</FormLabel>
               <ReactSelect
                 styles={appSelectStyles}
                 value={[
-                  { value: 'all', label: 'Todo o período' },
+                  { value: 'all', label: 'Todo o histórico' },
                   { value: '7days', label: 'Últimos 7 dias' },
                   { value: '30days', label: 'Últimos 30 dias' },
                   { value: 'thisMonth', label: 'Este mês' },
-                  { value: 'custom', label: 'Personalizado' },
+                  { value: 'custom', label: 'Escolher datas' },
                 ].find(o => o.value === datePreset)}
                 onChange={(opt) => handleDatePresetChange(opt?.value || 'all')}
                 options={[
-                  { value: 'all', label: 'Todo o período' },
+                  { value: 'all', label: 'Todo o histórico' },
                   { value: '7days', label: 'Últimos 7 dias' },
                   { value: '30days', label: 'Últimos 30 dias' },
                   { value: 'thisMonth', label: 'Este mês' },
-                  { value: 'custom', label: 'Personalizado' },
+                  { value: 'custom', label: 'Escolher datas' },
                 ]}
                 isSearchable={false}
                 menuPortalTarget={document.body}
@@ -651,6 +665,7 @@ Qualquer dúvida, estou à disposição!`
                 <FormControl w={{ base: 'full', lg: 'auto' }} isInvalid={!!dateError}>
                   <FormLabel>De</FormLabel>
                   <Input
+                    variant="app"
                     type="date"
                     value={dateRange.start}
                     max={dateRange.end || undefined}
@@ -669,6 +684,7 @@ Qualquer dúvida, estou à disposição!`
                 <FormControl w={{ base: 'full', lg: 'auto' }} isInvalid={!!dateError}>
                   <FormLabel>Até</FormLabel>
                   <Input
+                    variant="app"
                     type="date"
                     value={dateRange.end}
                     min={dateRange.start || undefined}
@@ -690,7 +706,7 @@ Qualquer dúvida, estou à disposição!`
 
         {/* Proposals List */}
         <DataCard
-          title="Seus Orçamentos"
+          title="Seus orçamentos"
           subtitle={`${pagination.total} orçamento${pagination.total !== 1 ? 's' : ''} encontrado${pagination.total !== 1 ? 's' : ''}`}
         >
           {isLoading ? (
@@ -737,23 +753,17 @@ Qualquer dúvida, estou à disposição!`
                         <Box flex="1">
                           <HStack spacing={2} mb={1} wrap="wrap">
                             <Text fontWeight="semibold">{proposal.client}</Text>
-                            <StatusBadge
-                              status={proposal.status}
-                              customLabel={
-                                proposal.status === 'approved' ? 'Orçamento aceito pelo cliente' :
-                                  proposal.status === 'rejected' ? 'Orçamento negado pelo cliente' : undefined
-                              }
-                            />
+                            <StatusBadge status={proposal.status} />
                           </HStack>
                           <Text fontSize="sm" color="gray.500" mb={2}>
                             {proposal.service}
                           </Text>
                           <HStack spacing={4} fontSize="xs" color="gray.400" wrap="wrap">
-                            <Text>Criada: {formatDateTime(proposal.createdAt)}</Text>
+                            <Text>Criado em: {formatDateTime(proposal.createdAt)}</Text>
                             {proposal.viewedAt && (
-                              <Text>Visualizada: {formatDateTime(proposal.viewedAt)}</Text>
+                              <Text>Cliente viu: {formatDateTime(proposal.viewedAt)}</Text>
                             )}
-                            <Text>Válida até: {formatDate(proposal.validUntil)}</Text>
+                            <Text>Vence dia: {formatDate(proposal.validUntil)}</Text>
                           </HStack>
                         </Box>
                       </HStack>
@@ -798,7 +808,7 @@ Qualquer dúvida, estou à disposição!`
                                 w={{ base: 'full', md: 'auto' }}
                                 h={{ base: '44px', md: 'auto' }}
                               >
-                                Aprovar orçamento
+                                Fechou negócio! 🎉
                               </Button>
                               <Button
                                 size={{ base: 'md', md: 'sm' }}
@@ -810,7 +820,7 @@ Qualquer dúvida, estou à disposição!`
                                 w={{ base: 'full', md: 'auto' }}
                                 h={{ base: '44px', md: 'auto' }}
                               >
-                                Reprovar orçamento
+                                Não fechou
                               </Button>
                             </Stack>
                           ) : proposal.status === 'approved' ? (
@@ -824,7 +834,7 @@ Qualquer dúvida, estou à disposição!`
                               w={{ base: 'full', md: 'auto' }}
                               h={{ base: '44px', md: 'auto' }}
                             >
-                              Reprovar orçamento
+                              Não fechou
                             </Button>
                           ) : proposal.status === 'rejected' && (
                             <Button
@@ -845,15 +855,17 @@ Qualquer dúvida, estou à disposição!`
                               as={Button}
                               variant="outline"
                               size={{ base: 'md', md: 'sm' }}
+                              leftIcon={copiedProposalId === proposal.id ? <Icon as={FiCheck} color="emerald.500" /> : undefined}
                               rightIcon={<Icon as={FiChevronDown} />}
-                              bg="gray.50"
-                              borderColor="gray.200"
-                              _hover={{ bg: 'gray.100' }}
+                              bg={copiedProposalId === proposal.id ? 'emerald.50' : 'gray.50'}
+                              borderColor={copiedProposalId === proposal.id ? 'emerald.300' : 'gray.200'}
+                              color={copiedProposalId === proposal.id ? 'emerald.600' : undefined}
+                              _hover={{ bg: copiedProposalId === proposal.id ? 'emerald.50' : 'gray.100' }}
                               isLoading={loadingAction[proposal.id] === 'whatsapp' || loadingAction[proposal.id] === 'download'}
                               w={{ base: 'full', md: 'auto' }}
                               h={{ base: '44px', md: 'auto' }}
                             >
-                              Opções
+                              {copiedProposalId === proposal.id ? 'Link copiado!' : 'Opções'}
                             </MenuButton>
                             <MenuList>
                               <MenuItem
@@ -862,25 +874,19 @@ Qualquer dúvida, estou à disposição!`
                                 href={proposal.sharing_token ? `/share/proposta/${proposal.sharing_token}` : '#'}
                                 target="_blank"
                               >
-                                Visualizar
+                                Ver orçamento
                               </MenuItem>
                               <MenuItem
                                 icon={<Icon as={FaWhatsapp} color="#25D366" />}
                                 onClick={() => handleWhatsAppShare(proposal)}
                               >
-                                {proposal.status === 'draft' ? 'Enviar via WhatsApp' : 'Reenviar via WhatsApp'}
+                                {proposal.status === 'draft' ? 'Enviar no WhatsApp' : 'Reenviar via WhatsApp'}
                               </MenuItem>
                               <MenuItem
                                 icon={<Icon as={copiedProposalId === proposal.id ? FiCheck : FiCopy} color={copiedProposalId === proposal.id ? "emerald.500" : undefined} />}
                                 onClick={() => handleCopyLink(proposal)}
                               >
                                 {copiedProposalId === proposal.id ? 'Link Copiado!' : 'Copiar link para o cliente'}
-                              </MenuItem>
-                              <MenuItem
-                                icon={<Icon as={FiDownload} />}
-                                onClick={() => handleDownloadPDF(proposal.id)}
-                              >
-                                Baixar PDF
                               </MenuItem>
                               <MenuItem
                                 as={Link}
@@ -894,7 +900,7 @@ Qualquer dúvida, estou à disposição!`
                                 color="red.500"
                                 onClick={() => confirmAction('delete', proposal)}
                               >
-                                Excluir
+                                Apagar
                               </MenuItem>
                             </MenuList>
                           </Menu>

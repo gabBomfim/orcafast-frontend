@@ -3,109 +3,119 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import {
   Box,
   Button,
-  Card,
-  CardBody,
-  Center,
+  Flex,
   Heading,
   HStack,
   Icon,
   Text,
   VStack,
-  useColorModeValue,
-  useToast,
-  Divider,
+  Spinner,
+  Center,
 } from '@chakra-ui/react'
 import {
-  FiCheckCircle,
+  FiShare2,
+  FiChevronLeft,
+  FiLink,
+  FiCheck,
+  FiFileText,
   FiDownload,
   FiList,
-  FiUser,
-  FiDollarSign,
-  FiFileText,
-  FiCopy,
-  FiCheck,
 } from 'react-icons/fi'
 import { FaWhatsapp } from 'react-icons/fa'
 import Container from '../components/layout/Container'
 import { proposalService } from '../services'
 import { openWhatsApp } from '../utils/whatsapp'
+import { maskPhone } from '../utils/mask'
 
 const ProposalSuccessPage = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const toast = useToast()
-  const [isDownloading, setIsDownloading] = useState(false)
+
   const [isSendingWhatsApp, setIsSendingWhatsApp] = useState(false)
+  const [isDownloading, setIsDownloading] = useState(false)
   const [isCopyingLink, setIsCopyingLink] = useState(false)
   const [linkCopied, setLinkCopied] = useState(false)
-
-  const bgColor = useColorModeValue('white', 'gray.800')
-  const textColor = useColorModeValue('gray.900', 'white')
-  const subTextColor = useColorModeValue('gray.600', 'gray.300')
-  const successBg = useColorModeValue('green.50', 'green.900')
-  const successColor = useColorModeValue('green.600', 'green.300')
+  const [proposal, setProposal] = useState(null)
+  const [isLoadingProposal, setIsLoadingProposal] = useState(true)
 
   const [initialData] = useState(() => {
     return location.state || JSON.parse(sessionStorage.getItem('pending_proposal_success') || '{}')
   })
 
-  const { proposalId, proposalData, isEdit } = initialData
+  const { proposalId, proposalData, sharingToken, isEdit } = initialData
 
   useEffect(() => {
-    // Redireciona se não houver dados
     if (!proposalId || !proposalData) {
       navigate('/dashboard/propostas')
-    } else {
-      sessionStorage.removeItem('pending_proposal_success')
+      return
     }
+    sessionStorage.removeItem('pending_proposal_success')
+
+    // Busca detalhes completos para montar o preview com itens
+    proposalService.get(proposalId)
+      .then(({ data }) => setProposal(data))
+      .catch(() => setProposal(null))
+      .finally(() => setIsLoadingProposal(false))
   }, [proposalId, proposalData, navigate])
 
-  const handleWhatsAppShare = async () => {
+  if (!proposalId || !proposalData) return null
+
+  // ─── Dados do preview ─────────────────────────────────────────────────────
+
+  const clientName  = proposal?.client?.name  || proposalData.clientName  || 'Cliente'
+  const clientPhone = proposal?.client?.phone || proposalData.clientPhone || ''
+  const title       = proposal?.title         || proposalData.title        || ''
+  const token       = proposal?.sharing_token || sharingToken               || ''
+
+  const rawItems = proposal?.items || []
+  const previewItems = rawItems.map((item, i) => ({
+    id:    item.id || i,
+    desc:  item.description || '',
+    qtd:   item.quantity    || 1,
+    value: item.unit_price  || 0,
+  }))
+
+  const subtotal = previewItems.reduce((acc, item) => {
+    return acc + (parseFloat(item.value) || 0) * (parseFloat(item.qtd) || 0)
+  }, 0)
+
+  const discountPct    = parseFloat(proposal?.discount || 0)
+  const discountAmount = subtotal * (discountPct / 100)
+  const total          = parseFloat(proposal?.total_value || proposalData.totalValue || subtotal - discountAmount)
+
+  const proposalUrl = token
+    ? `${window.location.origin}/share/proposta/${token}`
+    : `${window.location.origin}/proposta/${proposalId}`
+
+  const fmt = (n) => Number(n).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+
+  // ─── Ações ────────────────────────────────────────────────────────────────
+
+  const handleWhatsApp = async () => {
     setIsSendingWhatsApp(true)
-
     try {
-      // Atualiza o status do orçamento para "enviado" (status 2)
       await proposalService.updateStatus(proposalId, 2)
-
-      // Constrói a URL pública do orçamento usando o token
-      const token = initialData.sharingToken || initialData.sharing_token
-      const proposalUrl = token
-        ? `${window.location.origin}/share/proposta/${token}`
-        : `${window.location.origin}/proposta/${proposalId}`
-
-      // Mensagem personalizada mais amigável
-      const message = `Olá ${proposalData.clientName}!
-
-Seu orçamento de *${proposalData.title}* está pronto! 😊
-
-Visualize os detalhes completos clicando no link abaixo:
-🔗 ${proposalUrl}
-
-Qualquer dúvida, estou à disposição!`
-
-      // Abre o WhatsApp de forma inteligente (Web no desktop, App no mobile)
-      openWhatsApp({
-        phone: proposalData.clientPhone,
-        message: message
-      })
-
-      toast({
-        title: 'Orçamento marcado como enviado',
-        description: 'Selecione o contato no WhatsApp para enviar.',
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      })
-    } catch (error) {
-      toast({
-        title: 'Erro ao atualizar status',
-        description: error.response?.data?.message || 'Não foi possível marcar como enviada.',
-        status: 'error',
-        duration: 4000,
-        isClosable: true,
-      })
+      const message = `Olá ${clientName}!\n\nSeu orçamento de *${title}* está pronto! 😊\n\nVisualize os detalhes clicando no link:\n🔗 ${proposalUrl}\n\nQualquer dúvida, estou à disposição!`
+      openWhatsApp({ phone: clientPhone, message })
+    } catch {
+      // silencia — o WhatsApp ainda abre mesmo se o status falhar
+      openWhatsApp({ phone: clientPhone, message: `Olá! Seu orçamento está pronto: ${proposalUrl}` })
     } finally {
       setIsSendingWhatsApp(false)
+    }
+  }
+
+  const handleCopyLink = async () => {
+    setIsCopyingLink(true)
+    try {
+      await navigator.clipboard.writeText(proposalUrl)
+      await proposalService.updateStatus(proposalId, 2)
+      setLinkCopied(true)
+      setTimeout(() => setLinkCopied(false), 3000)
+    } catch {
+      // falha silenciosa
+    } finally {
+      setIsCopyingLink(false)
     }
   }
 
@@ -113,277 +123,204 @@ Qualquer dúvida, estou à disposição!`
     setIsDownloading(true)
     try {
       const response = await proposalService.downloadPDF(proposalId)
-
-      // Cria blob e faz download
       const blob = new Blob([response.data], { type: 'application/pdf' })
-      const url = window.URL.createObjectURL(blob)
+      const url  = window.URL.createObjectURL(blob)
       const link = document.createElement('a')
-      link.href = url
-      link.download = `proposta-${proposalId}.pdf`
+      link.href     = url
+      link.download = `orcamento-${proposalId}.pdf`
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
       window.URL.revokeObjectURL(url)
-
-      toast({
-        title: 'Download concluído',
-        description: 'O PDF do orçamento foi baixado com sucesso.',
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      })
-
-      // Marca como enviado
       await proposalService.updateStatus(proposalId, 2)
-    } catch (error) {
-      toast({
-        title: 'Erro ao baixar PDF',
-        description: error.response?.data?.message || 'Não foi possível baixar o PDF.',
-        status: 'error',
-        duration: 4000,
-        isClosable: true,
-      })
+    } catch {
+      // falha silenciosa
     } finally {
       setIsDownloading(false)
     }
   }
 
-  const handleCopyLink = async () => {
-    setIsCopyingLink(true)
-    try {
-      const token = initialData.sharingToken || initialData.sharing_token
-      const proposalUrl = token
-        ? `${window.location.origin}/share/proposta/${token}`
-        : `${window.location.origin}/proposta/${proposalId}`
-
-      await navigator.clipboard.writeText(proposalUrl)
-      setLinkCopied(true)
-
-      // Marca como enviado
-      await proposalService.updateStatus(proposalId, 2)
-
-      toast({
-        title: 'Link copiado!',
-        status: 'success',
-        duration: 2000,
-        isClosable: true,
-        position: 'top',
-        variant: 'subtle',
-      })
-
-      setTimeout(() => setLinkCopied(false), 3000)
-    } catch (error) {
-      toast({
-        title: 'Erro ao copiar',
-        status: 'error',
-        duration: 4000,
-        isClosable: true,
-      })
-    } finally {
-      setIsCopyingLink(false)
-    }
-  }
-
-  const handleGoToList = () => {
-    navigate('/dashboard/propostas')
-  }
-
-  if (!proposalId || !proposalData) {
-    return null
-  }
+  // ─── Render ───────────────────────────────────────────────────────────────
 
   return (
-    <Container maxW="container.md">
-      <Center minH="70vh">
-        <Card
-          shadow="xl"
-          border="0"
-          bg={bgColor}
-          borderRadius="2xl"
-          w="full"
-          animation="fadeIn 0.5s ease-in"
-        >
-          <CardBody p={8}>
-            <VStack spacing={8} align="stretch">
-              {/* Ícone de Sucesso */}
-              <Center>
-                <Box
-                  w={20}
-                  h={20}
-                  bg={successBg}
-                  borderRadius="full"
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                  animation="bounceIn 0.6s ease-out"
-                >
-                  <Icon as={FiCheckCircle} w={10} h={10} color={successColor} />
-                </Box>
-              </Center>
+    <Container maxW="container.sm">
+      <VStack spacing={6} py={4}>
 
-              {/* Título */}
-              <VStack spacing={2}>
-                <Heading as="h1" size="xl" textAlign="center" color={textColor}>
-                  {isEdit ? 'Orçamento atualizado!' : 'Orçamento criado!'}
-                </Heading>
-                <Text fontSize="lg" color={subTextColor} textAlign="center">
-                  {isEdit
-                    ? 'As alterações foram salvas com sucesso.'
-                    : 'Seu orçamento foi criado e está pronto para ser enviado.'}
+        {/* Cabeçalho */}
+        <VStack textAlign="center" spacing={3}>
+          <Flex
+            w={16} h={16}
+            bg="emerald.50"
+            borderRadius="2xl"
+            align="center" justify="center"
+            mx="auto"
+          >
+            <Icon as={FiShare2} w={8} h={8} color="emerald.500" />
+          </Flex>
+          <Heading as="h1" fontSize="3xl" fontWeight="bold" color="gray.900">
+            {isEdit ? 'Orçamento atualizado! ✅' : 'Orçamento pronto! 🎉'}
+          </Heading>
+          <Text fontSize="lg" color="gray.600">
+            {isEdit
+              ? 'As alterações foram salvas. Escolha como enviar pro cliente.'
+              : 'Tudo certo! Agora é só escolher como enviar pro cliente.'}
+          </Text>
+        </VStack>
+
+        {/* Preview do orçamento */}
+        {isLoadingProposal ? (
+          <Center py={8} w="full">
+            <Spinner size="lg" color="emerald.500" />
+          </Center>
+        ) : (
+          <Box
+            bg="white"
+            borderRadius="2xl"
+            p={6}
+            boxShadow="sm"
+            border="1px"
+            borderColor="gray.200"
+            w="full"
+          >
+            <HStack justify="space-between" mb={6}>
+              <Heading size="md" color="gray.900">Resumo do orçamento</Heading>
+              <Icon as={FiFileText} color="gray.400" />
+            </HStack>
+
+            <VStack spacing={4} align="stretch">
+              {/* Cabeçalho cliente */}
+              <Box bg="emerald.50" p={4} borderRadius="lg" borderWidth="1px" borderColor="emerald.200">
+                <Text fontSize="sm" color="emerald.700" fontWeight="semibold" mb={2}>
+                  ORÇAMENTO PARA:
                 </Text>
-              </VStack>
-
-              <Divider />
-
-              {/* Informações do Orçamento */}
-              <VStack spacing={4} align="stretch" bg={successBg} p={6} borderRadius="xl">
-                <HStack spacing={3}>
-                  <Icon as={FiUser} color={successColor} boxSize={5} />
-                  <VStack align="start" spacing={0} flex={1}>
-                    <Text fontSize="sm" color={subTextColor} fontWeight="medium">
-                      Cliente
-                    </Text>
-                    <Text fontSize="md" color={textColor} fontWeight="semibold">
-                      {proposalData.clientName}
-                    </Text>
-                  </VStack>
-                </HStack>
-
-                <HStack spacing={3}>
-                  <Icon as={FiFileText} color={successColor} boxSize={5} />
-                  <VStack align="start" spacing={0} flex={1}>
-                    <Text fontSize="sm" color={subTextColor} fontWeight="medium">
-                      Título
-                    </Text>
-                    <Text fontSize="md" color={textColor} fontWeight="semibold">
-                      {proposalData.title}
-                    </Text>
-                  </VStack>
-                </HStack>
-
-                <HStack spacing={3}>
-                  <Icon as={FiDollarSign} color={successColor} boxSize={5} />
-                  <VStack align="start" spacing={0} flex={1}>
-                    <Text fontSize="sm" color={subTextColor} fontWeight="medium">
-                      Valor Total
-                    </Text>
-                    <Text fontSize="lg" color={successColor} fontWeight="bold">
-                      R${' '}
-                      {proposalData.totalValue.toLocaleString('pt-BR', {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
-                    </Text>
-                  </VStack>
-                </HStack>
-              </VStack>
-
-              {/* Botões de Ação */}
-              <VStack spacing={6} pt={4}>
-                <VStack spacing={2} w="full">
-                  <Button
-                    leftIcon={<Icon as={FaWhatsapp} />}
-                    size="lg"
-                    w="full"
-                    onClick={handleWhatsAppShare}
-                    bg="#25D366"
-                    color="white"
-                    _hover={{ bg: '#128C7E' }}
-                    _active={{ bg: '#075E54' }}
-                    isLoading={isSendingWhatsApp}
-                    loadingText="Enviando..."
-                    h={14}
-                  >
-                    Enviar via WhatsApp
-                  </Button>
-                </VStack>
-
-                <VStack spacing={2} w="full">
-                  <Button
-                    leftIcon={<Icon as={linkCopied ? FiCheck : FiCopy} />}
-                    variant="outline"
-                    colorScheme="emerald"
-                    size="lg"
-                    w="full"
-                    onClick={handleCopyLink}
-                    isLoading={isCopyingLink}
-                    loadingText="Copiando..."
-                    isDisabled={linkCopied}
-                    h={14}
-                  >
-                    {linkCopied ? 'Link Copiado!' : 'Copiar link para compartilhar'}
-                  </Button>
-                  {!linkCopied && (
-                    <Text fontSize="xs" color="emerald.600" fontWeight="medium" textAlign="center">
-                      Ideal para enviar em outras redes sociais com rastreamento.
-                    </Text>
+                <VStack align="start" spacing={1}>
+                  <Text fontWeight="bold" color="gray.900">{clientName}</Text>
+                  {clientPhone && (
+                    <Text fontSize="sm" color="gray.600">{maskPhone(clientPhone)}</Text>
                   )}
                 </VStack>
+              </Box>
 
-                <VStack spacing={2} w="full">
-                  <Button
-                    leftIcon={<Icon as={FiDownload} />}
-                    variant="outline"
-                    colorScheme="gray"
-                    size="lg"
-                    w="full"
-                    onClick={handleDownloadPDF}
-                    isLoading={isDownloading}
-                    loadingText="Baixando..."
-                    h={14}
-                    color="gray.600"
-                  >
-                    Baixar PDF
-                  </Button>
-                  <Text fontSize="xs" color="gray.500" textAlign="center">
-                    Atenção: O rastreamento de visualização não funciona em arquivos PDF.
+              <Heading size="lg" color="gray.900">{title}</Heading>
+              <Box height="1px" bg="gray.200" />
+
+              {/* Itens */}
+              {previewItems.filter(item => String(item.desc).trim()).map((item) => {
+                const v = parseFloat(item.value) || 0
+                const q = parseInt(item.qtd)      || 1
+                return (
+                  <HStack key={item.id} justify="space-between">
+                    <VStack align="start" spacing={0}>
+                      <Text fontWeight="medium" color="gray.900">{item.desc}</Text>
+                      <Text fontSize="sm" color="gray.600">
+                        {q}x R$ {fmt(v)}
+                      </Text>
+                    </VStack>
+                    <Text fontWeight="bold" color="gray.900">R$ {fmt(v * q)}</Text>
+                  </HStack>
+                )
+              })}
+
+              {previewItems.length === 0 && (
+                <Text fontSize="sm" color="gray.400" textAlign="center" py={2}>
+                  Carregando itens...
+                </Text>
+              )}
+
+              <Box height="1px" bg="gray.200" />
+
+              {/* Totais */}
+              <VStack spacing={2} align="stretch">
+                <HStack justify="space-between">
+                  <Text color="gray.900">Subtotal:</Text>
+                  <Text fontWeight="medium" color="gray.900">R$ {fmt(subtotal)}</Text>
+                </HStack>
+                {discountPct > 0 && (
+                  <HStack justify="space-between">
+                    <Text color="gray.900">Desconto ({discountPct}%):</Text>
+                    <Text fontWeight="medium" color="red.500">- R$ {fmt(discountAmount)}</Text>
+                  </HStack>
+                )}
+                <Box height="1px" bg="gray.200" />
+                <HStack justify="space-between">
+                  <Text fontSize="xl" fontWeight="bold" color="gray.900">Total</Text>
+                  <Text fontSize="xl" fontWeight="bold" color="emerald.600">
+                    R$ {fmt(total)}
                   </Text>
-                </VStack>
-
-                <Button
-                  leftIcon={<Icon as={FiList} />}
-                  variant="ghost"
-                  size="lg"
-                  w="full"
-                  onClick={handleGoToList}
-                >
-                  Ir para meus orçamentos
-                </Button>
+                </HStack>
               </VStack>
             </VStack>
-          </CardBody>
-        </Card>
-      </Center>
+          </Box>
+        )}
 
-      <style>
-        {`
-          @keyframes fadeIn {
-            from {
-              opacity: 0;
-              transform: translateY(20px);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
-          }
+        {/* Botões de ação */}
+        <VStack spacing={3} w="full">
+          {/* WhatsApp */}
+          <Button
+            w="full"
+            h={14}
+            bg="#25D366"
+            _hover={{ bg: '#128C7E' }}
+            _active={{ bg: '#075E54' }}
+            borderRadius="xl"
+            color="white"
+            fontWeight="semibold"
+            leftIcon={<Icon as={FaWhatsapp} boxSize={5} />}
+            onClick={handleWhatsApp}
+            isLoading={isSendingWhatsApp}
+            loadingText="Abrindo WhatsApp..."
+          >
+            Enviar via WhatsApp
+          </Button>
 
-          @keyframes bounceIn {
-            0% {
-              transform: scale(0);
-            }
-            50% {
-              transform: scale(1.1);
-            }
-            100% {
-              transform: scale(1);
-            }
-          }
-        `}
-      </style>
+          {/* Copiar link */}
+          <Button
+            w="full"
+            h={14}
+            variant="outline"
+            colorScheme="emerald"
+            borderRadius="xl"
+            fontWeight="semibold"
+            leftIcon={<Icon as={linkCopied ? FiCheck : FiLink} boxSize={5} />}
+            onClick={handleCopyLink}
+            isLoading={isCopyingLink}
+            loadingText="Copiando..."
+            isDisabled={linkCopied}
+          >
+            {linkCopied ? 'Link copiado!' : 'Copiar link para compartilhar'}
+          </Button>
+        </VStack>
+
+        {/* Navegação */}
+        <Flex
+          align="center"
+          justify="right"
+          w="full"
+          pt={6}
+          borderTop="1px"
+          borderColor="gray.200"
+        >
+          <Button
+           type="button"
+            h={12}
+            px={8}
+            bg="emerald.500"
+            _hover={{ bg: 'emerald.600' }}
+            color="white"
+            fontWeight="semibold"
+            fontSize="sm"
+            borderRadius="xl"
+            boxShadow="lg"
+            rightIcon={<Icon as={FiCheck} w={4} h={4} />}
+            onClick={() => navigate('/dashboard/propostas')}
+          >
+            Feito
+          </Button>
+        </Flex>
+
+      </VStack>
     </Container>
   )
 }
 
 export default ProposalSuccessPage
-
