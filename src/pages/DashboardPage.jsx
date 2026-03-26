@@ -40,7 +40,7 @@ import { useSubscription } from '../hooks/useSubscription'
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 const PERIOD_OPTIONS = [
-  { value: 'this-month', label: 'Este Mês' },
+  { value: 'this-month', label: 'O que rolou este mês' },
   { value: 'last-month', label: 'Mês Passado' },
   { value: 'this-year', label: 'Este Ano' },
   { value: 'custom', label: 'Personalizado' },
@@ -170,22 +170,22 @@ const DashboardPage = () => {
   const proposals = stats.proposals
   const totalSent = proposals.total_sent ?? 0
   const funnelData = [
-    { label: 'Enviados', value: totalSent, color: 'gray.400', percentage: 100 },
-    { label: 'Visualizados', value: proposals.total_viewed ?? 0, color: 'blue.400', percentage: totalSent > 0 ? Math.round(((proposals.total_viewed ?? 0) / totalSent) * 100) : 0 },
-    { label: 'Aprovados', value: proposals.total_approved ?? 0, color: 'emerald.500', percentage: totalSent > 0 ? Math.round(((proposals.total_approved ?? 0) / totalSent) * 100) : 0 },
+    { label: 'Já mandou', value: totalSent, color: 'gray.400', percentage: 100 },
+    { label: 'O cliente já viu', value: proposals.total_viewed ?? 0, color: 'blue.400', percentage: totalSent > 0 ? Math.round(((proposals.total_viewed ?? 0) / totalSent) * 100) : 0 },
+    { label: 'Fechados', value: proposals.total_approved ?? 0, color: 'emerald.500', percentage: totalSent > 0 ? Math.round(((proposals.total_approved ?? 0) / totalSent) * 100) : 0 },
   ]
 
   const getMetaTitle = () => {
     if (isMember) return 'Seu Desempenho'
-    if (isYearlyView) return `Meta de ${new Date().getFullYear()}`
+    if (isYearlyView) return `Seu objetivo para ${new Date().getFullYear()}`
     const m = new Date().toLocaleDateString('pt-BR', { month: 'long' })
     if (selectedPeriod === 'last-month') {
       const d = new Date()
       d.setMonth(d.getMonth() - 1)
       const lm = d.toLocaleDateString('pt-BR', { month: 'long' })
-      return `Meta de ${lm.charAt(0).toUpperCase() + lm.slice(1)}`
+      return `Seu objetivo para ${lm.charAt(0).toUpperCase() + lm.slice(1)}`
     }
-    return `Meta de ${m.charAt(0).toUpperCase() + m.slice(1)}`
+    return `Seu objetivo para ${m.charAt(0).toUpperCase() + m.slice(1)}`
   }
 
   const userName = user?.name?.split(' ')[0] || 'Usuário'
@@ -217,7 +217,7 @@ const DashboardPage = () => {
               <Box w={{ base: 'full', sm: '250px' }}>
                 <ReactSelect
                   isMulti
-                  placeholder="Filtrar por equipe"
+                  placeholder="Ver orçamentos do time"
                   closeMenuOnSelect={false}
                   styles={appSelectStyles}
                   options={teamMembers}
@@ -323,7 +323,7 @@ const DashboardPage = () => {
 
                     <Box flex={1} w="full">
                       <Text fontSize="sm" fontWeight="medium" color="gray.600" mb={1}>
-                        Faturamento Aprovado
+                        Serviços fechados
                       </Text>
                       {totalSent > 0 ? (
                         <>
@@ -331,7 +331,7 @@ const DashboardPage = () => {
                             R$ {fmt(revenue)}
                           </Text>
                           <Text fontSize="xs" color="gray.500" mt={2}>
-                            Baseado em orçamentos aprovados neste período
+                            Total dos orçamentos que você marcou como fechados.
                           </Text>
                         </>
                       ) : (
@@ -380,6 +380,9 @@ const DashboardPage = () => {
                                       as={Link}
                                       to="/dashboard/propostas"
                                       variant="solid"
+                                      size="md"
+                                      height="40px"
+                                      minW="120px"
                                       mt={4}
                                       w={{ base: 'full', md: 'auto' }}
                                       leftIcon={<Icon as={FiFileText} />}
@@ -400,6 +403,9 @@ const DashboardPage = () => {
                                       as={Link}
                                       to="/dashboard/propostas/nova"
                                       variant="solid"
+                                      size="md"
+                                      height="40px"
+                                      minW="120px"
                                       mt={4}
                                       w={{ base: 'full', md: 'auto' }}
                                       leftIcon={<Icon as={FiZap} />}
@@ -494,15 +500,17 @@ const DashboardPage = () => {
                                   as={Link}
                                   to="/dashboard/configuracoes/assinatura"
                                   variant="outline"
-                                  size="sm"
+                                  size="md"
+                                  height="40px"
+                                  minW="120px"
                                   mt={4}
                                   fontWeight="medium"
                                   rounded="lg"
                                   borderColor="orange.300"
                                   color="orange.700"
                                   _hover={{ bg: 'orange.50' }}
+                                  leftIcon={<Icon as={FiStar} w={4} h={4} />}
                                 >
-                                  <Icon as={FiStar} w={4} h={4} mr={1.5} />
                                   Fazer Upgrade para o Pro
                                 </Button>
                               </>
@@ -511,23 +519,25 @@ const DashboardPage = () => {
                                 <Flex w={16} h={16} bg="emerald.50" rounded="2xl" align="center" justify="center" mx="auto" mb={4}>
                                   <Icon as={FiTarget} w={8} h={8} color="emerald.500" />
                                 </Flex>
-                                <Text fontSize="md" fontWeight="semibold" color="gray.900">Configure sua meta</Text>
+                                <Text fontSize="md" fontWeight="semibold" color="gray.900">Quanto você quer ganhar esse mês?</Text>
                                 <Text fontSize="sm" color="gray.500" mt={2} maxW="xs" mx="auto">
-                                  Defina quanto deseja faturar este mês para acompanhar seu progresso.
+                                  Coloque o seu objetivo de lucro para a gente te ajudar a acompanhar.
                                 </Text>
                                 <Button
                                   as={Link}
                                   to="/dashboard/configuracoes/metas"
-                                  size="sm"
+                                  size="md"
+                                  height="40px"
+                                  minW="120px"
                                   mt={4}
                                   bg="emerald.500"
                                   color="white"
                                   _hover={{ bg: 'emerald.600' }}
                                   fontWeight="medium"
                                   rounded="lg"
+                                  rightIcon={<Icon as={FiArrowRight} w={4} h={4} />}
                                 >
-                                  Definir meta mensal
-                                  <Icon as={FiArrowRight} w={4} h={4} ml={1.5} />
+                                  Bora crescer!
                                 </Button>
                               </>
                             )}
@@ -602,7 +612,7 @@ const DashboardPage = () => {
                       <Text as="span" fontWeight="semibold" color="gray.900">
                         {annualProg}%
                       </Text>{' '}
-                      da sua meta de {new Date().getFullYear()}.
+                      do seu objetivo para {new Date().getFullYear()}.
                     </Text>
                   </Flex>
                 </Box>
@@ -624,7 +634,7 @@ const DashboardPage = () => {
                   </Box>
                   <Box flex={1} w="full">
                     <Text fontSize="sm" fontWeight="medium" color="gray.600" mb={4}>
-                      Eficiência dos Orçamentos
+                      Como andam seus negócios
                     </Text>
 
                     {totalSent > 0 ? (
@@ -662,7 +672,7 @@ const DashboardPage = () => {
                         {/* Conversion rate */}
                         <Box mt={4} pt={4} borderTop="1px" borderColor="gray.200">
                           <Flex justify="space-between" align="center">
-                            <Text fontSize="sm" color="gray.600">Taxa de conversão</Text>
+                            <Text fontSize="sm" color="gray.600">Sua média de fechamento</Text>
                             <Text fontSize="lg" fontWeight="bold" color="emerald.500">
                               {Math.round(proposals.conversion_rate ?? 0)}%
                             </Text>
@@ -682,15 +692,15 @@ const DashboardPage = () => {
                         <Flex align="center" justify="center" gap={6} mt={6}>
                           <Flex align="center" gap={1.5}>
                             <Box w={2.5} h={2.5} rounded="full" bg="gray.400" />
-                            <Text fontSize="xs" color="gray.500">Enviados</Text>
+                            <Text fontSize="xs" color="gray.500">Já mandou</Text>
                           </Flex>
                           <Flex align="center" gap={1.5}>
                             <Box w={2.5} h={2.5} rounded="full" bg="blue.400" />
-                            <Text fontSize="xs" color="gray.500">Visualizados</Text>
+                            <Text fontSize="xs" color="gray.500">O cliente já viu</Text>
                           </Flex>
                           <Flex align="center" gap={1.5}>
                             <Box w={2.5} h={2.5} rounded="full" bg="emerald.500" />
-                            <Text fontSize="xs" color="gray.500">Aprovados</Text>
+                            <Text fontSize="xs" color="gray.500">Fechados</Text>
                           </Flex>
                         </Flex>
                       </Box>

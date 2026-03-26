@@ -56,8 +56,8 @@ const PRO_TO_BUSINESS_BENEFITS = [
 
 const PLAN_DISPLAY = {
     free: { label: 'FREE', badgeBg: 'gray.100', badgeColor: 'gray.600', iconBg: 'gray.50', iconColor: 'gray.400' },
-    pro: { label: 'PRO', badgeBg: 'yellow.50', badgeColor: 'yellow.600', iconBg: 'yellow.50', iconColor: 'yellow.500' },
-    business: { label: 'BUSINESS', badgeBg: 'purple.50', badgeColor: 'purple.600', iconBg: 'purple.50', iconColor: 'purple.500' },
+    pro: { label: 'AUTÔNOMO', badgeBg: 'yellow.50', badgeColor: 'yellow.600', iconBg: 'yellow.50', iconColor: 'yellow.500' },
+    business: { label: 'EQUIPE', badgeBg: 'purple.50', badgeColor: 'purple.600', iconBg: 'purple.50', iconColor: 'purple.500' },
 }
 
 // ─── UpgradeCTA ────────────────────────────────────────────────────────────────
@@ -102,9 +102,9 @@ const UpgradeCTA = ({ benefits, title, subtitle, price, buttonLabel, onCheckout,
                 colorScheme="green"
                 bg="green.400"
                 color="white"
-                size="lg"
+                size="md"
                 w="full"
-                h="56px"
+                height="40px"
                 rounded="xl"
                 fontWeight="semibold"
                 fontSize="lg"
@@ -155,7 +155,9 @@ const ActiveSubscriptionCard = ({ subscription, onPortal, onCancel, onResume, is
                                 </Text>
                             </Box>
                             <Button
-                                size="sm"
+                                size="md"
+                                height="40px"
+                                minW="120px"
                                 colorScheme="orange"
                                 variant="solid"
                                 leftIcon={<Icon as={FiRefreshCw} />}
@@ -182,11 +184,12 @@ const ActiveSubscriptionCard = ({ subscription, onPortal, onCancel, onResume, is
                 <VStack mt={4} spacing={2}>
                     <Button
                         w="full"
-                        h={11}
-                        p={3}
+                        size="md"
+                        height="40px"
+                        minW="120px"
                         variant="outline"
                         colorScheme="green"
-                        leftIcon={<Icon as={FiExternalLink} />}
+                        rightIcon={<Icon as={FiExternalLink} />}
                         borderRadius="xl"
                         fontWeight="medium"
                         isLoading={isLoading === 'portal'}
@@ -198,7 +201,9 @@ const ActiveSubscriptionCard = ({ subscription, onPortal, onCancel, onResume, is
                     {!onGracePeriod && (
                         <Button
                             variant="ghost"
-                            size="sm"
+                            size="md"
+                            height="40px"
+                            minW="120px"
                             colorScheme="red"
                             fontWeight="normal"
                             _hover={{ color: 'red.600' }}
@@ -446,9 +451,6 @@ const SettingsSubscription = () => {
             {/* Header */}
             <Box mb={8}>
                 <Text fontSize="2xl" fontWeight="bold" color="gray.800">Assinatura</Text>
-                <Text fontSize="sm" color="gray.600" mt={1}>
-                    Gerencie seu plano e acesse recursos exclusivos
-                </Text>
             </Box>
 
             {/* Trial Alert Box */}
@@ -535,9 +537,9 @@ const SettingsSubscription = () => {
                     <UpgradeCTA
                         benefits={PRO_TO_BUSINESS_BENEFITS}
                         title="Leve sua equipe ao próximo nível"
-                        subtitle="Faça upgrade para o Business e escale sua operação com múltiplos usuários"
+                        subtitle="Faça upgrade para o plano Equipe e escale sua operação com múltiplos usuários"
                         price="97,90"
-                        buttonLabel="Fazer Upgrade para Business"
+                        buttonLabel="Fazer Upgrade para Equipe"
                         isLoading={actionLoading === 'checkout-business'}
                         onCheckout={() => confirmUpgrade('business')}
                     />
@@ -599,7 +601,7 @@ const SettingsSubscription = () => {
                             <Text>
                                 Você está prestes a fazer upgrade para o plano{' '}
                                 <Text as="strong" color="green.600">
-                                    {pendingUpgradePlan === 'business' ? 'Business' : 'Pro'}
+                                    {pendingUpgradePlan === 'business' ? 'Equipe' : 'Autônomo'}
                                 </Text>.
                             </Text>
                             {isPaidPlan && (

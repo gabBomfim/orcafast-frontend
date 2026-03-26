@@ -37,7 +37,7 @@ const CreateProposalPage = () => {
 
   const [title, setTitle] = useState(guestData?.proposal?.title || '')
   const [discount, setDiscount] = useState(guestData?.proposal?.discount || '')
-  const [validUntil, setValidUntil] = useState(guestData?.proposal?.validUntil || '')
+  const [validUntil, setValidUntil] = useState(guestData?.proposal?.valid_until || guestData?.proposal?.validUntil || '')
   const [items, setItems] = useState(() => {
     if (guestData?.proposal?.items?.length > 0) {
       return guestData.proposal.items.map((item, index) => ({
@@ -172,7 +172,7 @@ const CreateProposalPage = () => {
 
     const proposalData = {
       title,
-      validUntil,
+      valid_until: validUntil,
       discount: discountPct,
       items: items.map(item => ({
         description: item.desc,
@@ -360,7 +360,7 @@ const CreateProposalPage = () => {
                           color="gray.500"
                           _hover={{ color: 'red.500' }}
                           mt={5}
-                          size="sm"
+                          size="md"
                           onClick={() => handleRemoveItem(item.id)}
                           isDisabled={items.length === 1}
                         />
@@ -374,7 +374,8 @@ const CreateProposalPage = () => {
                 onClick={handleAddItem}
                 mt={3}
                 w="full"
-                h={10}
+                size="md"
+                height="40px"
                 borderRadius="xl"
                 boxShadow="lg"
                 bg="emerald.500"
@@ -453,6 +454,9 @@ const CreateProposalPage = () => {
                 as={RouterLink}
                 to="/onboarding/create-client"
                 variant="ghost"
+                size="md"
+                height="40px"
+                minW="120px"
                 leftIcon={<Icon as={FiChevronLeft} w={4} h={4} />}
                 color="gray.600"
                 _hover={{ color: 'gray.900' }}
@@ -461,7 +465,9 @@ const CreateProposalPage = () => {
               </Button>
               <Button
                 type="submit"
-                h={12}
+                size="md"
+                height="40px"
+                minW="120px"
                 px={8}
                 bg="emerald.500"
                 _hover={{ bg: 'emerald.600' }}
@@ -516,6 +522,11 @@ const CreateProposalPage = () => {
               </Box>
 
               <Heading size="lg" color="gray.900">{title || 'Título do Orçamento'}</Heading>
+              {validUntil && (
+                <Text fontSize="sm" color="red.500" fontWeight="medium">
+                  Válido até: {validUntil.split('-').reverse().join('/')}
+                </Text>
+              )}
               <Box height="1px" bg="gray.200" />
               {items.filter(item => item.desc.trim()).map((item) => {
                 const v = parseFloat(String(item.value).replace(',', '.')) || 0
@@ -580,6 +591,9 @@ const CreateProposalPage = () => {
           as={RouterLink}
           to="/onboarding/create-client"
           variant="ghost"
+          size="md"
+          height="40px"
+          minW="120px"
           leftIcon={<Icon as={FiChevronLeft} w={4} h={4} />}
           color="gray.600"
           _hover={{ color: 'gray.900' }}
@@ -603,7 +617,9 @@ const CreateProposalPage = () => {
             updateProposalData(proposalData)
             navigate('/onboarding/send-proposal')
           }}
-          h={12}
+          size="md"
+          height="40px"
+          minW="120px"
           px={8}
           bg="emerald.500"
           _hover={{ bg: 'emerald.600' }}

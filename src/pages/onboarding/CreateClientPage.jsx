@@ -126,7 +126,7 @@ const CreateClientPage = () => {
               color="gray.900"
               mb={2}
             >
-              Telefone <Text as="span" color="red.500">*</Text>
+              Celular <Text as="span" color="red.500">*</Text>
             </Text>
             <Input
               id="phone"
@@ -193,7 +193,7 @@ const CreateClientPage = () => {
               Dica
             </Text>
             <Text fontSize="sm" color="gray.600">
-              Adicione o telefone do WhatsApp para enviar o orçamento diretamente.
+              Adicione o celular do WhatsApp para enviar o orçamento diretamente.
             </Text>
           </Box>
         </Flex> */}
@@ -204,6 +204,9 @@ const CreateClientPage = () => {
             as={RouterLink}
             to="/"
             variant="ghost"
+            size="md"
+            height="40px"
+            minW="120px"
             leftIcon={<Icon as={FiChevronLeft} w={4} h={4} />}
             color="gray.600"
             _hover={{ color: 'gray.900' }}
@@ -212,7 +215,9 @@ const CreateClientPage = () => {
           </Button>
           <Button
             type="submit"
-            h={12}
+            size="md"
+            height="40px"
+            minW="120px"
             px={8}
             bg="emerald.500"
             _hover={{ bg: 'emerald.600' }}

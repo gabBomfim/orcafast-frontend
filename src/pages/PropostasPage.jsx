@@ -325,9 +325,14 @@ const PropostasPage = () => {
         })
       } else if (actionType === 'approve') {
         await proposalService.updateStatus(selectedProposal.id, 4)
-        setProposals(prev => prev.map(p => 
+        setProposals(prev => prev.map(p =>
           p.id === selectedProposal.id ? { ...p, status: 'approved' } : p
         ))
+        setStatusCounts(prev => ({
+          ...prev,
+          [selectedProposal.status]: Math.max(0, (prev[selectedProposal.status] || 0) - 1),
+          approved: (prev.approved || 0) + 1,
+        }))
         toast({
           title: 'Negócio fechado! 🎉',
           status: 'success',
@@ -336,9 +341,13 @@ const PropostasPage = () => {
         })
       } else if (actionType === 'reject') {
         await proposalService.updateStatus(selectedProposal.id, 5)
-        setProposals(prev => prev.map(p => 
+        setProposals(prev => prev.map(p =>
           p.id === selectedProposal.id ? { ...p, status: 'rejected' } : p
         ))
+        setStatusCounts(prev => ({
+          ...prev,
+          [selectedProposal.status]: Math.max(0, (prev[selectedProposal.status] || 0) - 1),
+        }))
         toast({
           title: 'Marcado como não fechado',
           status: 'success',
@@ -375,10 +384,14 @@ const PropostasPage = () => {
       // Only update status if NOT approved
       if (proposal.status !== 'approved') {
         await proposalService.updateStatus(proposal.id, 2)
-        // Update local state
-        setProposals(prev => prev.map(p => 
+        setProposals(prev => prev.map(p =>
           p.id === proposal.id ? { ...p, status: 'sent' } : p
         ))
+        setStatusCounts(prev => ({
+          ...prev,
+          [proposal.status]: Math.max(0, (prev[proposal.status] || 0) - 1),
+          sent: (prev.sent || 0) + 1,
+        }))
       }
 
       const proposalUrl = proposal.sharing_token
@@ -456,10 +469,14 @@ Qualquer dúvida, estou à disposição!`
       if (proposal?.status === 'draft') {
         try {
           await proposalService.updateStatus(proposalId, 2)
-          // Update local state
-          setProposals(prev => prev.map(p => 
+          setProposals(prev => prev.map(p =>
             p.id === proposalId ? { ...p, status: 'sent' } : p
           ))
+          setStatusCounts(prev => ({
+            ...prev,
+            draft: Math.max(0, (prev.draft || 0) - 1),
+            sent: (prev.sent || 0) + 1,
+          }))
           await reloadData()
         } catch (e) {
           console.error("Erro ao atualizar status após download", e)
@@ -479,6 +496,11 @@ Qualquer dúvida, estou à disposição!`
         setProposals(prev => prev.map(p =>
           p.id === proposal.id ? { ...p, status: 'sent' } : p
         ))
+        setStatusCounts(prev => ({
+          ...prev,
+          [proposal.status]: Math.max(0, (prev[proposal.status] || 0) - 1),
+          sent: (prev.sent || 0) + 1,
+        }))
       }
 
       const proposalUrl = proposal.sharing_token
@@ -522,7 +544,7 @@ Qualquer dúvida, estou à disposição!`
       case 'approve':
         return {
           title: 'Negócio fechado? 🎉',
-          body: `O cliente deu o OK? Marcar como fechado ajuda a gente a organizar suas metas e o seu faturamento.`,
+          body: `O cliente deu o OK? Marcar como fechado ajuda a gente a organizar suas metas e o seu lucro.`,
           confirmText: 'Sim, fechamos!',
           confirmColor: 'green'
         }
@@ -549,9 +571,11 @@ Qualquer dúvida, estou à disposição!`
   return (
     <Container>
       <VStack align="stretch" spacing={8}>
+        <Box>
+          <Text fontSize="2xl" fontWeight="bold" color="gray.800">Orçamentos</Text>
+        </Box>
         {/* Stats */}
         <Box>
-          <Text fontSize="lg" fontWeight="semibold" mb={4}>Como estão seus negócios?</Text>
           <Grid
             templateColumns={{
               base: 'repeat(2, 1fr)',
@@ -775,7 +799,7 @@ Qualquer dúvida, estou à disposição!`
                             color="primary.500"
                             fontSize="lg"
                           >
-                            R$ {(proposal.value || 0).toLocaleString('pt-BR')}
+                            R$ {(proposal.value || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </Text>
                           
                           {isAdmin && proposal.user && (
@@ -800,51 +824,55 @@ Qualquer dúvida, estou à disposição!`
                           {(proposal.status === 'draft' || proposal.status === 'sent' || proposal.status === 'viewed') ? (
                             <Stack direction={{ base: 'column', md: 'row' }} spacing={2} w={{ base: 'full', md: 'auto' }}>
                               <Button
-                                size={{ base: 'md', md: 'sm' }}
+                                size="md"
+                                height="40px"
+                                minW="120px"
                                 colorScheme="green"
                                 variant="outline"
                                 onClick={() => confirmAction('approve', proposal)}
                                 leftIcon={<Icon as={FiCheckCircle} />}
                                 w={{ base: 'full', md: 'auto' }}
-                                h={{ base: '44px', md: 'auto' }}
                               >
                                 Fechou negócio! 🎉
                               </Button>
                               <Button
-                                size={{ base: 'md', md: 'sm' }}
+                                size="md"
+                                height="40px"
+                                minW="120px"
                                 colorScheme="red"
                                 variant="outline"
                                 onClick={() => confirmAction('reject', proposal)}
                                 leftIcon={<Icon as={FiXCircle} />}
                                 _hover={{ bg: 'red.50', borderColor: 'red.500', color: 'red.600' }}
                                 w={{ base: 'full', md: 'auto' }}
-                                h={{ base: '44px', md: 'auto' }}
                               >
                                 Não fechou
                               </Button>
                             </Stack>
                           ) : proposal.status === 'approved' ? (
                             <Button
-                              size={{ base: 'md', md: 'sm' }}
+                              size="md"
+                              height="40px"
+                              minW="120px"
                               colorScheme="red"
                               variant="outline"
                               onClick={() => confirmAction('reject', proposal)}
                               leftIcon={<Icon as={FiXCircle} />}
                               _hover={{ bg: 'red.50', borderColor: 'red.500', color: 'red.600' }}
                               w={{ base: 'full', md: 'auto' }}
-                              h={{ base: '44px', md: 'auto' }}
                             >
                               Não fechou
                             </Button>
                           ) : proposal.status === 'rejected' && (
                             <Button
-                              size={{ base: 'md', md: 'sm' }}
+                              size="md"
+                              height="40px"
+                              minW="120px"
                               colorScheme="green"
                               variant="outline"
                               onClick={() => confirmAction('approve', proposal)}
                               leftIcon={<Icon as={FiCheckCircle} />}
                               w={{ base: 'full', md: 'auto' }}
-                              h={{ base: '44px', md: 'auto' }}
                             >
                               Aprovar orçamento
                             </Button>
@@ -854,7 +882,9 @@ Qualquer dúvida, estou à disposição!`
                             <MenuButton
                               as={Button}
                               variant="outline"
-                              size={{ base: 'md', md: 'sm' }}
+                              size="md"
+                              height="40px"
+                              minW="120px"
                               leftIcon={copiedProposalId === proposal.id ? <Icon as={FiCheck} color="emerald.500" /> : undefined}
                               rightIcon={<Icon as={FiChevronDown} />}
                               bg={copiedProposalId === proposal.id ? 'emerald.50' : 'gray.50'}
@@ -863,7 +893,6 @@ Qualquer dúvida, estou à disposição!`
                               _hover={{ bg: copiedProposalId === proposal.id ? 'emerald.50' : 'gray.100' }}
                               isLoading={loadingAction[proposal.id] === 'whatsapp' || loadingAction[proposal.id] === 'download'}
                               w={{ base: 'full', md: 'auto' }}
-                              h={{ base: '44px', md: 'auto' }}
                             >
                               {copiedProposalId === proposal.id ? 'Link copiado!' : 'Opções'}
                             </MenuButton>
@@ -880,7 +909,7 @@ Qualquer dúvida, estou à disposição!`
                                 icon={<Icon as={FaWhatsapp} color="#25D366" />}
                                 onClick={() => handleWhatsAppShare(proposal)}
                               >
-                                {proposal.status === 'draft' ? 'Enviar no WhatsApp' : 'Reenviar via WhatsApp'}
+                                {proposal.status === 'draft' ? 'Enviar no WhatsApp' : 'Reenviar no WhatsApp'}
                               </MenuItem>
                               <MenuItem
                                 icon={<Icon as={copiedProposalId === proposal.id ? FiCheck : FiCopy} color={copiedProposalId === proposal.id ? "emerald.500" : undefined} />}

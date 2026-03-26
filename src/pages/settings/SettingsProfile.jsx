@@ -27,12 +27,20 @@ const SettingsProfile = () => {
     const user = getCurrentUser()
 
     const [isSaving, setIsSaving] = useState(false)
+    const [hasPassword, setHasPassword] = useState(user?.has_password !== false)
     const [formData, setFormData] = useState({
         name: user?.name || '',
         email: user?.email || '',
         password: '',
         password_confirmation: '',
     })
+
+    useEffect(() => {
+        authService.getCurrentUser().then(({ data }) => {
+            updateUser(data)
+            setHasPassword(data.has_password !== false)
+        }).catch(() => {})
+    }, [])
 
     const handleInputChange = (field, value) => {
         setFormData(prev => ({ ...prev, [field]: value }))
@@ -98,9 +106,6 @@ const SettingsProfile = () => {
                 <Text fontSize="2xl" fontWeight="bold" color="gray.800">
                     Meu Perfil
                 </Text>
-                <Text fontSize="sm" color="gray.600" mt={1}>
-                    Gerencie suas informações pessoais e segurança
-                </Text>
             </Box>
 
             <VStack spacing={6} align="stretch">
@@ -108,7 +113,7 @@ const SettingsProfile = () => {
                     <CardBody p={6}>
                         <VStack spacing={5} align="stretch">
                             <Text fontSize="lg" fontWeight="bold" color="gray.800" mb={2}>
-                                Informações Pessoais
+                                Seus dados
                             </Text>
 
                             <FormControl isRequired>
@@ -150,6 +155,7 @@ const SettingsProfile = () => {
                     </CardBody>
                 </Card>
 
+                {hasPassword && (
                 <Card bg="white" shadow="sm" rounded="2xl" border="1px" borderColor="gray.200">
                     <CardBody p={6}>
                         <VStack spacing={5} align="stretch">
@@ -199,12 +205,15 @@ const SettingsProfile = () => {
                         </VStack>
                     </CardBody>
                 </Card>
+                )}
 
                 <Button
                     colorScheme="emerald"
                     bg="emerald.500"
                     _hover={{ bg: 'emerald.600' }}
-                    size="lg"
+                    size="md"
+                    height="40px"
+                    minW="120px"
                     leftIcon={<Icon as={FiSave} />}
                     onClick={handleSave}
                     isLoading={isSaving}

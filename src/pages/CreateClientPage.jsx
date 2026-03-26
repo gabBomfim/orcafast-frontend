@@ -25,6 +25,8 @@ import { useNavigate, useSearchParams, Link as RouterLink } from 'react-router-d
 import { clientService } from '../services'
 import { useState, useEffect, useRef } from 'react'
 import { maskPhone, unmaskPhone } from '../utils/mask'
+import { FieldError } from '../components/ui/FormFeedback'
+import { formMessages } from '../utils/formMessages'
 
 const CreateClientPage = () => {
   const navigate = useNavigate()
@@ -42,6 +44,17 @@ const CreateClientPage = () => {
     phone: '',
     company: '',
   })
+  const [errors, setErrors] = useState({})
+
+  const validate = () => {
+    const next = {}
+    if (!formData.name.trim()) next.name = formMessages.required.name
+    const digits = formData.phone.replace(/\D/g, '')
+    if (!digits) next.phone = formMessages.required.phone
+    else if (digits.length < 10) next.phone = formMessages.invalid.phone
+    setErrors(next)
+    return Object.keys(next).length === 0
+  }
 
   useEffect(() => {
     if (!isEditMode || fetching.current) return
@@ -75,44 +88,21 @@ const CreateClientPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if (!validate()) return
     setIsLoading(true)
 
-    const formDataObj = new FormData(e.target)
-
-    let phone = formDataObj.get('phone')
-    const email = formDataObj.get('email')
-
-    // Remove formatação do telefone antes de enviar
-    if (phone) {
-      phone = unmaskPhone(phone)
-    }
-
-    // Validação: pelo menos telefone ou email deve ser fornecido
-    if (!phone && !email) {
-      toast({
-        title: 'Contato obrigatório',
-        description: 'Adicione pelo menos o telefone ou e-mail do cliente.',
-        status: 'warning',
-        duration: 4000,
-        isClosable: true,
-      })
-      setIsLoading(false)
-      return
-    }
-
     const clientData = {
-      name: formDataObj.get('name'),
-      phone: phone || null,
-      email: email || null,
-      company: formDataObj.get('company') || null,
+      name: formData.name,
+      phone: unmaskPhone(formData.phone) || null,
+      email: formData.email || null,
+      company: formData.company || null,
     }
 
     try {
       if (isEditMode) {
         await clientService.update(editId, clientData)
         toast({
-          title: 'Cliente atualizado!',
-          description: 'O cliente foi atualizado com sucesso.',
+          title: 'Dados atualizados!',
           status: 'success',
           duration: 3000,
           isClosable: true,
@@ -121,7 +111,6 @@ const CreateClientPage = () => {
         await clientService.create(clientData)
         toast({
           title: 'Cliente cadastrado!',
-          description: 'O cliente foi cadastrado com sucesso.',
           status: 'success',
           duration: 3000,
           isClosable: true,
@@ -130,7 +119,7 @@ const CreateClientPage = () => {
 
       navigate('/dashboard/clientes')
     } catch (error) {
-      const message = error.response?.data?.message || 'Erro ao cadastrar cliente'
+      const message = error.response?.data?.message || 'Ih, algo deu errado aqui. A gente já sabe e tá resolvendo.'
       toast({
         title: 'Erro',
         description: message,
@@ -174,10 +163,10 @@ const CreateClientPage = () => {
                   <Icon as={FiUser} w={8} h={8} color="emerald.500" />
                 </Flex>
                 <Heading as="h1" fontSize="2xl" fontWeight="bold" color="gray.900" mb={2}>
-                  {isEditMode ? 'Editar cliente' : 'Cadastrar cliente'}
+                  {isEditMode ? 'Mudando os dados' : 'Quem é o cliente?'}
                 </Heading>
                 <Text color="gray.600">
-                  {isEditMode ? 'Atualize os dados do cliente' : 'Cadastre um novo cliente para seus orçamentos'}
+                  {isEditMode ? 'Ajuste o que precisar e salva.' : 'Coloca os dados de quem vai receber o orçamento.'}
                 </Text>
               </VStack>
 
@@ -193,17 +182,22 @@ const CreateClientPage = () => {
                     color="gray.900"
                     mb={2}
                   >
-                    Nome do cliente *
+                    Nome do cliente <Text as="span" color="red.500">*</Text>
                   </Text>
                   <Input
                     id="name"
                     name="name"
                     type="text"
+                    variant="app"
                     placeholder="Ex: João Silva"
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    required
+                    isInvalid={!!errors.name}
+                    onChange={(e) => {
+                      setFormData({ ...formData, name: e.target.value })
+                      if (errors.name) setErrors(prev => ({ ...prev, name: '' }))
+                    }}
                   />
+                  <FieldError message={errors.name} />
                 </Box>
 
                 {/* <Box w="full">
@@ -239,19 +233,23 @@ const CreateClientPage = () => {
                       color="gray.900"
                       mb={2}
                     >
-                      Telefone *
+                      Celular <Text as="span" color="red.500">*</Text>
                     </Text>
                     <Input
                       id="phone"
                       name="phone"
                       type="tel"
+                      variant="app"
                       placeholder="(11) 99999-9999"
                       value={formData.phone}
+                      isInvalid={!!errors.phone}
                       onChange={(e) => {
-                        setFormData({ ...formData, phone: maskPhone(e.target.value) })
+                        const masked = maskPhone(e.target.value)
+                        setFormData({ ...formData, phone: masked })
+                        if (errors.phone) setErrors(prev => ({ ...prev, phone: '' }))
                       }}
-                      required
                     />
+                    <FieldError message={errors.phone} />
                   </Box>
 
                   <Box>
@@ -270,6 +268,7 @@ const CreateClientPage = () => {
                       id="email"
                       name="email"
                       type="email"
+                      variant="app"
                       placeholder="cliente@email.com"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -303,7 +302,7 @@ const CreateClientPage = () => {
                       Dica profissional
                     </Text>
                     <Text fontSize="sm" color="gray.600">
-                      Adicione o telefone do WhatsApp para enviar o orçamento diretamente.
+                      Adicione o celular do WhatsApp para enviar o orçamento diretamente.
                     </Text>
                   </Box>
                 </Flex> */}
@@ -313,6 +312,9 @@ const CreateClientPage = () => {
                   <Button
                     onClick={() => navigate('/dashboard/clientes')}
                     variant="ghost"
+                    size="md"
+                    height="40px"
+                    minW="120px"
                     leftIcon={<Icon as={FiChevronLeft} w={4} h={4} />}
                     color="gray.600"
                     _hover={{ color: 'gray.900' }}
@@ -321,20 +323,16 @@ const CreateClientPage = () => {
                   </Button>
                   <Button
                     type="submit"
-                    h={12}
+                    variant="solid"
+                    size="md"
+                    height="40px"
+                    minW="120px"
                     px={8}
-                    bg="emerald.500"
-                    _hover={{ bg: 'emerald.600' }}
-                    color="white"
-                    fontWeight="semibold"
-                    fontSize="sm"
-                    borderRadius="xl"
-                    boxShadow="lg"
                     rightIcon={<Icon as={FiChevronRight} w={4} h={4} />}
                     isLoading={isLoading}
                     loadingText="Salvando..."
                   >
-                    {isEditMode ? 'Atualizar Cliente' : 'Salvar Cliente'}
+                    {isEditMode ? 'Salvar alterações' : 'Continuar'}
                   </Button>
                 </Flex>
               </VStack>

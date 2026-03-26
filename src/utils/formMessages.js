@@ -19,7 +19,7 @@ export const formMessages = {
     generic: 'Preencha este campo para continuar.',
     name: 'Coloque o nome aqui.',
     email: 'Preciso do e-mail para seguir.',
-    phone: 'Coloque o telefone aqui.',
+    phone: 'Coloque o celular aqui.',
     password: 'Crie uma senha para proteger sua conta.',
     title: 'Dê um título para o orçamento.',
     value: 'Coloque o valor aqui.',
@@ -31,7 +31,7 @@ export const formMessages = {
   // Formato inválido
   invalid: {
     email: 'Esse e-mail não tá certo. Confere aí.',
-    phone: 'Esse telefone não tá no formato certo. Ex: (11) 99999-9999',
+    phone: 'Esse celular não tá no formato certo. Ex: (11) 99999-9999',
     cpf: 'Esse CPF não tá batendo. Confere os números.',
     cnpj: 'Esse CNPJ não tá batendo. Confere os números.',
     cep: 'Esse CEP não existe. Confere aí.',
@@ -111,7 +111,7 @@ export const formMessages = {
 
   // Clientes
   client: {
-    duplicate: 'Já existe um cliente com esse telefone.',
+    duplicate: 'Já existe um cliente com esse celular.',
     notFound: 'Não achei esse cliente. Confere o nome.',
   },
 }
@@ -190,7 +190,7 @@ export const infoMessages = {
   },
 
   tip: {
-    whatsapp: 'Dica: adiciona o telefone do WhatsApp pra enviar direto.',
+    whatsapp: 'Dica: adiciona o celular do WhatsApp pra enviar direto.',
     description: 'Dica: uma boa descrição ajuda o cliente a entender o serviço.',
     validity: 'Dica: orçamentos com validade curta têm mais chance de fechar.',
   },

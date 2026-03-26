@@ -258,7 +258,8 @@ const ProposalSuccessPage = () => {
           {/* WhatsApp */}
           <Button
             w="full"
-            h={14}
+            size="md"
+            height="40px"
             bg="#25D366"
             _hover={{ bg: '#128C7E' }}
             _active={{ bg: '#075E54' }}
@@ -270,13 +271,14 @@ const ProposalSuccessPage = () => {
             isLoading={isSendingWhatsApp}
             loadingText="Abrindo WhatsApp..."
           >
-            Enviar via WhatsApp
+            Enviar no WhatsApp
           </Button>
 
           {/* Copiar link */}
           <Button
             w="full"
-            h={14}
+            size="md"
+            height="40px"
             variant="outline"
             colorScheme="emerald"
             borderRadius="xl"
@@ -302,7 +304,9 @@ const ProposalSuccessPage = () => {
         >
           <Button
            type="button"
-            h={12}
+            size="md"
+            height="40px"
+            minW="120px"
             px={8}
             bg="emerald.500"
             _hover={{ bg: 'emerald.600' }}
@@ -311,7 +315,7 @@ const ProposalSuccessPage = () => {
             fontSize="sm"
             borderRadius="xl"
             boxShadow="lg"
-            rightIcon={<Icon as={FiCheck} w={4} h={4} />}
+            leftIcon={<Icon as={FiCheck} w={4} h={4} />}
             onClick={() => navigate('/dashboard/propostas')}
           >
             Feito

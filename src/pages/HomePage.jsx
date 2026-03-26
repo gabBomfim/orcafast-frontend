@@ -160,14 +160,14 @@ const HomePage = () => {
                 <div className="stat-box">
                   <div className="stat-label">
                     <FiDollarSign style={{ width: '1rem', height: '1rem' }} />
-                    <span>Faturamento</span>
+                    <span>Serviços fechados</span>
                   </div>
                   <p className="stat-value">R$ 7.300</p>
                 </div>
                 <div className="stat-box">
                   <div className="stat-label">
                     <FiTrendingUp style={{ width: '1rem', height: '1rem' }} />
-                    <span>Aprovados</span>
+                    <span>Fechados</span>
                   </div>
                   <p className="stat-value">2 hoje</p>
                 </div>
@@ -181,7 +181,7 @@ const HomePage = () => {
                     </div>
                     <div>
                       <p className="proposal-title">Orçamento #1234</p>
-                      <p className="proposal-status">Aprovada</p>
+                      <p className="proposal-status">Fechado</p>
                     </div>
                   </div>
                   <span className="proposal-value approved">R$ 2.500</span>
@@ -193,7 +193,7 @@ const HomePage = () => {
                     </div>
                     <div>
                       <p className="proposal-title">Orçamento #1233</p>
-                      <p className="proposal-status">Aprovada</p>
+                      <p className="proposal-status">Fechado</p>
                     </div>
                   </div>
                   <span className="proposal-value approved">R$ 4.800</span>
@@ -276,7 +276,7 @@ const HomePage = () => {
               </div>
               <h3 className="step-title">Enviar</h3>
               <p className="step-description">
-                Compartilhe por link, WhatsApp ou PDF em um único clique.
+                Compartilhe por link ou WhatsApp em um único clique.
               </p>
             </CardContent>
           </Card>
@@ -421,7 +421,7 @@ const HomePage = () => {
                 className="pricing-btn-primary"
                 style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
-                Assinar plano Business
+                Assinar plano Equipe
               </Link>
             </CardContent>
           </Card>

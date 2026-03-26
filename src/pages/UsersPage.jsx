@@ -10,12 +10,6 @@ import {
     Flex,
     Avatar,
     Badge,
-    Table,
-    Thead,
-    Tbody,
-    Tr,
-    Th,
-    Td,
     IconButton,
     Menu,
     MenuButton,
@@ -42,10 +36,11 @@ import {
     AlertDialogHeader,
     AlertDialogContent,
     AlertDialogOverlay,
+    Divider,
 } from '@chakra-ui/react'
 import {
     FiUsers, FiPlus, FiLock, FiMoreVertical,
-    FiEdit2, FiTrash2, FiMail, FiSearch, FiChevronDown, FiAlertCircle
+    FiEdit2, FiTrash2, FiAlertCircle
 } from 'react-icons/fi'
 import { useState, useEffect, useRef } from 'react'
 import Container from '../components/layout/Container'
@@ -53,7 +48,7 @@ import { useSubscription } from '../hooks/useSubscription'
 import { useAuth } from '../hooks/useAuth'
 import { teamUserService } from '../services'
 
-// ─── Role Mapping (Reflects Laravel UserRole Enum) ───────────────────────────
+// ─── Role Mapping ─────────────────────────────────────────────────────────────
 const ROLE_MAP = {
     1: { label: 'Administrador Master', color: 'red' },
     2: { label: 'Cliente', color: 'blue' },
@@ -62,15 +57,15 @@ const ROLE_MAP = {
 }
 
 const getRoleBadge = (roleId) => {
-    const role = ROLE_MAP[roleId] || { label: 'Usuário', color: 'gray' }
+    const role = ROLE_MAP[roleId] || { label: 'Membro', color: 'gray' }
     return (
-        <Badge variant="subtle" colorScheme={role.color} rounded="full" px={2.5}>
+        <Badge variant="subtle" colorScheme={role.color} rounded="full" px={2.5} fontSize="xs">
             {role.label}
         </Badge>
     )
 }
 
-// ─── Lock Overlay (Business Required) ────────────────────────────────────────
+// ─── Lock Overlay (Plano Equipe Necessário) ───────────────────────────────────
 const UpgradeOverlay = () => (
     <Flex
         position="absolute"
@@ -92,36 +87,35 @@ const UpgradeOverlay = () => (
             borderColor="gray.100"
             maxW="sm"
             textAlign="center"
+            mx={4}
         >
-            <Flex
-                w={16} h={16}
-                bg="purple.50"
-                borderRadius="2xl"
-                align="center"
-                justify="center"
-            >
+            <Flex w={16} h={16} bg="purple.50" borderRadius="2xl" align="center" justify="center">
                 <Icon as={FiLock} color="purple.500" boxSize={8} />
             </Flex>
             <Box>
                 <Text fontSize="lg" fontWeight="bold" color="gray.900" mb={1}>
-                    Recurso exclusivo Business
+                    Recurso exclusivo do plano Equipe
                 </Text>
                 <Text fontSize="sm" color="gray.600">
-                    Gerencie múltiplos usuários na sua conta com o plano Business. Defina funções, permissões e mantenha sua equipe organizada.
+                    Com o plano Equipe você adiciona membros, define funções e mantém todo mundo no mesmo lugar.
                 </Text>
             </Box>
             <Button
                 w="full"
+                size="md"
+                height="40px"
+                minW="120px"
                 colorScheme="purple"
+                borderRadius="xl"
                 onClick={() => window.location.href = '/dashboard/configuracoes/assinatura'}
             >
-                Fazer Upgrade para Business
+                Fazer upgrade para Equipe
             </Button>
         </VStack>
     </Flex>
 )
 
-// ─── Restrict Access Overlay (Permission Required) ────────────────────────────
+// ─── Restricted Overlay (Sem Permissão) ──────────────────────────────────────
 const RestrictedOverlay = () => (
     <Flex
         position="absolute"
@@ -136,42 +130,84 @@ const RestrictedOverlay = () => (
         <VStack
             spacing={4}
             bg="white"
-            p={10}
+            p={8}
             borderRadius="2xl"
             shadow="2xl"
             border="1px"
             borderColor="red.100"
-            maxW="md"
+            maxW="sm"
             textAlign="center"
+            mx={4}
         >
-            <Flex
-                w={20} h={20}
-                bg="red.50"
-                borderRadius="full"
-                align="center"
-                justify="center"
-            >
-                <Icon as={FiAlertCircle} color="red.500" boxSize={10} />
+            <Flex w={16} h={16} bg="red.50" borderRadius="full" align="center" justify="center">
+                <Icon as={FiAlertCircle} color="red.500" boxSize={8} />
             </Flex>
             <Box>
-                <Text fontSize="xl" fontWeight="bold" color="gray.900" mb={2}>
-                    Acesso Restrito
+                <Text fontSize="lg" fontWeight="bold" color="gray.900" mb={1}>
+                    Acesso restrito
                 </Text>
-                <Text color="gray.600">
-                    Apenas os **Administradores** da conta podem gerenciar a equipe. Entre em contato com o administrador da sua empresa para solicitar permissão.
+                <Text fontSize="sm" color="gray.600">
+                    Só os administradores da conta podem gerenciar a equipe. Fala com o admin da sua empresa.
                 </Text>
             </Box>
             <Button
+                w="full"
+                size="md"
+                height="40px"
+                minW="120px"
                 colorScheme="gray"
                 variant="outline"
+                borderRadius="xl"
                 onClick={() => window.history.back()}
             >
-                Voltar para o Dashboard
+                Voltar
             </Button>
         </VStack>
     </Flex>
 )
 
+// ─── Member Card (Mobile) ─────────────────────────────────────────────────────
+const MemberCard = ({ u, currentUserId, isBusiness, onEdit, onDelete }) => (
+    <Card bg="white" shadow="sm" rounded="2xl" border="1px" borderColor="gray.200">
+        <CardBody p={4}>
+            <Flex align="center" gap={3}>
+                <Avatar size="md" name={u.name} src={u.avatar} bg="emerald.500" color="white" flexShrink={0} />
+                <Box flex={1} minW={0}>
+                    <Text fontSize="sm" fontWeight="semibold" color="gray.800" noOfLines={1}>{u.name}</Text>
+                    <Text fontSize="xs" color="gray.500" noOfLines={1}>{u.email}</Text>
+                    <HStack spacing={2} mt={1}>
+                        {getRoleBadge(u.role)}
+                        <Badge colorScheme="green" rounded="full" fontSize="xs">Ativo</Badge>
+                    </HStack>
+                </Box>
+                <Menu isLazy>
+                    <MenuButton
+                        as={IconButton}
+                        icon={<Icon as={FiMoreVertical} />}
+                        size="md"
+                        height="40px"
+                        variant="ghost"
+                        colorScheme="gray"
+                        isDisabled={!isBusiness}
+                        flexShrink={0}
+                    />
+                    <MenuList shadow="xl" borderRadius="xl">
+                        <MenuItem icon={<Icon as={FiEdit2} />} onClick={() => onEdit(u)}>
+                            Editar
+                        </MenuItem>
+                        {u.id !== currentUserId && (
+                            <MenuItem icon={<Icon as={FiTrash2} />} color="red.500" onClick={() => onDelete(u)}>
+                                Remover
+                            </MenuItem>
+                        )}
+                    </MenuList>
+                </Menu>
+            </Flex>
+        </CardBody>
+    </Card>
+)
+
+// ─── Main ─────────────────────────────────────────────────────────────────────
 const UsersPage = () => {
     const { isBusiness } = useSubscription()
     const { getCurrentUser } = useAuth()
@@ -179,21 +215,17 @@ const UsersPage = () => {
     const cancelRef = useRef()
     const user = getCurrentUser()
 
-    // Access Control: Only Owner (3) or SaaS Admin (1)
     const canManageTeam = user?.role === 3 || user?.role === 1
 
-    // State
     const [users, setUsers] = useState([])
     const [loading, setLoading] = useState(true)
     const [isSaving, setIsSaving] = useState(false)
     const [selectedUser, setSelectedUser] = useState(null)
     const [isDeleting, setIsDeleting] = useState(false)
 
-    // Form State
     const [formData, setFormData] = useState({ name: '', email: '' })
     const [errors, setErrors] = useState({})
 
-    // Modals
     const { isOpen: isFormOpen, onOpen: onFormOpen, onClose: onFormClose } = useDisclosure()
     const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose } = useDisclosure()
 
@@ -210,10 +242,10 @@ const UsersPage = () => {
             setLoading(true)
             const res = await teamUserService.list()
             setUsers(res.data || [])
-        } catch (error) {
+        } catch {
             toast({
-                title: 'Erro ao carregar usuários',
-                description: error.response?.data?.message || 'Tente novamente mais tarde',
+                title: 'Ih, algo deu errado aqui.',
+                description: 'A gente já sabe e tá resolvendo. Tenta de novo em instantes.',
                 status: 'error',
                 duration: 5000,
                 isClosable: true,
@@ -225,10 +257,9 @@ const UsersPage = () => {
 
     const validateForm = () => {
         const newErrors = {}
-        if (!selectedUser && !formData.email) newErrors.email = 'E-mail é obrigatório'
-        if (selectedUser && !formData.name) newErrors.name = 'Nome é obrigatório'
-        if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'E-mail inválido'
-
+        if (!selectedUser && !formData.email) newErrors.email = 'Esqueceu o e-mail do membro.'
+        if (selectedUser && !formData.name) newErrors.name = 'Esqueceu o nome do membro.'
+        if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Esse e-mail não tá certo. Confere aí.'
         setErrors(newErrors)
         return Object.keys(newErrors).length === 0
     }
@@ -240,24 +271,25 @@ const UsersPage = () => {
         try {
             setIsSaving(true)
             if (selectedUser) {
-                // Ao atualizar, enviamos apenas o nome (e-mail não é editável na listagem)
                 await teamUserService.update(selectedUser.id, { name: formData.name })
-                toast({ title: 'Membro atualizado com sucesso', status: 'success' })
+                toast({ title: 'Membro atualizado.', status: 'success', duration: 3000 })
             } else {
                 await teamUserService.store({ email: formData.email })
                 toast({
-                    title: 'Convite enviado com sucesso',
-                    description: 'Um e-mail com o link de acesso foi enviado para o colaborador.',
-                    status: 'success'
+                    title: 'Convite enviado!',
+                    description: 'O membro vai receber um link por e-mail para entrar na equipe.',
+                    status: 'success',
+                    duration: 5000,
                 })
             }
             onFormClose()
             fetchUsers()
         } catch (error) {
             toast({
-                title: 'Erro ao processar solicitação',
-                description: error.response?.data?.message || 'Verifique os dados e tente novamente',
+                title: 'Não consegui salvar.',
+                description: error.response?.data?.message || 'Confere os dados e tenta de novo.',
                 status: 'error',
+                duration: 5000,
             })
         } finally {
             setIsSaving(false)
@@ -268,14 +300,15 @@ const UsersPage = () => {
         try {
             setIsDeleting(true)
             await teamUserService.destroy(selectedUser.id)
-            toast({ title: 'Membro desativado com sucesso', status: 'success' })
+            toast({ title: 'Membro removido da equipe.', status: 'success', duration: 3000 })
             onDeleteClose()
             fetchUsers()
         } catch (error) {
             toast({
-                title: 'Erro ao desativar membro',
-                description: error.response?.data?.message || 'Tente novamente',
+                title: 'Não consegui remover.',
+                description: error.response?.data?.message || 'Tenta de novo.',
                 status: 'error',
+                duration: 4000,
             })
         } finally {
             setIsDeleting(false)
@@ -289,22 +322,22 @@ const UsersPage = () => {
         onFormOpen()
     }
 
-    const openEditModal = (user) => {
-        setSelectedUser(user)
-        setFormData({ name: user.name, email: user.email })
+    const openEditModal = (member) => {
+        setSelectedUser(member)
+        setFormData({ name: member.name, email: member.email })
         setErrors({})
         onFormOpen()
     }
 
-    const openDeleteDialog = (user) => {
-        setSelectedUser(user)
+    const openDeleteDialog = (member) => {
+        setSelectedUser(member)
         onDeleteOpen()
     }
 
     if (loading) {
         return (
             <Center h="50vh">
-                <Spinner size="xl" color="primary.500" thickness="4px" />
+                <Spinner size="xl" color="emerald.500" thickness="3px" />
             </Center>
         )
     }
@@ -317,234 +350,76 @@ const UsersPage = () => {
 
                 <VStack align="stretch" spacing={6}>
                     {/* Header */}
-                    <Flex
-                        direction={{ base: 'column', sm: 'row' }}
-                        justify="space-between"
-                        align={{ base: 'start', sm: 'center' }}
-                        gap={4}
-                    >
+                    <Flex justify="space-between" align="center">
                         <Box>
-                            <Text fontSize="2xl" fontWeight="bold" color="gray.800">
-                                Usuários
-                            </Text>
-                            <Text fontSize="sm" color="gray.600" mt={1}>
-                                Gerencie os membros da sua equipe
+                            <Text fontSize="2xl" fontWeight="bold" color="gray.800">Equipe</Text>
+                            <Text fontSize="sm" color="gray.500" mt={0.5}>
+                                {users.length} {users.length === 1 ? 'membro ativo' : 'membros ativos'}
                             </Text>
                         </Box>
 
                         <Button
                             leftIcon={<Icon as={FiPlus} />}
                             variant="gradient"
+                            size="md"
+                            height="40px"
+                            minW="120px"
+                            display={{ base: 'none', md: 'inline-flex' }}
                             onClick={openCreateModal}
                             isDisabled={!isBusiness}
                         >
-                            Convidar Usuário
+                            Convidar membro
                         </Button>
                     </Flex>
 
-                    {/* Stats Card */}
-                    <Card flex={1} bg="white" shadow="sm" rounded="2xl" border="1px" borderColor="gray.200">
-                        <CardBody p={5}>
-                            <Flex align="center" gap={4}>
-                                <Flex w={12} h={12} bg="emerald.50" rounded="xl" align="center" justify="center" flexShrink={0}>
-                                    <Icon as={FiUsers} boxSize={6} color="emerald.500" />
-                                </Flex>
-                                <Box>
-                                    <Text fontSize="2xl" fontWeight="bold" color="gray.800">
-                                        {users.length}
+                    {/* Empty State */}
+                    {users.length === 0 && (
+                        <Card bg="white" shadow="sm" rounded="2xl" border="1px" borderColor="gray.200">
+                            <CardBody py={12}>
+                                <VStack spacing={3}>
+                                    <Flex w={16} h={16} bg="gray.50" rounded="2xl" align="center" justify="center">
+                                        <Icon as={FiUsers} boxSize={8} color="gray.300" />
+                                    </Flex>
+                                    <Text fontWeight="semibold" color="gray.600">Sua equipe tá vazia.</Text>
+                                    <Text fontSize="sm" color="gray.400" textAlign="center" maxW="xs">
+                                        Manda um convite pra começar. É só colocar o e-mail do membro.
                                     </Text>
-                                    <Text fontSize="sm" color="gray.500">Membros ativos</Text>
-                                </Box>
-                            </Flex>
-                        </CardBody>
-                    </Card>
+                                    <Button
+                                        leftIcon={<Icon as={FiPlus} />}
+                                        variant="gradient"
+                                        size="md"
+                                        height="40px"
+                                        minW="120px"
+                                        mt={2}
+                                        onClick={openCreateModal}
+                                        isDisabled={!isBusiness}
+                                    >
+                                        Convidar membro
+                                    </Button>
+                                </VStack>
+                            </CardBody>
+                        </Card>
+                    )}
 
-                    {/* Table Card */}
-                    <Card bg="white" shadow="sm" rounded="2xl" border="1px" borderColor="gray.200">
-                        <Box overflowX="auto">
-                            <Table variant="simple">
-                                <Thead bg="gray.50">
-                                    <Tr>
-                                        <Th fontSize="xs" py={4}>Usuário</Th>
-                                        <Th fontSize="xs" py={4} display={{ base: 'none', md: 'table-cell' }}>Cargo</Th>
-                                        <Th fontSize="xs" py={4}>Status</Th>
-                                        <Th w="60px" />
-                                    </Tr>
-                                </Thead>
-                                <Tbody>
-                                    {users.length === 0 ? (
-                                        <Tr>
-                                            <Td colSpan={4} textAlign="center" py={10}>
-                                                <VStack spacing={2}>
-                                                    <Icon as={FiUsers} boxSize={8} color="gray.300" />
-                                                    <Text color="gray.500">Nenhum membro encontrado.</Text>
-                                                </VStack>
-                                            </Td>
-                                        </Tr>
-                                    ) : (
-                                        users.map((u) => (
-                                            <Tr key={u.id} _hover={{ bg: 'gray.50' }}>
-                                                <Td py={4}>
-                                                    <HStack spacing={3}>
-                                                        <Avatar size="sm" name={u.name} src={u.avatar} bg="emerald.500" />
-                                                        <Box>
-                                                            <Text fontSize="sm" fontWeight="semibold" color="gray.800">{u.name}</Text>
-                                                            <Text fontSize="xs" color="gray.500">{u.email}</Text>
-                                                        </Box>
-                                                    </HStack>
-                                                </Td>
-                                                <Td display={{ base: 'none', md: 'table-cell' }}>
-                                                    {getRoleBadge(u.role)}
-                                                </Td>
-                                                <Td>
-                                                    <Badge colorScheme="green" rounded="full">
-                                                        Ativo
-                                                    </Badge>
-                                                </Td>
-                                                <Td textAlign="right">
-                                                    <Menu isLazy>
-                                                        <MenuButton
-                                                            as={Button}
-                                                            size="sm"
-                                                            variant="outline"
-                                                            rightIcon={<Icon as={FiChevronDown} />}
-                                                            bg="gray.50"
-                                                            borderColor="gray.200"
-                                                            _hover={{ bg: 'gray.100' }}
-                                                            isDisabled={!isBusiness}
-                                                            px={4}
-                                                        >
-                                                            Opções
-                                                        </MenuButton>
-                                                        <MenuList shadow="xl" borderRadius="xl">
-                                                            <MenuItem
-                                                                icon={<Icon as={FiEdit2} />}
-                                                                onClick={() => openEditModal(u)}
-                                                            >
-                                                                Editar
-                                                            </MenuItem>
-                                                            {u.id !== user?.id && (
-                                                                <MenuItem
-                                                                    icon={<Icon as={FiTrash2} />}
-                                                                    color="red.500"
-                                                                    onClick={() => openDeleteDialog(u)}
-                                                                >
-                                                                    Remover
-                                                                </MenuItem>
-                                                            )}
-                                                        </MenuList>
-                                                    </Menu>
-                                                </Td>
-                                            </Tr>
-                                        ))
-                                    )}
-                                </Tbody>
-                            </Table>
-                        </Box>
-                    </Card>
+                    {/* Members List */}
+                    {users.length > 0 && (
+                        <VStack spacing={3} align="stretch">
+                            {users.map((u) => (
+                                <MemberCard
+                                    key={u.id}
+                                    u={u}
+                                    currentUserId={user?.id}
+                                    isBusiness={isBusiness}
+                                    onEdit={openEditModal}
+                                    onDelete={openDeleteDialog}
+                                />
+                            ))}
+                        </VStack>
+                    )}
                 </VStack>
             </Box>
 
-            {/* Modal de Convidar/Editar */}
-            <Modal isOpen={isFormOpen} onClose={onFormClose} isCentered>
-                <ModalOverlay backdropFilter="blur(4px)" />
-                <ModalContent borderRadius="2xl" mx={4}>
-                    <ModalHeader borderBottom="1px" borderColor="gray.100">
-                        {selectedUser ? 'Editar Membro' : 'Convidar Membro'}
-                    </ModalHeader>
-                    <ModalCloseButton />
-                    <ModalBody py={6}>
-                        <VStack spacing={4}>
-                            {selectedUser && (
-                                <FormControl isInvalid={errors.name}>
-                                    <FormLabel fontSize="sm" fontWeight="semibold">Nome Completo</FormLabel>
-                                    <Input
-                                        placeholder="Ex: João Silva"
-                                        value={formData.name}
-                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    />
-                                    <FormErrorMessage>{errors.name}</FormErrorMessage>
-                                </FormControl>
-                            )}
-
-                            <FormControl isInvalid={errors.email} isReadOnly={!!selectedUser} variant={selectedUser ? 'filled' : 'outline'}>
-                                <FormLabel fontSize="sm" fontWeight="semibold">E-mail</FormLabel>
-                                <Input
-                                    type="email"
-                                    placeholder="email@empresa.com"
-                                    value={formData.email}
-                                    style={{ backgroundColor: '#f5f5f5' }}
-                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                />
-                                {selectedUser && (
-                                    <Text fontSize="xs" color="gray.500" mt={1}>
-                                        O e-mail não pode ser alterado após o convite.
-                                    </Text>
-                                )}
-                                <FormErrorMessage>{errors.email}</FormErrorMessage>
-                            </FormControl>
-
-                            {!selectedUser && (
-                                <Text fontSize="xs" color="gray.500" textAlign="center">
-                                    O colaborador receberá um e-mail com um **link mágico** para criar sua própria conta e senha.
-                                </Text>
-                            )}
-                        </VStack>
-                    </ModalBody>
-                    <ModalFooter bg="gray.50" borderBottomRadius="2xl">
-                        <Button variant="ghost" mr={3} onClick={onFormClose} isDisabled={isSaving}>
-                            Cancelar
-                        </Button>
-                        <Button
-                            variant="gradient"
-                            onClick={handleSubmit}
-                            isLoading={isSaving}
-                            loadingText="Salvando..."
-                        >
-                            {selectedUser ? 'Atualizar' : 'Enviar Convite'}
-                        </Button>
-                    </ModalFooter>
-                </ModalContent>
-            </Modal>
-
-            {/* Dialog de Confirmação de Remoção */}
-            <AlertDialog
-                isOpen={isDeleteOpen}
-                leastDestructiveRef={cancelRef}
-                onClose={onDeleteClose}
-                isCentered
-            >
-                <AlertDialogOverlay backdropFilter="blur(4px)">
-                    <AlertDialogContent borderRadius="2xl" mx={4}>
-                        <AlertDialogHeader fontSize="lg" fontWeight="bold">
-                            Remover Membro
-                        </AlertDialogHeader>
-
-                        <AlertDialogBody>
-                            Tem certeza que deseja remover **{selectedUser?.name}** da sua equipe?
-                            O acesso do usuário será revogado imediatamente.
-                        </AlertDialogBody>
-
-                        <AlertDialogFooter>
-                            <Button ref={cancelRef} onClick={onDeleteClose} isDisabled={isDeleting}>
-                                Cancelar
-                            </Button>
-                            <Button
-                                colorScheme="red"
-                                bg="red.500"
-                                color="white"
-                                onClick={handleDelete}
-                                ml={3}
-                                isLoading={isDeleting}
-                            >
-                                Sim, remover
-                            </Button>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialogOverlay>
-            </AlertDialog>
-
-            {/* Mobile FAB */}
+            {/* FAB Mobile */}
             {isBusiness && (
                 <Button
                     position="fixed"
@@ -552,8 +427,8 @@ const UsersPage = () => {
                     right="24px"
                     zIndex={100}
                     variant="gradient"
-                    size="lg"
-                    height="56px"
+                    size="md"
+                    height="40px"
                     borderRadius="full"
                     boxShadow="0 12px 32px rgba(0, 217, 126, 0.4)"
                     display={{ base: 'flex', md: 'none' }}
@@ -566,6 +441,108 @@ const UsersPage = () => {
                     Convidar
                 </Button>
             )}
+
+            {/* Modal Convidar / Editar */}
+            <Modal isOpen={isFormOpen} onClose={onFormClose} isCentered motionPreset="slideInBottom">
+                <ModalOverlay backdropFilter="blur(4px)" />
+                <ModalContent borderRadius="2xl" mx={4}>
+                    <ModalHeader borderBottom="1px" borderColor="gray.100" pb={4}>
+                        {selectedUser ? 'Editar membro' : 'Convidar membro'}
+                    </ModalHeader>
+                    <ModalCloseButton />
+                    <ModalBody py={6}>
+                        <VStack spacing={4}>
+                            {selectedUser && (
+                                <FormControl isInvalid={!!errors.name}>
+                                    <FormLabel fontSize="sm" fontWeight="semibold" color="gray.700">Nome completo</FormLabel>
+                                    <Input
+                                        variant="app"
+                                        placeholder="Ex: João Silva"
+                                        value={formData.name}
+                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                    />
+                                    <FormErrorMessage>{errors.name}</FormErrorMessage>
+                                </FormControl>
+                            )}
+
+                            <FormControl isInvalid={!!errors.email}>
+                                <FormLabel fontSize="sm" fontWeight="semibold" color="gray.700">E-mail</FormLabel>
+                                <Input
+                                    variant="app"
+                                    type="email"
+                                    placeholder="email@empresa.com"
+                                    value={formData.email}
+                                    isReadOnly={!!selectedUser}
+                                    bg={selectedUser ? 'gray.50' : 'white'}
+                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                />
+                                {selectedUser && (
+                                    <Text fontSize="xs" color="gray.400" mt={1}>
+                                        O e-mail não pode ser alterado depois do convite.
+                                    </Text>
+                                )}
+                                <FormErrorMessage>{errors.email}</FormErrorMessage>
+                            </FormControl>
+
+                            {!selectedUser && (
+                                <Box w="full" p={3} bg="blue.50" rounded="xl" border="1px" borderColor="blue.100">
+                                    <Text fontSize="xs" color="blue.700" textAlign="center">
+                                        O membro vai receber um link por e-mail para criar a conta dele.
+                                    </Text>
+                                </Box>
+                            )}
+                        </VStack>
+                    </ModalBody>
+                    <ModalFooter bg="gray.50" borderBottomRadius="2xl" gap={2}>
+                        <Button variant="ghost" onClick={onFormClose} isDisabled={isSaving} borderRadius="xl">
+                            Cancelar
+                        </Button>
+                        <Button
+                            variant="gradient"
+                            onClick={handleSubmit}
+                            isLoading={isSaving}
+                            loadingText="Salvando..."
+                            borderRadius="xl"
+                        >
+                            {selectedUser ? 'Salvar' : 'Enviar convite'}
+                        </Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+
+            {/* Dialog Remover Membro */}
+            <AlertDialog
+                isOpen={isDeleteOpen}
+                leastDestructiveRef={cancelRef}
+                onClose={onDeleteClose}
+                isCentered
+            >
+                <AlertDialogOverlay backdropFilter="blur(4px)">
+                    <AlertDialogContent borderRadius="2xl" mx={4}>
+                        <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                            Remover membro?
+                        </AlertDialogHeader>
+                        <AlertDialogBody color="gray.600">
+                            Tem certeza que quer remover <strong>{selectedUser?.name}</strong> da equipe?
+                            O acesso vai ser cortado na hora.
+                        </AlertDialogBody>
+                        <AlertDialogFooter gap={2}>
+                            <Button ref={cancelRef} onClick={onDeleteClose} isDisabled={isDeleting} borderRadius="xl">
+                                Cancelar
+                            </Button>
+                            <Button
+                                colorScheme="red"
+                                onClick={handleDelete}
+                                isLoading={isDeleting}
+                                loadingText="Removendo..."
+                                borderRadius="xl"
+                            >
+                                Sim, remover
+                            </Button>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialogOverlay>
+            </AlertDialog>
         </Container>
     )
 }

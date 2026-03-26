@@ -84,12 +84,13 @@ const PublicProposalView = () => {
               {error}
             </Text>
           </VStack>
-          <Button 
-            as="a" 
-            href="https://orcafast.com.br" 
-            colorScheme="emerald" 
-            variant="link" 
+          <Button
+            as="a"
+            href="https://orcafast.com.br"
+            colorScheme="emerald"
+            variant="link"
             size="md"
+            height="40px"
             fontWeight="bold"
             mt={4}
           >
@@ -185,8 +186,8 @@ const PublicProposalView = () => {
             </HStack>
             {parseFloat(discount) > 0 && (
               <HStack justify="space-between">
-                <Text color="gray.600">Desconto:</Text>
-                <Text fontWeight="medium" color="red.500">- R$ {fmt(discount)}</Text>
+                <Text color="gray.600">Desconto ({parseFloat(discount)}%):</Text>
+                <Text fontWeight="medium" color="red.500">- R$ {fmt(parseFloat(subtotal) * parseFloat(discount) / 100)}</Text>
               </HStack>
             )}
             <Divider />

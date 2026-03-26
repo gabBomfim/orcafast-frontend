@@ -268,7 +268,8 @@ const SendProposalPage = () => {
             <Button
               type="button"
               w="full"
-              h={14}
+              size="md"
+              height="40px"
               bg="#25D366"
               _hover={{ bg: '#128C7E' }}
               _active={{ bg: '#075E54' }}
@@ -279,7 +280,7 @@ const SendProposalPage = () => {
               leftIcon={<Icon as={FaWhatsapp} />}
               onClick={() => handleSend('whatsapp')}
             >
-              Enviar via WhatsApp
+              Enviar no WhatsApp
             </Button>
           </VStack>
 
@@ -287,7 +288,8 @@ const SendProposalPage = () => {
             <Button
               type="button"
               w="full"
-              h={14}
+              size="md"
+              height="40px"
               variant="outline"
               colorScheme="emerald"
               borderRadius="xl"
@@ -345,6 +347,9 @@ const SendProposalPage = () => {
             as={RouterLink}
             to={isAuthenticated ? "/dashboard/propostas" : "/onboarding/create-proposal"}
             variant="ghost"
+            size="md"
+            height="40px"
+            minW="120px"
             leftIcon={<Icon as={FiChevronLeft} w={4} h={4} />}
             color="gray.600"
             _hover={{ color: 'gray.900' }}
@@ -353,7 +358,9 @@ const SendProposalPage = () => {
           </Button>
           <Button
             type="button"
-            h={12}
+            size="md"
+            height="40px"
+            minW="120px"
             px={8}
             bg="emerald.500"
             _hover={{ bg: 'emerald.600' }}
@@ -362,7 +369,7 @@ const SendProposalPage = () => {
             fontSize="sm"
             borderRadius="xl"
             boxShadow="lg"
-            rightIcon={<Icon as={FiCheck} w={4} h={4} />}
+            leftIcon={<Icon as={FiCheck} w={4} h={4} />}
             onClick={() => handleSend('finalize')}
           >
             Feito

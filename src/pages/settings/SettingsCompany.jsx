@@ -199,10 +199,7 @@ const SettingsCompany = () => {
         <Container maxW="container.md">
             <Box mb={8}>
                 <Text fontSize="2xl" fontWeight="bold" color="gray.800">
-                    Perfil da Empresa
-                </Text>
-                <Text fontSize="sm" color="gray.600" mt={1}>
-                    Essas informações aparecerão nos seus orçamentos
+                    Dados da sua empresa
                 </Text>
             </Box>
 
@@ -233,6 +230,9 @@ const SettingsCompany = () => {
                             </Box>
                             <Button
                                 w="full"
+                                size="md"
+                                height="40px"
+                                minW="120px"
                                 colorScheme="emerald"
                                 onClick={() => window.location.href = '/dashboard/configuracoes/assinatura'}
                             >
@@ -245,7 +245,7 @@ const SettingsCompany = () => {
                 <Card bg="white" shadow="sm" rounded="2xl" border="1px" borderColor="gray.200">
                     <CardBody p={6}>
                         <VStack spacing={3} mb={8} alignItems="center" w="full">
-                            <Text fontSize="sm" fontWeight="medium" color="gray.800">Seu Logo</Text>
+                            <Text fontSize="sm" fontWeight="medium" color="gray.800">Sua logo</Text>
                             <FormControl>
                                 <FormLabel
                                     htmlFor="logo-upload"
@@ -284,7 +284,9 @@ const SettingsCompany = () => {
                             </FormControl>
                             {hasLogo && (
                                 <Button
-                                    size="xs"
+                                    size="md"
+                                    height="40px"
+                                    minW="120px"
                                     variant="ghost"
                                     colorScheme="red"
                                     leftIcon={<Icon as={FiTrash2} />}
@@ -298,7 +300,7 @@ const SettingsCompany = () => {
 
                         <VStack spacing={5}>
                             <FormControl isRequired>
-                                <FormLabel fontSize="sm" fontWeight="medium">Nome da Empresa (Fantasia)</FormLabel>
+                                <FormLabel fontSize="sm" fontWeight="medium">Nome da empresa</FormLabel>
                                 <Input
                                     value={formData.name}
                                     onChange={(e) => handleInputChange('name', e.target.value)}
@@ -328,11 +330,11 @@ const SettingsCompany = () => {
                                     h="48px"
                                     rounded="xl"
                                 />
-                                <FormHelperText fontSize="xs">Exibido no orçamento para facilitar o pagamento</FormHelperText>
+                                <FormHelperText fontSize="xs">A gente coloca isso no orçamento pra facilitar seu recebimento.</FormHelperText>
                             </FormControl>
 
                             <FormControl>
-                                <FormLabel fontSize="sm" fontWeight="medium">Telefone / WhatsApp</FormLabel>
+                                <FormLabel fontSize="sm" fontWeight="medium">Celular / WhatsApp</FormLabel>
                                 <Input
                                     value={formData.phone}
                                     onChange={(e) => handleInputChange('phone', e.target.value)}
@@ -343,11 +345,11 @@ const SettingsCompany = () => {
                             </FormControl>
 
                             <FormControl>
-                                <FormLabel fontSize="sm" fontWeight="medium">Condições Padrão do Orçamento</FormLabel>
+                                <FormLabel fontSize="sm" fontWeight="medium">Suas condições de pagamento</FormLabel>
                                 <Textarea
                                     value={formData.default_proposal_terms}
                                     onChange={(e) => handleInputChange('default_proposal_terms', e.target.value)}
-                                    placeholder="Ex: Pagamento 50% na aprovação..."
+                                    placeholder="Ex: 50% de sinal e o restante na entrega."
                                     minH="120px"
                                     rounded="xl"
                                 />
@@ -360,12 +362,13 @@ const SettingsCompany = () => {
                             colorScheme="emerald"
                             bg="emerald.500"
                             _hover={{ bg: 'emerald.600' }}
-                            size="lg"
+                            size="md"
+                            height="40px"
                             leftIcon={<Icon as={FiSave} />}
                             onClick={handleSave}
                             isLoading={isSaving}
                         >
-                            Salvar Alterações
+                            Salvar dados
                         </Button>
                     </CardBody>
                 </Card>

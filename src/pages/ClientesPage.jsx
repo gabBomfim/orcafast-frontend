@@ -194,7 +194,7 @@ const ClientesPage = () => {
     try {
       await clientService.delete(selectedClient.id)
       toast({
-        title: 'Cliente excluído',
+        title: 'Cliente apagado',
         status: 'success',
         duration: 3000,
         isClosable: true,
@@ -203,7 +203,7 @@ const ClientesPage = () => {
       fetchClients(pagination.currentPage)
     } catch (err) {
       toast({
-        title: 'Erro ao excluir cliente',
+        title: 'Erro ao apagar cliente',
         description: err.response?.data?.message || 'Tente novamente',
         status: 'error',
         duration: 4000,
@@ -222,8 +222,8 @@ const ClientesPage = () => {
   const handleWhatsApp = (client) => {
     if (!client.phone) {
       toast({
-        title: 'Telefone não informado',
-        description: 'Este cliente não possui telefone cadastrado.',
+        title: 'Celular não informado',
+        description: 'Este cliente não possui celular cadastrado.',
         status: 'warning',
         duration: 3000,
         isClosable: true,
@@ -248,6 +248,9 @@ const ClientesPage = () => {
   return (
     <Container>
       <VStack align="stretch" spacing={8}>
+        <Box>
+          <Text fontSize="2xl" fontWeight="bold" color="gray.800">Clientes</Text>
+        </Box>
         {/* Stats */}
         <Grid
           templateColumns={{
@@ -271,14 +274,14 @@ const ClientesPage = () => {
           />
 
           <StatsCard
-            title="Valor Total"
+            title="Total orçado"
             value={`R$ ${totalProposalValue.toLocaleString('pt-BR')}`}
             icon={FiZap}
             colorScheme="primary"
           />
 
           <StatsCard
-            title="Ticket Médio"
+            title="Média por serviço"
             value={`R$ ${averageTicket.toLocaleString('pt-BR')}`}
             icon={FiActivity}
             colorScheme="primary"
@@ -286,7 +289,7 @@ const ClientesPage = () => {
         </Grid>
 
         {/* Filters */}
-        <DataCard title="Filtros e Busca">
+        <DataCard title="Ache um cliente">
           <Stack direction={{ base: 'column', lg: 'row' }} spacing={4} align={{ lg: 'flex-end' }}>
             <FormControl flex={2}>
               <FormLabel>Buscar</FormLabel>
@@ -295,7 +298,7 @@ const ClientesPage = () => {
                   <Icon as={FiSearch} color="gray.400" />
                 </InputLeftElement>
                 <Input
-                  placeholder="Buscar por nome, email ou empresa..."
+                  placeholder="Quem você está procurando?"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -303,11 +306,11 @@ const ClientesPage = () => {
             </FormControl>
 
             <FormControl flex={1}>
-              <FormLabel>Período</FormLabel>
+              <FormLabel>De quando?</FormLabel>
               <ReactSelect
                 styles={appSelectStyles}
                 value={[
-                  { value: 'all', label: 'Todo o período' },
+                  { value: 'all', label: 'Todo o histórico' },
                   { value: '7days', label: 'Últimos 7 dias' },
                   { value: '30days', label: 'Últimos 30 dias' },
                   { value: 'thisMonth', label: 'Este mês' },
@@ -315,7 +318,7 @@ const ClientesPage = () => {
                 ].find(o => o.value === datePreset)}
                 onChange={(opt) => handleDatePresetChange(opt?.value || 'all')}
                 options={[
-                  { value: 'all', label: 'Todo o período' },
+                  { value: 'all', label: 'Todo o histórico' },
                   { value: '7days', label: 'Últimos 7 dias' },
                   { value: '30days', label: 'Últimos 30 dias' },
                   { value: 'thisMonth', label: 'Este mês' },
@@ -329,7 +332,7 @@ const ClientesPage = () => {
 
             {isAdmin && teamMembers.length > 0 && (
               <FormControl flex={1.5}>
-                <FormLabel>Filtrar por Equipe</FormLabel>
+                <FormLabel>Quem do time cadastrou?</FormLabel>
                 <ReactSelect
                   isMulti
                   placeholder="Membros da equipe"
@@ -405,7 +408,7 @@ const ClientesPage = () => {
             <VStack spacing={4}>
               {clients.length === 0 ? (
                 <Box w="full" textAlign="center" py={6} color="gray.500">
-                  Nenhum cliente encontrado.
+                  Sua lista tá vazia. Que tal cadastrar o primeiro cliente e já mandar um orçamento?
                 </Box>
               ) : (
                 clients.map((client) => (
@@ -441,23 +444,29 @@ const ClientesPage = () => {
                           <HStack spacing={2} mb={1} wrap="wrap">
                             <Text fontWeight="semibold">{client.name}</Text>
                             <Badge colorScheme="gray" variant="subtle">
-                              {client.proposalsCount} {client.proposalsCount !== 1 ? 'orçamentos' : 'orçamento'}
+                              {client.proposalsCount} {client.proposalsCount !== 1 ? 'orçamentos feitos' : 'orçamento feito'}
                             </Badge>
                           </HStack>
 
                           <VStack spacing={1} align="start">
-                            <HStack spacing={2} fontSize="sm" color="gray.500">
-                              <Icon as={FiMail} boxSize={3} />
-                              <Text>{client.email || 'Não informado'}</Text>
-                            </HStack>
-                            <HStack spacing={2} fontSize="sm" color="gray.500">
-                              <Icon as={FiPhone} boxSize={3} />
-                              <Text>{client.phone || 'Não informado'}</Text>
-                            </HStack>
-                            <HStack spacing={2} fontSize="sm" color="gray.500">
-                              <Icon as={FiActivity} boxSize={3} />
-                              <Text>{client.company || 'Sem empresa'}</Text>
-                            </HStack>
+                            {client.email && (
+                              <HStack spacing={2} fontSize="sm" color="gray.500">
+                                <Icon as={FiMail} boxSize={3} />
+                                <Text>{client.email}</Text>
+                              </HStack>
+                            )}
+                            {client.phone && (
+                              <HStack spacing={2} fontSize="sm" color="gray.500">
+                                <Icon as={FiPhone} boxSize={3} />
+                                <Text>{client.phone}</Text>
+                              </HStack>
+                            )}
+                            {client.company && (
+                              <HStack spacing={2} fontSize="sm" color="gray.500">
+                                <Icon as={FiActivity} boxSize={3} />
+                                <Text>{client.company}</Text>
+                              </HStack>
+                            )}
                           </VStack>
 
                           {isAdmin && client.user && (
@@ -466,7 +475,7 @@ const ClientesPage = () => {
                                 <Avatar size="xs" name={client.user.name} />
                               </Tooltip>
                               <Text fontSize="xs" color="gray.600" fontWeight="medium">
-                                Criado por: {client.user.name.split(' ')[0]}
+                                Cadastrado por: {client.user.name.split(' ')[0]}
                               </Text>
                             </HStack>
                           )}
@@ -483,7 +492,7 @@ const ClientesPage = () => {
                             R$ {(client.totalValue || 0).toLocaleString('pt-BR')}
                           </Text>
                           <Text fontSize="xs" color="gray.500">
-                            Último orçamento: {client.lastProposal || 'Sem registro'}
+                            {client.lastProposal ? `Último orçamento: ${client.lastProposal}` : 'Nenhum orçamento ainda'}
                           </Text>
                         </Box>
 
@@ -504,13 +513,14 @@ const ClientesPage = () => {
                             <MenuButton
                               as={Button}
                               variant="outline"
-                              size={{ base: 'md', md: 'sm' }}
+                              size="md"
+                              height="40px"
+                              minW="120px"
                               rightIcon={<Icon as={FiChevronDown} />}
                               bg="gray.50"
                               borderColor="gray.200"
                               _hover={{ bg: 'gray.100' }}
                               w={{ base: 'full', md: 'auto' }}
-                              h={{ base: '44px', md: 'auto' }}
                             >
                               Opções
                             </MenuButton>
@@ -526,7 +536,7 @@ const ClientesPage = () => {
                                 icon={<Icon as={FaWhatsapp} color="#25D366" />}
                                 onClick={() => handleWhatsApp(client)}
                               >
-                                WhatsApp
+                                Chamar no WhatsApp
                               </MenuItem>
                               <MenuItem
                                 icon={<Icon as={FiTrash2} />}
@@ -536,7 +546,7 @@ const ClientesPage = () => {
                                   onOpen()
                                 }}
                               >
-                                Excluir
+                                Apagar cliente
                               </MenuItem>
                             </MenuList>
                           </Menu>
@@ -567,14 +577,14 @@ const ClientesPage = () => {
         <AlertDialogOverlay>
           <AlertDialogContent>
             <AlertDialogHeader fontSize="lg" fontWeight="bold">
-              Excluir Cliente
+              Apagar cliente?
             </AlertDialogHeader>
 
             <AlertDialogBody>
               {selectedClient?.proposalsCount > 0 ? (
                 <VStack align="start" spacing={3}>
                   <Text>
-                    Tem certeza que deseja excluir <strong>{selectedClient?.name}</strong>?
+                    Quer mesmo apagar <strong>{selectedClient?.name}</strong>?
                   </Text>
                   <Box
                     p={3}
@@ -588,18 +598,16 @@ const ClientesPage = () => {
                       ⚠️ Atenção
                     </Text>
                     <Text fontSize="sm" color="orange.700">
-                      Este cliente possui <strong>{selectedClient.proposalsCount}</strong> orçamento{selectedClient.proposalsCount !== 1 ? 's' : ''} associado{selectedClient.proposalsCount !== 1 ? 's' : ''}.
-                      A exclusão do cliente também removerá todos os orçamentos relacionados a ele.
+                      Esse cliente tem <strong>{selectedClient.proposalsCount}</strong> orçamento{selectedClient.proposalsCount !== 1 ? 's' : ''} vinculado{selectedClient.proposalsCount !== 1 ? 's' : ''}. Apagar o cliente vai apagar tudo junto.
                     </Text>
                   </Box>
                   <Text fontSize="sm" color="gray.600">
-                    Esta ação não pode ser desfeita.
+                    Depois que apagar não tem como recuperar, tá bom?
                   </Text>
                 </VStack>
               ) : (
                 <Text>
-                  Tem certeza que deseja excluir <strong>{selectedClient?.name}</strong>?
-                  Esta ação não pode ser desfeita.
+                  Quer mesmo apagar <strong>{selectedClient?.name}</strong>? Depois que apagar não tem como recuperar, tá bom?
                 </Text>
               )}
             </AlertDialogBody>
@@ -615,7 +623,7 @@ const ClientesPage = () => {
                 bg="red.500"
                 _hover={{ bg: 'red.600' }}
               >
-                Confirmar
+                Pode apagar
               </Button>
             </AlertDialogFooter>
           </AlertDialogContent>

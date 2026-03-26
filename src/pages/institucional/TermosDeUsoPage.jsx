@@ -37,7 +37,7 @@ const TermosDeUsoPage = () => {
             2. Planos e Assinaturas
           </Heading>
           <Text color="gray.600" mb={4} lineHeight="tall">
-            <strong>2.1. Modelos de Assinatura:</strong> O sistema opera sob um modelo de assinatura de licença de uso temporário (Planos Pro e Business), processados de forma segura e internacionalmente reconhecida pela plataforma <strong>Stripe</strong>.
+            <strong>2.1. Modelos de Assinatura:</strong> O sistema opera sob um modelo de assinatura de licença de uso temporário (Planos Autônomo e Equipe), processados de forma segura e internacionalmente reconhecida pela plataforma <strong>Stripe</strong>.
           </Text>
           <Text color="gray.600" mb={4} lineHeight="tall">
             <strong>2.2. Renovações e Cancelamento:</strong> As cobranças são recorrentes e renovadas automaticamente. O Usuário pode solicitar ou efetuar o cancelamento a qualquer momento diretamente no seu painel de configurações. 

@@ -60,9 +60,12 @@ const Header = ({ title, showBackButton = false, rightContent }) => {
               as={Link}
               to="/dashboard"
               variant="ghost"
-              size="sm"
+              size="md"
+              height="40px"
+              minW="120px"
               leftIcon={<Icon as={FiArrowLeft} />}
               px={{ base: 2, md: 4 }}
+              display={{ base: 'none', md: 'flex' }}
             >
               <Text display={{ base: 'none', md: 'block' }}>Dashboard</Text>
             </Button>
@@ -105,7 +108,9 @@ const Header = ({ title, showBackButton = false, rightContent }) => {
             <>
               <Button
                 variant="outline"
-                size="sm"
+                size="md"
+                height="40px"
+                minW="120px"
                 leftIcon={<Icon as={FiCrop} />}
                 as={Link}
                 to="/dashboard/configuracoes/assinatura"
@@ -115,13 +120,13 @@ const Header = ({ title, showBackButton = false, rightContent }) => {
               </Button>
               <Button
                 variant="outline"
-                size="sm"
+                size="md"
+                height="40px"
                 as={Link}
                 to="/dashboard/configuracoes/assinatura"
                 display={{ base: 'inline-flex', md: 'none' }}
                 colorScheme="emerald"
                 minW="44px"
-                h="44px"
                 px={2}
                 aria-label="Upgrade de plano"
               >
@@ -139,7 +144,7 @@ const Header = ({ title, showBackButton = false, rightContent }) => {
                 to="/dashboard/configuracoes/assinatura"
                 display={{ base: 'none', md: 'inline-flex' }}
               >
-                Upgrade Business
+                Upgrade Equipe
               </Button>
               <Button
                 variant="outline"
@@ -160,7 +165,8 @@ const Header = ({ title, showBackButton = false, rightContent }) => {
             <MenuButton
               as={Button}
               variant="ghost"
-              size="sm"
+              size="md"
+              height="40px"
               p={2}
               borderRadius="full"
             >

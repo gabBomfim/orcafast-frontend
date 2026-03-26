@@ -152,7 +152,7 @@ const InitialDashboardPage = () => {
             <VStack align="stretch" spacing={6}>
               <HStack justify="space-between" align="center">
                 <Heading size="md" color={headingColor}>Seu Primeiro Orçamento</Heading>
-                <Button as={Link} to="/dashboard" variant="outline" size="sm" rightIcon={<Icon as={FiArrowRight} />}>
+                <Button as={Link} to="/dashboard" variant="outline" size="md" height="40px" minW="120px" rightIcon={<Icon as={FiArrowRight} />}>
                   Ver Todas
                 </Button>
               </HStack>

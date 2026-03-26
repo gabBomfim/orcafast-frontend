@@ -112,7 +112,7 @@ const SuportePage = () => {
                 <AccordionIcon color="gray.400" />
               </AccordionButton>
               <AccordionPanel pb={6} px={5} color="gray.600" lineHeight="tall">
-                <strong>Não.</strong> Documentos impressos por via digital (PDF, Docx) comportam uma tecnologia passiva e morta de download — não possuem código web vivo que permita os disparos do sistema de métrica. <strong>Apenas o link web gerado no botão "Envio Mágico via WhatsApp" e o clique de "Cópia Simples"</strong> contêm rastreamento do engajamento em tempo real sob o selo indicativo da "Visualização". Dê sempre a primazia em compartilhar o Web Link!
+                <strong>Não.</strong> Documentos impressos por via digital (PDF, Docx) comportam uma tecnologia passiva e morta de download — não possuem código web vivo que permita os disparos do sistema de métrica. <strong>Apenas o link web gerado no botão "Envio Mágico no WhatsApp" e o clique de "Cópia Simples"</strong> contêm rastreamento do engajamento em tempo real sob o selo indicativo da "Visualização". Dê sempre a primazia em compartilhar o Web Link!
               </AccordionPanel>
             </AccordionItem>
 

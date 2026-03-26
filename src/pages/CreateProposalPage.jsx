@@ -549,7 +549,7 @@ const CreateProposalPage = () => {
                                 color="gray.500"
                                 _hover={{ color: 'red.500' }}
                                 mt={5}
-                                size="sm"
+                                size="md"
                                 onClick={() => handleRemoveItem(item.id)}
                                 isDisabled={items.length === 1}
                               />
@@ -564,7 +564,8 @@ const CreateProposalPage = () => {
                       onClick={handleAddItem}
                       mt={3}
                       w="full"
-                      h={10}
+                      size="md"
+                      height="40px"
                       borderRadius="xl"
                       variant="solid"
                       leftIcon={<Icon as={FiPlus} w={4} h={4} />}
@@ -619,6 +620,9 @@ const CreateProposalPage = () => {
                     <Button
                       onClick={() => navigate('/dashboard/propostas')}
                       variant="ghost"
+                      size="md"
+                      height="40px"
+                      minW="120px"
                       leftIcon={<Icon as={FiChevronLeft} w={4} h={4} />}
                       color="gray.600"
                       _hover={{ color: 'gray.900' }}
@@ -627,7 +631,9 @@ const CreateProposalPage = () => {
                     </Button>
                     <Button
                       type="submit"
-                      h={12}
+                      size="md"
+                      height="40px"
+                      minW="120px"
                       px={8}
                       variant="solid"
                       rightIcon={<Icon as={FiChevronRight} w={4} h={4} />}
@@ -678,6 +684,12 @@ const CreateProposalPage = () => {
                     <Heading size="lg" color="gray.900">
                       {formData.title || 'Título do Orçamento'}
                     </Heading>
+
+                    {formData.validUntil && (
+                      <Text fontSize="sm" color="red.500" fontWeight="medium">
+                        Válido até: {formData.validUntil.split('-').reverse().join('/')}
+                      </Text>
+                    )}
 
                     <Box height="1px" bg="gray.200" />
 
@@ -744,6 +756,9 @@ const CreateProposalPage = () => {
               <Button
                 onClick={() => navigate('/dashboard/propostas')}
                 variant="ghost"
+                size="md"
+                height="40px"
+                minW="120px"
                 leftIcon={<Icon as={FiChevronLeft} w={4} h={4} />}
                 color="gray.600"
                 _hover={{ color: 'gray.900' }}
@@ -752,7 +767,9 @@ const CreateProposalPage = () => {
               </Button>
               <Button
                 onClick={handleSubmit}
-                h={12}
+                size="md"
+                height="40px"
+                minW="120px"
                 px={8}
                 variant="solid"
                 rightIcon={<Icon as={FiChevronRight} w={4} h={4} />}
@@ -816,7 +833,7 @@ const CreateProposalPage = () => {
                     color="gray.900"
                     mb={2}
                   >
-                    Telefone <Text as="span" color="red.500">*</Text>
+                    Celular <Text as="span" color="red.500">*</Text>
                   </Text>
                   <Input
                     id="modal-phone"

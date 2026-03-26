@@ -82,7 +82,7 @@ const SidebarContent = ({ isCollapsed = false, onItemClick = () => { } }) => {
     },
     {
       icon: FiUsers,
-      label: 'Usuários',
+      label: 'Equipe',
       path: '/dashboard/usuarios',
       isLocked: !subscribed || !isBusiness,
       isHidden: user?.role !== 3 && user?.role !== 1,
@@ -113,7 +113,7 @@ const SidebarContent = ({ isCollapsed = false, onItemClick = () => { } }) => {
         as={Link}
         to={item.path}
         variant="ghost"
-        size="sm"
+        size="md"
         justifyContent={isCollapsed ? 'center' : 'flex-start'}
         leftIcon={
           <Icon
@@ -248,7 +248,7 @@ const SidebarContent = ({ isCollapsed = false, onItemClick = () => { } }) => {
                 <VStack spacing={0} align="flex-start" flex={1}>
                   <HStack spacing={1.5}>
                     <Text fontSize="sm" fontWeight="bold" color="gray.800">
-                      {isFree ? 'Upgrade Pro' : 'Upgrade Business'}
+                      {isFree ? 'Upgrade Autônomo' : 'Upgrade Equipe'}
                     </Text>
                     <Badge
                       bg="emerald.100"
@@ -295,7 +295,7 @@ const SidebarContent = ({ isCollapsed = false, onItemClick = () => { } }) => {
           <Box mt={4}>
             <Button
               variant="ghost"
-              size="sm"
+              size="md"
               justifyContent="flex-start"
               leftIcon={<Icon as={FiSettings} boxSize={4} />}
               rightIcon={
@@ -333,7 +333,7 @@ const SidebarContent = ({ isCollapsed = false, onItemClick = () => { } }) => {
                       as={Link}
                       to={item.path}
                       variant="ghost"
-                      size="sm"
+                      size="md"
                       justifyContent="flex-start"
                       leftIcon={<Icon as={item.icon} boxSize={4} />}
                       color={isActive ? 'emerald.600' : 'gray.600'}
@@ -343,7 +343,7 @@ const SidebarContent = ({ isCollapsed = false, onItemClick = () => { } }) => {
                         color: 'gray.900'
                       }}
                       onClick={onItemClick}
-                      h="36px"
+                      h="40px"
                       w="full"
                       borderRadius="lg"
                       pl={3}
@@ -366,7 +366,7 @@ const SidebarContent = ({ isCollapsed = false, onItemClick = () => { } }) => {
         {isCollapsed && (
           <Button
             variant="ghost"
-            size="sm"
+            size="md"
             justifyContent="center"
             leftIcon={<Icon as={FiSettings} boxSize={4} />}
             color={isSettingsPage ? 'emerald.600' : 'gray.700'}
@@ -385,7 +385,7 @@ const SidebarContent = ({ isCollapsed = false, onItemClick = () => { } }) => {
         <VStack spacing={1} align="stretch">
           <Button
             variant="ghost"
-            size="sm"
+            size="md"
             justifyContent={isCollapsed ? 'center' : 'flex-start'}
             leftIcon={<Icon as={isCollapsed ? FiChevronRight : FiChevronLeft} boxSize={4} />}
             color="gray.600"

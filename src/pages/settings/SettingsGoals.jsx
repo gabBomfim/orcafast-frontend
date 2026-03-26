@@ -218,9 +218,6 @@ const SettingsGoals = () => {
                     <Text fontSize="2xl" fontWeight="bold" color="gray.800">
                         Metas Financeiras
                     </Text>
-                    <Text fontSize="sm" color="gray.600" mt={1}>
-                        Defina suas metas de faturamento para acompanhar seu progresso
-                    </Text>
                 </Box>
 
                 {/* Year selector */}
@@ -276,6 +273,9 @@ const SettingsGoals = () => {
                             </Box>
                             <Button
                                 w="full"
+                                size="md"
+                                height="40px"
+                                minW="120px"
                                 colorScheme="emerald"
                                 onClick={() => window.open('https://orcafast.com.br/precos', '_blank')}
                             >
@@ -295,10 +295,10 @@ const SettingsGoals = () => {
                             <Box flex={1}>
                                 <FormControl>
                                     <FormLabel fontSize="sm" fontWeight="medium" color="gray.800" mb={1}>
-                                        Meta Anual ({year})
+                                        Quanto quer ganhar em ({year})
                                     </FormLabel>
                                     <Text fontSize="xs" color="gray.600" mb={3}>
-                                        Quanto você deseja faturar em todo o ano
+                                        Defina o total que você busca alcançar este ano.
                                     </Text>
                                     <HStack spacing={0}>
                                         <Flex align="center" justify="center" px={4} h="48px" bg="white"
@@ -341,10 +341,10 @@ const SettingsGoals = () => {
                             <Box flex={1}>
                                 <FormControl>
                                     <FormLabel fontSize="sm" fontWeight="medium" color="gray.800" mb={1}>
-                                        Meta Mensal Padrão
+                                        Sua meta por mês
                                     </FormLabel>
                                     <Text fontSize="xs" color="gray.600" mb={3}>
-                                        Valor base usado para cada mês
+                                        O valor que você quer bater todo mês.
                                     </Text>
                                     <HStack spacing={0}>
                                         <Flex align="center" justify="center" px={4} h="48px" bg="white"
@@ -375,7 +375,7 @@ const SettingsGoals = () => {
                         {/* Toggle */}
                         <Flex align="center" justify="space-between" p={4} bg="gray.50" rounded="xl" mb={4}>
                             <Text fontSize="sm" fontWeight="medium" color="gray.800">
-                                Usar este valor para todos os meses
+                                Repetir valor em todos os meses
                             </Text>
                             <Switch
                                 colorScheme="green"
@@ -399,7 +399,7 @@ const SettingsGoals = () => {
                         ) : (
                             <VStack spacing={3} align="stretch">
                                 <Text fontSize="sm" color="gray.600" mb={1}>
-                                    Personalize a meta de cada mês individualmente:
+                                    Prefere ajustar mês a mês?
                                 </Text>
                                 <SimpleGrid columns={{ base: 2, sm: 3 }} spacing={3}>
                                     {MONTHS.map((month, idx) => (
@@ -442,7 +442,9 @@ const SettingsGoals = () => {
                                 colorScheme="green"
                                 bg="green.400"
                                 color="white"
-                                size="lg"
+                                size="md"
+                                height="40px"
+                                minW="120px"
                                 px={6}
                                 rounded="xl"
                                 fontWeight="medium"
