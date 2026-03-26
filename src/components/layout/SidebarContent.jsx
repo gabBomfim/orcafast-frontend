@@ -35,6 +35,8 @@ import {
 import { useAuth } from '../../hooks/useAuth'
 import { useSidebar } from '../../contexts/SidebarContext'
 import { useSubscription } from '../../hooks/useSubscription'
+import { openWhatsApp } from '../../utils/whatsapp'
+import { FaWhatsapp } from 'react-icons/fa'
 
 const SidebarContent = ({ isCollapsed = false, onItemClick = () => { } }) => {
   const { logout, getCurrentUser } = useAuth()
@@ -383,6 +385,27 @@ const SidebarContent = ({ isCollapsed = false, onItemClick = () => { } }) => {
       {/* Settings & Collapse/Logout Buttons at Bottom */}
       <Box borderTop="1px" borderColor="gray.200" pt={4} mt="auto">
         <VStack spacing={1} align="stretch">
+          <Tooltip label={isCollapsed ? 'Suporte via WhatsApp' : ''} placement="right" hasArrow>
+            <Button
+              variant="ghost"
+              size="md"
+              justifyContent={isCollapsed ? 'center' : 'flex-start'}
+              leftIcon={<Icon as={FaWhatsapp} boxSize={4} color="green.500" />}
+              color="green.600"
+              _hover={{ bg: 'green.50' }}
+              onClick={() => openWhatsApp({ phone: '11961693447', message: 'Olá! Preciso de ajuda com a OrçaFast.' })}
+              h="40px"
+              w="full"
+              borderRadius="lg"
+              transition="all 0.2s"
+              pl={isCollapsed ? 0 : 4}
+              pr={isCollapsed ? 0 : 4}
+              fontSize="sm"
+              iconSpacing={isCollapsed ? 0 : 3}
+            >
+              {!isCollapsed && 'Suporte'}
+            </Button>
+          </Tooltip>
           <Button
             variant="ghost"
             size="md"

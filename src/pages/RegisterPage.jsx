@@ -24,6 +24,9 @@ import { useState } from 'react'
 import { useLocation, Link as RouterLink, useNavigate } from 'react-router-dom'
 import { authService, subscriptionService, onboardingService } from '../services'
 import { storage } from '../utils/storage'
+import { maskDocument, validateDocument } from '../utils/mask'
+import { formMessages } from '../utils/formMessages'
+import { FieldError } from '../components/ui/FormFeedback'
 
 // Componente SVG do Google inline
 const GoogleIcon = () => (
@@ -53,6 +56,7 @@ const RegisterPage = () => {
   const [name, setName] = useState('')
   const [companyName, setCompanyName] = useState('')
   const [document, setDocument] = useState('')
+  const [documentError, setDocumentError] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [passwordConfirmation, setPasswordConfirmation] = useState('')
@@ -78,6 +82,21 @@ const RegisterPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+
+    const digits = document.replace(/\D/g, '')
+    if (!digits) {
+      setDocumentError(formMessages.required.generic)
+      return
+    }
+    if (digits.length !== 11 && digits.length !== 14) {
+      setDocumentError(digits.length < 11 ? formMessages.invalid.cpf : formMessages.invalid.cnpj)
+      return
+    }
+    if (!validateDocument(document)) {
+      setDocumentError(digits.length === 11 ? formMessages.invalid.cpf : formMessages.invalid.cnpj)
+      return
+    }
+
     setIsLoading(true)
 
     const data = {
@@ -195,7 +214,7 @@ const RegisterPage = () => {
             color="gray.900"
             fontSize="sm"
             leftIcon={<GoogleIcon />}
-            onClick={() => handleSocialLogin('Google')}
+            onClick={handleGoogleLogin}
           >
             Continuar com Google
           </Button>
@@ -245,13 +264,21 @@ const RegisterPage = () => {
           />
 
           {/* Company CPF/CNPJ field */}
-          <Input
-            type="text"
-            value={document}
-            onChange={(e) => setDocument(e.target.value)}
-            placeholder="CNPJ ou CPF"
-            required
-          />
+          <Box w="full">
+            <Input
+              type="text"
+              value={document}
+              onChange={(e) => {
+                setDocument(maskDocument(e.target.value))
+                setDocumentError('')
+              }}
+              placeholder="CNPJ ou CPF"
+              maxLength={18}
+              isInvalid={!!documentError}
+              required
+            />
+            <FieldError message={documentError} />
+          </Box>
 
           {/* Email field */}
           <Input

@@ -23,8 +23,9 @@ import { FiUpload, FiBriefcase, FiKey, FiPhone, FiSave, FiTrash2, FiAlertCircle 
 import { useSubscription } from '../../hooks/useSubscription'
 import { useAuth } from '../../hooks/useAuth'
 import { companyService } from '../../services'
-import { maskPhone, unmaskPhone } from '../../utils/mask'
+import { maskPhone, unmaskPhone, maskDocument, validateDocument } from '../../utils/mask'
 import Container from '../../components/layout/Container'
+import { FieldError } from '../../components/ui/FormFeedback'
 
 const SettingsCompany = () => {
     const { canCustomizeBranding } = useSubscription()
@@ -38,6 +39,7 @@ const SettingsCompany = () => {
     // State
     const [isLoadingData, setIsLoadingData] = useState(true)
     const [isSaving, setIsSaving] = useState(false)
+    const [documentError, setDocumentError] = useState('')
     const [isDeletingLogo, setIsDeletingLogo] = useState(false)
 
     const [logoUrl, setLogoUrl] = useState(null)
@@ -58,7 +60,7 @@ const SettingsCompany = () => {
                 const { data } = await companyService.get()
                 setFormData({
                     name: data.name ?? '',
-                    document: data.document ?? '',
+                    document: maskDocument(data.document ?? ''),
                     pix_key: data.pix_key ?? '',
                     phone: maskPhone(data.phone ?? ''),
                     default_proposal_terms: data.default_proposal_terms ?? '',
@@ -81,7 +83,12 @@ const SettingsCompany = () => {
     }, [isAdmin])
 
     const handleInputChange = (field, value) => {
-        const newValue = field === 'phone' ? maskPhone(value) : value
+        let newValue = value
+        if (field === 'phone') newValue = maskPhone(value)
+        else if (field === 'document') {
+            newValue = maskDocument(value)
+            setDocumentError('')
+        }
         setFormData(prev => ({ ...prev, [field]: newValue }))
     }
 
@@ -124,11 +131,21 @@ const SettingsCompany = () => {
     }
 
     const handleSave = async () => {
+        const docDigits = formData.document.replace(/\D/g, '')
+        if (docDigits && !validateDocument(formData.document)) {
+            setDocumentError(
+                docDigits.length === 11
+                    ? 'Esse CPF não tá batendo. Confere os números.'
+                    : 'Esse CNPJ não tá batendo. Confere os números.'
+            )
+            return
+        }
+
         setIsSaving(true)
         try {
             const fd = new FormData()
             fd.append('name', formData.name)
-            if (formData.document) fd.append('document', formData.document)
+            if (formData.document) fd.append('document', docDigits)
             if (formData.pix_key) fd.append('pix_key', formData.pix_key)
             if (formData.phone) fd.append('phone', unmaskPhone(formData.phone))
             if (formData.default_proposal_terms)
@@ -310,15 +327,17 @@ const SettingsCompany = () => {
                                 />
                             </FormControl>
 
-                            <FormControl>
+                            <FormControl isInvalid={!!documentError}>
                                 <FormLabel fontSize="sm" fontWeight="medium">CNPJ / CPF</FormLabel>
                                 <Input
                                     value={formData.document}
                                     onChange={(e) => handleInputChange('document', e.target.value)}
                                     placeholder="Ex: 12.345.678/0001-99"
+                                    maxLength={18}
                                     h="48px"
                                     rounded="xl"
                                 />
+                                <FieldError message={documentError} />
                             </FormControl>
 
                             <FormControl>

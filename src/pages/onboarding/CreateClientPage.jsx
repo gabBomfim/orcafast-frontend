@@ -226,8 +226,7 @@ const CreateClientPage = () => {
             fontSize="sm"
             borderRadius="xl"
             boxShadow="lg"
-            //isDisabled={name === '' || phone === ''}
-            isDisabled={!isFormValid}
+            //isDisabled={!isFormValid}
             rightIcon={<Icon as={FiChevronRight} w={4} h={4} />}
           >
             Continuar

@@ -9,15 +9,17 @@ import {
   CardBody,
   HStack,
   Icon,
-  Link,
+  Button,
   Accordion,
   AccordionItem,
   AccordionButton,
   AccordionPanel,
   AccordionIcon,
 } from '@chakra-ui/react';
-import { FiMail, FiClock } from 'react-icons/fi';
+import { FiClock } from 'react-icons/fi';
+import { FaWhatsapp } from 'react-icons/fa';
 import LayoutInstitucional from './LayoutInstitucional';
+import { openWhatsApp } from '../../utils/whatsapp';
 
 const SuportePage = () => {
   return (
@@ -40,33 +42,40 @@ const SuportePage = () => {
           <CardBody p={6}>
             <VStack spacing={4} align="flex-start">
               <HStack spacing={3}>
-                <Box p={2} bg="emerald.50" borderRadius="md">
-                  <Icon as={FiMail} boxSize={6} color="emerald.500" />
+                <Box p={2} bg="green.50" borderRadius="md">
+                  <Icon as={FaWhatsapp} boxSize={6} color="green.500" />
                 </Box>
                 <Box>
                   <Heading as="h3" size="md" color="gray.900">
-                    Atendimento via E-mail
+                    Atendimento via WhatsApp
                   </Heading>
                   <Text color="gray.500" fontSize="sm">
-                    Para dúvidas financeiras, instabilidades críticas ou apoio com integrações.
+                    Para dúvidas, instabilidades ou qualquer apoio com a plataforma.
                   </Text>
                 </Box>
               </HStack>
-              
-              <Link 
-                href="mailto:suporte@orcafast.com.br" 
-                color="emerald.600" 
-                fontWeight="semibold" 
-                fontSize="lg"
-                _hover={{ color: 'emerald.700', textDecoration: 'underline' }}
+
+              <Button
+                leftIcon={<Icon as={FaWhatsapp} boxSize={5} />}
+                bg="green.500"
+                color="white"
+                _hover={{ bg: 'green.600' }}
+                borderRadius="xl"
+                fontWeight="semibold"
+                size="md"
+                w={{ base: 'full', sm: 'auto' }}
+                whiteSpace="normal"
+                h="auto"
+                py={3}
+                onClick={() => openWhatsApp({ phone: '11961693447', message: 'Olá! Preciso de ajuda com a OrçaFast.' })}
               >
-                suporte@orcafast.com.br
-              </Link>
+                Falar no WhatsApp
+              </Button>
 
               <HStack spacing={2} color="orange.500" bg="orange.50" px={3} py={1} borderRadius="full">
                 <Icon as={FiClock} boxSize={4} />
                 <Text fontSize="xs" fontWeight="medium">
-                  SLA de Resposta: Até 24 horas úteis.
+                  Atendimento em horário comercial.
                 </Text>
               </HStack>
             </VStack>

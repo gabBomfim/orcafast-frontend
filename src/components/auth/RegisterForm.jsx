@@ -20,6 +20,7 @@ import { FaApple } from 'react-icons/fa'
 import { useState } from 'react'
 import { FieldError } from '../ui/FormFeedback'
 import { formMessages } from '../../utils/formMessages'
+import { maskDocument, validateDocument } from '../../utils/mask'
 
 // Componente SVG do Google inline
 const GoogleIcon = () => (
@@ -43,21 +44,6 @@ const GoogleIcon = () => (
   </svg>
 )
 
-// Aplica máscara CPF (000.000.000-00) ou CNPJ (00.000.000/0000-00)
-const formatDocument = (value) => {
-  const digits = value.replace(/\D/g, '').slice(0, 14)
-  if (digits.length <= 11) {
-    return digits
-      .replace(/(\d{3})(\d)/, '$1.$2')
-      .replace(/(\d{3})(\d)/, '$1.$2')
-      .replace(/(\d{3})(\d{1,2})$/, '$1-$2')
-  }
-  return digits
-    .replace(/(\d{2})(\d)/, '$1.$2')
-    .replace(/(\d{3})(\d)/, '$1.$2')
-    .replace(/(\d{3})(\d)/, '$1/$2')
-    .replace(/(\d{4})(\d{1,2})$/, '$1-$2')
-}
 
 const RegisterForm = ({ onSubmit, onGoogleLogin, onFacebookLogin, isLoading }) => {
   const [showPassword, setShowPassword] = useState(false)
@@ -89,11 +75,18 @@ const RegisterForm = ({ onSubmit, onGoogleLogin, onFacebookLogin, isLoading }) =
     if (!formData.get('company_name')?.trim())
       next.company_name = formMessages.required.generic
 
-    const digits = (formData.get('document') || '').replace(/\D/g, '')
+    const rawDoc = formData.get('document') || ''
+    const digits = rawDoc.replace(/\D/g, '')
     if (!digits)
       next.document = formMessages.required.generic
     else if (digits.length !== 11 && digits.length !== 14)
-      next.document = 'Digite um CPF (11 dígitos) ou CNPJ (14 dígitos) válido.'
+      next.document = digits.length < 11
+        ? formMessages.invalid.cpf
+        : formMessages.invalid.cnpj
+    else if (!validateDocument(rawDoc))
+      next.document = digits.length === 11
+        ? formMessages.invalid.cpf
+        : formMessages.invalid.cnpj
 
     const email = formData.get('email')?.trim()
     if (!email)
@@ -193,7 +186,7 @@ const RegisterForm = ({ onSubmit, onGoogleLogin, onFacebookLogin, isLoading }) =
             maxLength={18}
             isInvalid={!!errors.document}
             onChange={(e) => {
-              setDocumentMasked(formatDocument(e.target.value))
+              setDocumentMasked(maskDocument(e.target.value))
               clearError('document')
             }}
           />
