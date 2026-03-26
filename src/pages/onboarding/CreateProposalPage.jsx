@@ -606,7 +606,7 @@ const CreateProposalPage = () => {
             if (!validate()) return
             const proposalData = {
               title,
-              validUntil,
+              valid_until: validUntil,
               discount: discountPct,
               items: items.map(item => ({
                 description: item.desc,
