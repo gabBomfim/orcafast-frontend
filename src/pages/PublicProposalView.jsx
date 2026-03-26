@@ -2,27 +2,28 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import {
   Box,
-  Container,
+  Center,
+  Spinner,
   VStack,
   HStack,
   Text,
-  Heading,
-  Image,
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  Divider,
-  Center,
-  Spinner,
-  Badge,
-  Button,
   Flex,
+  Image,
   Icon,
+  Button,
 } from '@chakra-ui/react'
-import { FiClock, FiAlertCircle } from 'react-icons/fi'
+import {
+  FiClock,
+  FiAlertCircle,
+  FiPhone,
+  FiMail,
+  FiCalendar,
+  FiUser,
+  FiCopy,
+  FiCheck,
+  FiBriefcase,
+  FiGrid,
+} from 'react-icons/fi'
 import OrcafastLogo from '../components/ui/OrcafastLogo'
 import { proposalService } from '../services'
 
@@ -31,8 +32,8 @@ const PublicProposalView = () => {
   const [proposal, setProposal] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-
   const [isExpired, setIsExpired] = useState(false)
+  const [copiedPix, setCopiedPix] = useState(false)
 
   useEffect(() => {
     const fetchProposal = async () => {
@@ -53,6 +54,33 @@ const PublicProposalView = () => {
     fetchProposal()
   }, [token])
 
+  const fmt = (n) => {
+    const val = typeof n === 'string' ? parseFloat(n) : n
+    return val?.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  }
+
+  const formatPhone = (phone) => {
+    if (!phone) return ''
+    const cleaned = phone.replace(/\D/g, '')
+    if (cleaned.length === 11) {
+      return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 7)}-${cleaned.slice(7)}`
+    }
+    if (cleaned.length === 10) {
+      return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 6)}-${cleaned.slice(6)}`
+    }
+    return phone
+  }
+
+  const handleCopyPix = async (pixKey) => {
+    try {
+      await navigator.clipboard.writeText(pixKey)
+      setCopiedPix(true)
+      setTimeout(() => setCopiedPix(false), 2000)
+    } catch {
+      // clipboard não disponível
+    }
+  }
+
   if (loading) {
     return (
       <Center minH="100vh">
@@ -67,19 +95,18 @@ const PublicProposalView = () => {
         <Box mb={12}>
           <OrcafastLogo variant="full" height="40px" />
         </Box>
-        
         <VStack spacing={6} p={10} bg="white" borderRadius="3xl" shadow="2xl" maxW="440px" textAlign="center" border="1px" borderColor="gray.100">
-          <Box bg={isExpired ? "orange.50" : "red.50"} p={6} borderRadius="full">
-            <Icon 
-              as={isExpired ? FiClock : FiAlertCircle} 
-              color={isExpired ? "orange.500" : "red.500"} 
-              boxSize={10} 
+          <Box bg={isExpired ? 'orange.50' : 'red.50'} p={6} borderRadius="full">
+            <Icon
+              as={isExpired ? FiClock : FiAlertCircle}
+              color={isExpired ? 'orange.500' : 'red.500'}
+              boxSize={10}
             />
           </Box>
           <VStack spacing={3}>
-            <Heading size="lg" color="gray.900" fontWeight="bold">
+            <Text fontSize="xl" fontWeight="bold" color="gray.900">
               {isExpired ? 'Orçamento Expirado' : 'Ops!'}
-            </Heading>
+            </Text>
             <Text color="gray.600" fontSize="md" px={4}>
               {error}
             </Text>
@@ -101,117 +128,219 @@ const PublicProposalView = () => {
     )
   }
 
-  const { title, client, company, items, total_value, discount, subtotal, default_proposal_terms, created_at, valid_until } = proposal
-  const fmt = (n) => {
-    const val = typeof n === 'string' ? parseFloat(n) : n
-    return val?.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-  }
+  const { title, client, company, items, total_value, discount, subtotal, created_at, valid_until } = proposal
+
+  const CompanyIcon = (
+    <Center w={12} h={12} bg="emerald.50" borderRadius="xl" flexShrink={0}>
+      <Icon as={FiBriefcase} color="emerald.500" boxSize={6} />
+    </Center>
+  )
 
   return (
-    <Box bg="gray.50" minH="100vh" py={12}>
-      <Container maxW="container.lg" bg="white" p={12} borderRadius="2xl" shadow="xl">
-        {/* Header - Empresa */}
-        <Flex justify="space-between" align="start" mb={8} direction={{ base: 'column', md: 'row' }} gap={6}>
-          <Box>
-            {company.logo_url && (
-              <Image src={company.logo_url} h="60px" mb={4} fallbackSrc="https://via.placeholder.com/150x60?text=LOGO" />
-            )}
-            <Heading size="md" color="gray.900">{company.name}</Heading>
-            <Text color="gray.600" fontSize="sm">{company.email}</Text>
-            {company.phone && <Text color="gray.600" fontSize="sm">{company.phone}</Text>}
-          </Box>
-          <Box textAlign={{ base: 'left', md: 'right' }}>
-            <Heading size="lg" color="emerald.600" mb={1}>ORÇAMENTO</Heading>
-            <VStack align={{ base: 'start', md: 'end' }} spacing={0}>
-              <Text color="gray.500" fontSize="sm">Data: {new Date(created_at).toLocaleDateString('pt-BR')}</Text>
-              {valid_until && (
-                <Text color="red.500" fontSize="sm" fontWeight="medium">
-                  Válido até: {new Date(valid_until).toLocaleDateString('pt-BR')}
-                </Text>
-              )}
-            </VStack>
-          </Box>
-        </Flex>
+    <Box bg="gray.50" minH="100vh">
+      <Box maxW="lg" mx="auto" px={4} py={6} pb={10}>
+        <VStack spacing={4} align="stretch">
 
-        <Divider mb={8} />
-
-        {/* Info - Cliente */}
-        <Box mb={8} bg="emerald.50" p={6} borderRadius="xl" borderWidth="1px" borderColor="emerald.100">
-          <Heading size="xs" color="emerald.700" mb={3} textTransform="uppercase">Orçamento para:</Heading>
-          <VStack align="start" spacing={1}>
-            <Text fontWeight="bold" fontSize="lg">{client.name}</Text>
-            {client.company && <Text fontSize="sm" color="gray.600">{client.company}</Text>}
-            {client.phone && <Text fontSize="sm" color="gray.600">{client.phone}</Text>}
-            {client.email && <Text fontSize="sm" color="gray.600">{client.email}</Text>}
-          </VStack>
-        </Box>
-
-        <VStack align="start" spacing={2} mb={6}>
-          <Heading size="md" color="gray.900">{title}</Heading>
-        </VStack>
-
-        {/* Itens */}
-        <Box overflowX="auto" mb={8}>
-          <Table variant="simple">
-            <Thead bg="gray.100">
-              <Tr>
-                <Th>Descrição</Th>
-                <Th isNumeric>Qtd</Th>
-                <Th isNumeric>Unitário</Th>
-                <Th isNumeric>Total</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {items.map((item, idx) => {
-                const itemTotal = (parseFloat(item.quantity) || 0) * (parseFloat(item.unit_price) || 0)
-                return (
-                  <Tr key={idx}>
-                    <Td fontWeight="medium">{item.description}</Td>
-                    <Td isNumeric>{item.quantity}</Td>
-                    <Td isNumeric>R$ {fmt(item.unit_price)}</Td>
-                    <Td isNumeric fontWeight="semibold">R$ {fmt(itemTotal)}</Td>
-                  </Tr>
-                )
-              })}
-            </Tbody>
-          </Table>
-        </Box>
-
-        {/* Resumo Financeiro */}
-        <Flex justify="flex-end" mb={8}>
-          <VStack align="stretch" spacing={3} w={{ base: 'full', md: '250px' }}>
-            <HStack justify="space-between">
-              <Text color="gray.600">Subtotal:</Text>
-              <Text fontWeight="medium">R$ {fmt(subtotal)}</Text>
-            </HStack>
-            {parseFloat(discount) > 0 && (
-              <HStack justify="space-between">
-                <Text color="gray.600">Desconto ({parseFloat(discount)}%):</Text>
-                <Text fontWeight="medium" color="red.500">- R$ {fmt(parseFloat(subtotal) * parseFloat(discount) / 100)}</Text>
+          {/* Company Header Card */}
+          <Box bg="white" borderRadius="2xl" shadow="sm" border="1px" borderColor="gray.200" overflow="hidden">
+            <Box p={5}>
+              <HStack align="start" spacing={4}>
+                {company.logo_url ? (
+                  <Image
+                    src={company.logo_url}
+                    h={12}
+                    w={12}
+                    objectFit="contain"
+                    borderRadius="xl"
+                    flexShrink={0}
+                    fallback={CompanyIcon}
+                  />
+                ) : CompanyIcon}
+                <Box flex={1} minW={0}>
+                  <Text fontWeight="bold" color="gray.900" noOfLines={1}>{company.name}</Text>
+                  {company.document && (
+                    <Text fontSize="xs" color="gray.500">{company.document}</Text>
+                  )}
+                </Box>
               </HStack>
-            )}
-            <Divider />
-            <HStack justify="space-between">
-              <Text fontSize="xl" fontWeight="bold">Total:</Text>
-              <Text fontSize="xl" fontWeight="bold" color="emerald.600">R$ {fmt(total_value)}</Text>
-            </HStack>
-          </VStack>
-        </Flex>
 
-        {/* Termos e Rodapé */}
-        {(company.default_proposal_terms || proposal.terms) && (
-          <Box mb={12}>
-            <Heading size="sm" mb={3} color="gray.900">Termos e Condições:</Heading>
-            <Box bg="gray.50" p={4} borderRadius="lg" fontSize="sm" color="gray.700" whiteSpace="pre-wrap">
-              {proposal.terms || company.default_proposal_terms}
+              {(company.email || company.phone) && (
+                <HStack mt={4} flexWrap="wrap" spacing={4}>
+                  {company.email && (
+                    <HStack spacing={1} color="gray.500">
+                      <Icon as={FiMail} boxSize={3} />
+                      <Text fontSize="xs">{company.email}</Text>
+                    </HStack>
+                  )}
+                  {company.phone && (
+                    <HStack spacing={1} color="gray.500">
+                      <Icon as={FiPhone} boxSize={3} />
+                      <Text fontSize="xs">{formatPhone(company.phone)}</Text>
+                    </HStack>
+                  )}
+                </HStack>
+              )}
+            </Box>
+
+            <Flex px={5} py={4} bg="gray.50" borderTop="1px" borderColor="gray.100" justify="space-between" align="center">
+              <Box>
+                <HStack spacing={1} color="gray.500" mt="0.5">
+                  <Icon as={FiCalendar} boxSize={3} />
+                  <Text fontSize="xs">Criado em {new Date(created_at).toLocaleDateString('pt-BR')}</Text>
+                </HStack>
+              </Box>
+              {valid_until && (
+                <Box textAlign="right">
+                  <Text fontSize="xs" color="gray.500">Válido até</Text>
+                  <Text fontSize="sm" fontWeight="semibold" color="orange.500">
+                    {new Date(valid_until).toLocaleDateString('pt-BR')}
+                  </Text>
+                </Box>
+              )}
+            </Flex>
+          </Box>
+
+          {/* Client Card */}
+          <Box bg="emerald.50" borderRadius="2xl" border="1px" borderColor="emerald.100" p={5}>
+            <Text fontSize="xs" fontWeight="semibold" color="emerald.600" textTransform="uppercase" letterSpacing="wider" mb={3}>
+              Orçamento para
+            </Text>
+            <HStack align="start" spacing={3}>
+              <Center w={10} h={10} bg="emerald.100" borderRadius="full" flexShrink={0}>
+                <Icon as={FiUser} color="emerald.600" boxSize={5} />
+              </Center>
+              <Box flex={1} minW={0}>
+                <Text fontWeight="bold" color="gray.900">{client.name}</Text>
+                {client.company && <Text fontSize="xs" color="gray.500">{client.company}</Text>}
+                <VStack align="start" spacing={1} mt={2}>
+                  {client.phone && (
+                    <HStack spacing="1.5" color="gray.500">
+                      <Icon as={FiPhone} boxSize={3} />
+                      <Text fontSize="xs">{formatPhone(client.phone)}</Text>
+                    </HStack>
+                  )}
+                  {client.email && (
+                    <HStack spacing="1.5" color="gray.500">
+                      <Icon as={FiMail} boxSize={3} />
+                      <Text fontSize="xs">{client.email}</Text>
+                    </HStack>
+                  )}
+                </VStack>
+              </Box>
+            </HStack>
+          </Box>
+
+          {/* Quote Details Card */}
+          <Box bg="white" borderRadius="2xl" shadow="sm" border="1px" borderColor="gray.200" overflow="hidden">
+            <Box p={5} borderBottom="1px" borderColor="gray.100">
+              <Text fontWeight="bold" color="gray.900">{title}</Text>
+              {proposal.description && (
+                <Text fontSize="sm" color="gray.500" mt={1}>{proposal.description}</Text>
+              )}
+            </Box>
+
+            {items.map((item, idx) => {
+              const itemTotal = (parseFloat(item.quantity) || 0) * (parseFloat(item.unit_price) || 0)
+              return (
+                <Flex
+                  key={idx}
+                  p={4}
+                  justify="space-between"
+                  align="center"
+                  gap={4}
+                  borderBottom={idx < items.length - 1 ? '1px' : undefined}
+                  borderColor="gray.100"
+                >
+                  <Box flex={1} minW={0}>
+                    <Text fontWeight="medium" color="gray.900" fontSize="sm">{item.description}</Text>
+                    <Text fontSize="xs" color="gray.500" mt="0.5">
+                      {item.quantity}x R$ {fmt(item.unit_price)}
+                    </Text>
+                  </Box>
+                  <Text fontWeight="semibold" color="gray.900" fontSize="sm" flexShrink={0}>
+                    R$ {fmt(itemTotal)}
+                  </Text>
+                </Flex>
+              )
+            })}
+
+            <Box p={5} bg="gray.50" borderTop="1px" borderColor="gray.100">
+              <VStack spacing={2} align="stretch">
+                <Flex justify="space-between" fontSize="sm">
+                  <Text color="gray.500">Subtotal</Text>
+                  <Text fontWeight="medium" color="gray.900">R$ {fmt(subtotal)}</Text>
+                </Flex>
+                {parseFloat(discount) > 0 && (
+                  <Flex justify="space-between" fontSize="sm">
+                    <Text color="gray.500">Desconto</Text>
+                    <Text fontWeight="medium" color="red.500">
+                      - R$ {fmt(parseFloat(subtotal) * parseFloat(discount) / 100)}
+                    </Text>
+                  </Flex>
+                )}
+                <Flex justify="space-between" align="center" pt={2} borderTop="1px" borderColor="gray.200">
+                  <Text fontWeight="bold" color="gray.900">Total</Text>
+                  <Text fontSize="xl" fontWeight="bold" color="emerald.600">R$ {fmt(total_value)}</Text>
+                </Flex>
+              </VStack>
             </Box>
           </Box>
-        )}
 
-        <Box textAlign="center" pt={8} borderTop="1px" borderColor="gray.100">
-          <Text color="gray.400" fontSize="xs">Documento gerado digitalmente por OrçaFast</Text>
-        </Box>
-      </Container>
+          {/* PIX Card */}
+          {company.pix_key && (
+            <Box bg="white" borderRadius="2xl" shadow="sm" border="1px" borderColor="gray.200" p={5}>
+              <HStack align="center" spacing={3}>
+                <Center w={10} h={10} bg="emerald.50" borderRadius="xl" flexShrink={0}>
+                  <Icon as={FiGrid} color="emerald.500" boxSize={5} />
+                </Center>
+                <Box flex={1} minW={0}>
+                  <Text fontWeight="semibold" color="gray.900" fontSize="sm">Chave Pix</Text>
+                  <Text fontSize="xs" color="gray.500" mt="0.5" noOfLines={1}>{company.pix_key}</Text>
+                </Box>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleCopyPix(company.pix_key)}
+                  borderRadius="xl"
+                  fontSize="xs"
+                  h={8}
+                  flexShrink={0}
+                  leftIcon={
+                    <Icon
+                      as={copiedPix ? FiCheck : FiCopy}
+                      boxSize="3.5"
+                      color={copiedPix ? 'emerald.500' : undefined}
+                    />
+                  }
+                >
+                  {copiedPix ? 'Copiado' : 'Copiar'}
+                </Button>
+              </HStack>
+            </Box>
+          )}
+
+          {/* Terms Card */}
+          {(company.default_proposal_terms || proposal.terms) && (
+            <Box bg="white" borderRadius="2xl" shadow="sm" border="1px" borderColor="gray.200" p={5}>
+              <Text fontWeight="semibold" color="gray.900" fontSize="sm" mb={2}>Condições de Pagamento</Text>
+              <Text fontSize="sm" color="gray.500" whiteSpace="pre-wrap">
+                {proposal.terms || company.default_proposal_terms}
+              </Text>
+            </Box>
+          )}
+
+          {/* Footer */}
+          <Box pt={4} textAlign="center">
+            <Text fontSize="xs" color="gray.400" mb={2}>Documento gerado por</Text>
+            <Flex justify="center">
+              <Box as="a" href="https://orcafast.com.br" target="_blank" rel="noopener noreferrer">
+                <OrcafastLogo variant="full" height="28px" />
+              </Box>
+            </Flex>
+          </Box>
+
+        </VStack>
+      </Box>
     </Box>
   )
 }
