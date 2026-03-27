@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Center,
   Flex,
   Heading,
   HStack,
@@ -20,10 +21,15 @@ import {
   FiPlus,
   FiTrash2,
   FiEye,
+  FiUser,
+  FiPhone,
+  FiMail,
+  FiCalendar,
 } from 'react-icons/fi'
 import { WiStars } from 'react-icons/wi'
 import { Link as RouterLink, useNavigate } from 'react-router-dom'
 import OnboardingLayout from '../../components/layout/OnboardingLayout'
+import OrcafastLogo from '../../components/ui/OrcafastLogo'
 import { useOnboarding } from '../../contexts/OnboardingContext'
 import { useState } from 'react'
 import { FieldError } from '../../components/ui/FormFeedback'
@@ -51,6 +57,16 @@ const CreateProposalPage = () => {
   })
   const [isLoadingAI, setIsLoadingAI] = useState(false)
   const [errors, setErrors] = useState({})
+
+  const fmtBRL = (n) => n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+
+  const formatPhone = (phone) => {
+    if (!phone) return ''
+    const cleaned = phone.replace(/\D/g, '')
+    if (cleaned.length === 11) return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 7)}-${cleaned.slice(7)}`
+    if (cleaned.length === 10) return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 6)}-${cleaned.slice(6)}`
+    return phone
+  }
 
   const handleAddItem = () => {
     setItems([...items, { id: Date.now(), desc: '', qtd: 1, value: '' }])
@@ -486,90 +502,122 @@ const CreateProposalPage = () => {
         </Box>
 
         {/* Lado Direito: Preview */}
-        <Box display={{ base: 'block', lg: 'block' }}>
+        <Box>
           <Box
-            bg="white"
-            borderRadius="2xl"
             position={{ base: 'relative', lg: 'sticky' }}
             top={{ base: '0', lg: '100px' }}
-            p={6}
-            boxShadow="sm"
-            border="1px"
-            borderColor="gray.200"
           >
-            <HStack justify="space-between" mb={6}>
+            <HStack justify="space-between" mb={4}>
               <Heading size="md" color="gray.900">Olha como seu cliente vai ver:</Heading>
               <Icon as={FiEye} color="gray.400" />
             </HStack>
 
             <VStack spacing={4} align="stretch">
-              {/* Cabeçalho com dados do cliente */}
-              <Box bg="emerald.50" p={4} borderRadius="lg" borderWidth="1px" borderColor="emerald.200">
-                <Text fontSize="sm" color="emerald.700" fontWeight="semibold" mb={2}>
-                  ORÇAMENTO PARA:
+
+              {/* Client Card */}
+              <Box bg="emerald.50" borderRadius="2xl" border="1px" borderColor="emerald.100" p={5}>
+                <Text fontSize="xs" fontWeight="semibold" color="emerald.600" textTransform="uppercase" letterSpacing="wider" mb={3}>
+                  Orçamento para
                 </Text>
-                <VStack align="start" spacing={1}>
-                  <Text fontWeight="bold" color="gray.900">
-                    {clientData?.name || 'Cliente do onboarding'}
-                  </Text>
-                  {clientData?.phone && (
-                    <Text fontSize="sm" color="gray.600">{clientData.phone}</Text>
-                  )}
-                  {clientData?.email && (
-                    <Text fontSize="sm" color="gray.600">{clientData.email}</Text>
-                  )}
-                </VStack>
+                <HStack align="start" spacing={3}>
+                  <Center w={10} h={10} bg="emerald.100" borderRadius="full" flexShrink={0}>
+                    <Icon as={FiUser} color="emerald.600" boxSize={5} />
+                  </Center>
+                  <Box flex={1} minW={0}>
+                    <Text fontWeight="bold" color="gray.900">
+                      {clientData?.name || 'Cliente do onboarding'}
+                    </Text>
+                    {clientData?.company && (
+                      <Text fontSize="xs" color="gray.500">{clientData.company}</Text>
+                    )}
+                    <VStack align="start" spacing={1} mt={clientData?.name ? 2 : 0}>
+                      {clientData?.phone && (
+                        <HStack spacing="1.5" color="gray.500">
+                          <Icon as={FiPhone} boxSize={3} />
+                          <Text fontSize="xs">{formatPhone(clientData.phone)}</Text>
+                        </HStack>
+                      )}
+                      {clientData?.email && (
+                        <HStack spacing="1.5" color="gray.500">
+                          <Icon as={FiMail} boxSize={3} />
+                          <Text fontSize="xs">{clientData.email}</Text>
+                        </HStack>
+                      )}
+                    </VStack>
+                  </Box>
+                </HStack>
               </Box>
 
-              <Heading size="lg" color="gray.900">{title || 'Título do Orçamento'}</Heading>
-              {validUntil && (
-                <Text fontSize="sm" color="red.500" fontWeight="medium">
-                  Válido até: {validUntil.split('-').reverse().join('/')}
-                </Text>
-              )}
-              <Box height="1px" bg="gray.200" />
-              {items.filter(item => item.desc.trim()).map((item) => {
-                const v = parseFloat(String(item.value).replace(',', '.')) || 0
-                const q = parseInt(item.qtd || 1)
-                const fmt = (n) => n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                return (
-                  <HStack key={item.id} justify="space-between">
-                    <VStack align="start" spacing={0}>
-                      <Text fontWeight="medium" color="gray.900">{item.desc}</Text>
-                      <Text fontSize="sm" color="gray.600">
-                        {q}x R$ {fmt(v)}
+              {/* Quote Details Card */}
+              <Box bg="white" borderRadius="2xl" shadow="sm" border="1px" borderColor="gray.200" overflow="hidden">
+                <Box p={5} borderBottom="1px" borderColor="gray.100">
+                  <Text fontWeight="bold" color="gray.900">
+                    {title || 'Título do Orçamento'}
+                  </Text>
+                  {validUntil && (
+                    <HStack spacing={1} color="orange.500" mt={2}>
+                      <Icon as={FiCalendar} boxSize={3} />
+                      <Text fontSize="xs" fontWeight="semibold">
+                        Válido até {validUntil.split('-').reverse().join('/')}
                       </Text>
-                    </VStack>
-                    <Text fontWeight="bold" color="gray.900">
-                      R$ {fmt(v * q)}
-                    </Text>
-                  </HStack>
-                )
-              })}
-              <Box height="1px" bg="gray.200" />
-              <VStack spacing={2} align="stretch">
-                <HStack justify="space-between">
-                  <Text color="gray.900">Subtotal:</Text>
-                  <Text fontWeight="medium" color="gray.900">R$ {subtotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Text>
-                </HStack>
-                {discountPct > 0 && (
-                  <HStack justify="space-between">
-                    <Text color="gray.900">Desconto ({discountPct}%):</Text>
-                    <Text fontWeight="medium" color="red.500">
-                      - R$ {discountAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </Text>
-                  </HStack>
-                )}
-                <Box height="1px" bg="gray.200" />
-                <HStack justify="space-between">
-                  <Text fontSize="xl" fontWeight="bold" color="gray.900">
-                    Total
-                  </Text>
-                  <Text fontSize="xl" fontWeight="bold" color="emerald.600">
-                    R$ {total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </Text>
-                </HStack>
-              </VStack>
+                    </HStack>
+                  )}
+                </Box>
+
+                {items.filter(item => item.desc.trim()).map((item, idx, arr) => {
+                  const v = parseFloat(String(item.value).replace(',', '.')) || 0
+                  const q = parseInt(item.qtd || 1)
+                  return (
+                    <Flex
+                      key={item.id}
+                      p={4}
+                      justify="space-between"
+                      align="center"
+                      gap={4}
+                      borderBottom={idx < arr.length - 1 ? '1px' : undefined}
+                      borderColor="gray.100"
+                    >
+                      <Box flex={1} minW={0}>
+                        <Text fontWeight="medium" color="gray.900" fontSize="sm">{item.desc}</Text>
+                        <Text fontSize="xs" color="gray.500" mt="0.5">
+                          {q}x R$ {fmtBRL(v)}
+                        </Text>
+                      </Box>
+                      <Text fontWeight="semibold" color="gray.900" fontSize="sm" flexShrink={0}>
+                        R$ {fmtBRL(v * q)}
+                      </Text>
+                    </Flex>
+                  )
+                })}
+
+                <Box p={5} bg="gray.50" borderTop="1px" borderColor="gray.100">
+                  <VStack spacing={2} align="stretch">
+                    <Flex justify="space-between" fontSize="sm">
+                      <Text color="gray.500">Subtotal</Text>
+                      <Text fontWeight="medium" color="gray.900">R$ {fmtBRL(subtotal)}</Text>
+                    </Flex>
+                    {discountPct > 0 && (
+                      <Flex justify="space-between" fontSize="sm">
+                        <Text color="gray.500">Desconto ({discountPct}%)</Text>
+                        <Text fontWeight="medium" color="red.500">- R$ {fmtBRL(discountAmount)}</Text>
+                      </Flex>
+                    )}
+                    <Flex justify="space-between" align="center" pt={2} borderTop="1px" borderColor="gray.200">
+                      <Text fontWeight="bold" color="gray.900">Total</Text>
+                      <Text fontSize="xl" fontWeight="bold" color="emerald.600">R$ {fmtBRL(total)}</Text>
+                    </Flex>
+                  </VStack>
+                </Box>
+              </Box>
+
+              {/* Footer */}
+              <Box pt={2} textAlign="center">
+                <Text fontSize="xs" color="gray.400" mb={2}>Documento gerado por</Text>
+                <Flex justify="center">
+                  <OrcafastLogo variant="full" height="24px" />
+                </Flex>
+              </Box>
+
             </VStack>
           </Box>
         </Box>
