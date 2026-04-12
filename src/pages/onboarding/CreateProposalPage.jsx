@@ -34,6 +34,7 @@ import { useOnboarding } from '../../contexts/OnboardingContext'
 import { useState } from 'react'
 import { FieldError } from '../../components/ui/FormFeedback'
 import { formMessages } from '../../utils/formMessages'
+import { maskBRL, parseBRL, initBRL } from '../../utils/mask'
 
 const CreateProposalPage = () => {
   const navigate = useNavigate()
@@ -50,7 +51,7 @@ const CreateProposalPage = () => {
         id: index + 1,
         desc: item.description || '',
         qtd: item.quantity || 1,
-        value: item.unit_price || ''
+        value: initBRL(item.unit_price || 0),
       }))
     }
     return [{ id: 1, desc: '', qtd: 1, value: '' }]
@@ -86,31 +87,12 @@ const CreateProposalPage = () => {
   }
 
   const handleItemChange = (id, field, rawValue) => {
-    // Limites de entrada
-    if (field === 'qtd') {
-      if (rawValue.length > 6) return
-    }
-    if (field === 'value') {
-      // Aceita vírgula como separador decimal
-      const normalized = rawValue.replace(',', '.')
-      // Permite apenas números e um ponto decimal
-      if (!/^\d*\.?\d{0,2}$/.test(normalized) && rawValue !== '') return
-      if (normalized.length > 10) return
-    }
-
-    const newItems = items.map((item) => {
-      if (item.id === id) {
-        return { ...item, [field]: rawValue }
-      }
-      return item
-    })
-    setItems(newItems)
+    if (field === 'qtd' && rawValue.length > 6) return
+    setItems(items.map((item) => item.id === id ? { ...item, [field]: rawValue } : item))
   }
 
   const subtotal = items.reduce((acc, item) => {
-    const value = parseFloat(String(item.value).replace(',', '.')) || 0
-    const qtd = parseFloat(item.qtd) || 0
-    return acc + value * qtd
+    return acc + parseBRL(item.value) * (parseFloat(item.qtd) || 0)
   }, 0)
 
   const discountPct = parseFloat(String(discount).replace(',', '.')) || 0
@@ -148,7 +130,7 @@ const CreateProposalPage = () => {
 
     // Aplica no primeiro item
     if (items.length > 0) {
-      handleItemChange(items[0].id, 'value', suggestedPrice)
+      handleItemChange(items[0].id, 'value', maskBRL(String(Math.round(suggestedPrice * 100))))
       toast({
         title: 'Preço sugerido aplicado!',
         description: `Valor de R$ ${suggestedPrice.toFixed(2)} foi aplicado ao primeiro item.`,
@@ -167,7 +149,7 @@ const CreateProposalPage = () => {
     if (!validUntil.trim()) next.validUntil = formMessages.required.validUntil
     const firstItem = items[0]
     if (!firstItem?.desc?.trim()) next.itemDesc = formMessages.required.generic
-    const itemVal = parseFloat(String(firstItem?.value || '').replace(',', '.')) || 0
+    const itemVal = parseBRL(firstItem?.value || '')
     if (itemVal <= 0) next.itemValue = formMessages.value.zero
     setErrors(next)
     return Object.keys(next).length === 0
@@ -178,7 +160,7 @@ const CreateProposalPage = () => {
     if (!title.trim()) return false
     const first = items[0]
     if (!first?.desc?.trim()) return false
-    const val = parseFloat(String(first?.value || '').replace(',', '.')) || 0
+    const val = parseBRL(first?.value || '')
     return val > 0
   })()
 
@@ -193,7 +175,7 @@ const CreateProposalPage = () => {
       items: items.map(item => ({
         description: item.desc,
         quantity: parseFloat(item.qtd) || 0,
-        unit_price: parseFloat(String(item.value).replace(',', '.')) || 0
+        unit_price: parseBRL(item.value)
       }))
     }
 
@@ -352,12 +334,11 @@ const CreateProposalPage = () => {
                           </Text>
                           <Input
                             type="text"
-                            inputMode="decimal"
+                            inputMode="numeric"
                             placeholder="0,00"
                             value={item.value}
-                            onFocus={(e) => { if (e.target.value === '0') handleItemChange(item.id, 'value', '') }}
                             onChange={(e) => {
-                              handleItemChange(item.id, 'value', e.target.value)
+                              handleItemChange(item.id, 'value', maskBRL(e.target.value))
                               if (errors.itemValue && item.id === items[0]?.id) setErrors(prev => ({ ...prev, itemValue: '' }))
                             }}
                             h={10}
@@ -401,7 +382,7 @@ const CreateProposalPage = () => {
                 leftIcon={<Icon as={FiPlus} w={4} h={4} />}
                 _hover={{ bg: 'emerald.600' }}
               >
-                Incluir serviço ou peça
+                Incluir itens
               </Button>
 
               {/* Botão IA - aparece quando há dados suficientes */}
@@ -565,7 +546,7 @@ const CreateProposalPage = () => {
                 </Box>
 
                 {items.filter(item => item.desc.trim()).map((item, idx, arr) => {
-                  const v = parseFloat(String(item.value).replace(',', '.')) || 0
+                  const v = parseBRL(item.value)
                   const q = parseInt(item.qtd || 1)
                   return (
                     <Flex
@@ -659,7 +640,7 @@ const CreateProposalPage = () => {
               items: items.map(item => ({
                 description: item.desc,
                 quantity: parseFloat(item.qtd) || 0,
-                unit_price: parseFloat(String(item.value).replace(',', '.')) || 0
+                unit_price: parseBRL(item.value)
               }))
             }
             updateProposalData(proposalData)

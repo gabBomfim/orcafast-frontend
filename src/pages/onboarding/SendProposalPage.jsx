@@ -1,26 +1,25 @@
 import {
   Box,
   Button,
+  Center,
   Flex,
   Heading,
+  HStack,
   Icon,
   Text,
   VStack,
   useDisclosure,
-  HStack,
+  Spinner,
 } from '@chakra-ui/react'
 import {
   FiShare2,
   FiChevronLeft,
-  FiMessageSquare,
-  FiMail,
   FiLink,
   FiCheck,
   FiUser,
-  FiDollarSign,
-  FiFileText,
-  FiDownload,
-  FiList,
+  FiPhone,
+  FiMail,
+  FiCalendar,
 } from 'react-icons/fi'
 import { FaWhatsapp } from 'react-icons/fa'
 import { useState, useEffect } from 'react'
@@ -31,9 +30,7 @@ import { useOnboarding } from '../../contexts/OnboardingContext'
 import { storage } from '../../utils/storage'
 import { openWhatsApp } from '../../utils/whatsapp'
 import { proposalService } from '../../services/proposal.service'
-import { FieldHint } from '../../components/ui/FormFeedback'
-import { Spinner, Center } from '@chakra-ui/react'
-import { maskPhone } from '../../utils/mask'
+import OrcafastLogo from '../../components/ui/OrcafastLogo'
 
 const SendProposalPage = () => {
   const navigate = useNavigate()
@@ -78,10 +75,30 @@ const SendProposalPage = () => {
   const clientPhone = proposal?.clientPhone || guestData.client?.phone || '(00) 00000-0000'
   const proposalTitle = proposal?.title || guestData.proposal?.title || 'Título do Orçamento'
 
-  const subtotal = proposal?.subtotal || guestData.proposal?.items?.reduce((acc, item) => {
-    return acc + (item.quantity * item.unit_price)
-  }, 0) || 0
-  const totalValue = proposal?.totalValue || (subtotal - (guestData.proposal?.discount || 0))
+  const fmt = (n) => Number(n).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+
+  const formatPhone = (phone) => {
+    if (!phone) return ''
+    const cleaned = phone.replace(/\D/g, '')
+    if (cleaned.length === 11) return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 7)}-${cleaned.slice(7)}`
+    if (cleaned.length === 10) return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 6)}-${cleaned.slice(6)}`
+    return phone
+  }
+
+  const rawItems = proposal?.items || guestData.proposal?.items || []
+  const previewItems = rawItems.map((item, i) => ({
+    id: item.id || i,
+    desc: item.description || '',
+    qtd: item.quantity || 1,
+    value: item.unit_price || 0,
+  }))
+  const previewSubtotal = parseFloat(proposal?.subtotal) || previewItems.reduce((acc, item) => {
+    return acc + (parseFloat(item.value) || 0) * (parseFloat(item.qtd) || 0)
+  }, 0)
+  const discountPct = parseFloat(proposal?.discount || guestData.proposal?.discount) || 0
+  const discountAmount = previewSubtotal * (discountPct / 100)
+  const previewTotal = parseFloat(proposal?.totalValue) || (previewSubtotal - discountAmount)
+  const validUntil = proposal?.valid_until || guestData.proposal?.valid_until || guestData.proposal?.validUntil || ''
 
   const handleSend = (method) => {
     if (!isAuthenticated) {
@@ -170,97 +187,100 @@ const SendProposalPage = () => {
       </VStack>
 
       <VStack spacing={4}>
-        {/* Full preview — same pattern as CreateProposalPage */}
-        {(() => {
-          const rawItems = proposal?.items || guestData.proposal?.items || []
-          const previewItems = rawItems.map((item, i) => ({
-            id: item.id || i,
-            desc: item.description || '',
-            qtd: item.quantity || 1,
-            value: item.unit_price || 0,
-          }))
-          const previewSubtotal = parseFloat(proposal?.subtotal) || previewItems.reduce((acc, item) => {
-            return acc + (parseFloat(item.value) || 0) * (parseFloat(item.qtd) || 0)
-          }, 0)
-          const discountPct = parseFloat(proposal?.discount || guestData.proposal?.discount) || 0
-          const discountAmount = previewSubtotal * (discountPct / 100)
-          const previewTotal = parseFloat(proposal?.totalValue) || (previewSubtotal - discountAmount)
-          const fmt = (n) => Number(n).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+        {/* Preview */}
+        <VStack spacing={4} align="stretch" w="full">
 
-          return (
-            <Box
-              bg="white"
-              borderRadius="2xl"
-              p={6}
-              boxShadow="sm"
-              border="1px"
-              borderColor="gray.200"
-              w="full"
-              mb={6}
-            >
-              <HStack justify="space-between" mb={6}>
-                <Heading size="md" color="gray.900">Resumo do orçamento</Heading>
-                <Icon as={FiFileText} color="gray.400" />
-              </HStack>
-
-              <VStack spacing={4} align="stretch">
-                {/* Cabeçalho do cliente */}
-                <Box bg="emerald.50" p={4} borderRadius="lg" borderWidth="1px" borderColor="emerald.200">
-                  <Text fontSize="sm" color="emerald.700" fontWeight="semibold" mb={2}>
-                    ORÇAMENTO PARA:
-                  </Text>
-                  <VStack align="start" spacing={1}>
-                    <Text fontWeight="bold" color="gray.900">{clientName}</Text>
-                    {clientPhone && (
-                      <Text fontSize="sm" color="gray.600">{maskPhone(clientPhone)}</Text>
-                    )}
-                  </VStack>
-                </Box>
-
-                <Heading size="lg" color="gray.900">{proposalTitle}</Heading>
-                <Box height="1px" bg="gray.200" />
-
-                {/* Lista de itens */}
-                {previewItems.filter(item => item.desc.trim()).map((item) => {
-                  const v = parseFloat(item.value) || 0
-                  const q = parseInt(item.qtd) || 1
-                  return (
-                    <HStack key={item.id} justify="space-between">
-                      <VStack align="start" spacing={0}>
-                        <Text fontWeight="medium" color="gray.900">{item.desc}</Text>
-                        <Text fontSize="sm" color="gray.600">
-                          {q}x R$ {fmt(v)}
-                        </Text>
-                      </VStack>
-                      <Text fontWeight="bold" color="gray.900">R$ {fmt(v * q)}</Text>
-                    </HStack>
-                  )
-                })}
-
-                <Box height="1px" bg="gray.200" />
-
-                {/* Totais */}
-                <VStack spacing={2} align="stretch">
-                  <HStack justify="space-between">
-                    <Text color="gray.900">Subtotal:</Text>
-                    <Text fontWeight="medium" color="gray.900">R$ {fmt(previewSubtotal)}</Text>
-                  </HStack>
-                  {discountPct > 0 && (
-                    <HStack justify="space-between">
-                      <Text color="gray.900">Desconto ({discountPct}%):</Text>
-                      <Text fontWeight="medium" color="red.500">- R$ {fmt(discountAmount)}</Text>
+          {/* Client Card */}
+          <Box bg="emerald.50" borderRadius="2xl" border="1px" borderColor="emerald.100" p={5}>
+            <Text fontSize="xs" fontWeight="semibold" color="emerald.600" textTransform="uppercase" letterSpacing="wider" mb={3}>
+              Orçamento para
+            </Text>
+            <HStack align="start" spacing={3}>
+              <Center w={10} h={10} bg="emerald.100" borderRadius="full" flexShrink={0}>
+                <Icon as={FiUser} color="emerald.600" boxSize={5} />
+              </Center>
+              <Box flex={1} minW={0}>
+                <Text fontWeight="bold" color="gray.900">{clientName}</Text>
+                {guestData.client?.company && (
+                  <Text fontSize="xs" color="gray.500">{guestData.client.company}</Text>
+                )}
+                <VStack align="start" spacing={1} mt={2}>
+                  {clientPhone && (
+                    <HStack spacing="1.5" color="gray.500">
+                      <Icon as={FiPhone} boxSize={3} />
+                      <Text fontSize="xs">{formatPhone(clientPhone)}</Text>
                     </HStack>
                   )}
-                  <Box height="1px" bg="gray.200" />
-                  <HStack justify="space-between">
-                    <Text fontSize="xl" fontWeight="bold" color="gray.900">Total</Text>
-                    <Text fontSize="xl" fontWeight="bold" color="emerald.600">R$ {fmt(previewTotal)}</Text>
-                  </HStack>
+                  {guestData.client?.email && (
+                    <HStack spacing="1.5" color="gray.500">
+                      <Icon as={FiMail} boxSize={3} />
+                      <Text fontSize="xs">{guestData.client.email}</Text>
+                    </HStack>
+                  )}
                 </VStack>
+              </Box>
+            </HStack>
+          </Box>
+
+          {/* Quote Details Card */}
+          <Box bg="white" borderRadius="2xl" shadow="sm" border="1px" borderColor="gray.200" overflow="hidden">
+            <Box p={5} borderBottom="1px" borderColor="gray.100">
+              <Text fontWeight="bold" color="gray.900">{proposalTitle}</Text>
+              {validUntil && (
+                <HStack spacing={1} color="orange.500" mt={2}>
+                  <Icon as={FiCalendar} boxSize={3} />
+                  <Text fontSize="xs" fontWeight="semibold">
+                    Válido até {new Date(validUntil).toLocaleDateString('pt-BR')}
+                  </Text>
+                </HStack>
+              )}
+            </Box>
+
+            {previewItems.filter(item => item.desc.trim()).map((item, idx, arr) => {
+              const v = parseFloat(item.value) || 0
+              const q = parseInt(item.qtd) || 1
+              return (
+                <Flex
+                  key={item.id}
+                  p={4}
+                  justify="space-between"
+                  align="center"
+                  gap={4}
+                  borderBottom={idx < arr.length - 1 ? '1px' : undefined}
+                  borderColor="gray.100"
+                >
+                  <Box flex={1} minW={0}>
+                    <Text fontWeight="medium" color="gray.900" fontSize="sm">{item.desc}</Text>
+                    <Text fontSize="xs" color="gray.500" mt="0.5">{q}x R$ {fmt(v)}</Text>
+                  </Box>
+                  <Text fontWeight="semibold" color="gray.900" fontSize="sm" flexShrink={0}>
+                    R$ {fmt(v * q)}
+                  </Text>
+                </Flex>
+              )
+            })}
+
+            <Box p={5} bg="gray.50" borderTop="1px" borderColor="gray.100">
+              <VStack spacing={2} align="stretch">
+                <Flex justify="space-between" fontSize="sm">
+                  <Text color="gray.500">Subtotal</Text>
+                  <Text fontWeight="medium" color="gray.900">R$ {fmt(previewSubtotal)}</Text>
+                </Flex>
+                {discountPct > 0 && (
+                  <Flex justify="space-between" fontSize="sm">
+                    <Text color="gray.500">Desconto ({discountPct}%)</Text>
+                    <Text fontWeight="medium" color="red.500">- R$ {fmt(discountAmount)}</Text>
+                  </Flex>
+                )}
+                <Flex justify="space-between" align="center" pt={2} borderTop="1px" borderColor="gray.200">
+                  <Text fontWeight="bold" color="gray.900">Total</Text>
+                  <Text fontSize="xl" fontWeight="bold" color="emerald.600">R$ {fmt(previewTotal)}</Text>
+                </Flex>
               </VStack>
             </Box>
-          )
-        })()}
+          </Box>
+
+        </VStack>
 
         {/* Send options standardized */}
         <VStack spacing={6} w="full">

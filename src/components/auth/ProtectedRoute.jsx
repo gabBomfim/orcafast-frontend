@@ -92,11 +92,13 @@ const ProtectedRoute = () => {
 
       if (pendingSlug) {
         sessionStorage.removeItem('show_welcome')
-        setWelcomePlanSlug(pendingSlug)
-        onWelcomeOpen()
+        if (subscribed || onTrial) {
+          setWelcomePlanSlug(pendingSlug)
+          onWelcomeOpen()
+        }
       }
     }
-  }, [isCheckingSub, onWelcomeOpen, toast])
+  }, [isCheckingSub, subscribed, onTrial, onWelcomeOpen, toast])
 
   const handleCreateProposal = (e) => {
     e.preventDefault()
@@ -143,7 +145,7 @@ const ProtectedRoute = () => {
     // Rotas de cadastro/edição
     if (path === '/dashboard/clientes/novo') {
       return {
-        title: 'Novo Cliente',
+        title: 'Novo cliente',
         showBackButton: true,
       }
     }
@@ -167,7 +169,7 @@ const ProtectedRoute = () => {
             variant="gradient"
             display={{ base: 'none', md: 'inline-flex' }}
           >
-            Novo Cliente
+            Novo cliente
           </Button>
         )
       }
@@ -253,7 +255,7 @@ const ProtectedRoute = () => {
           fontWeight="bold"
           _active={{ transform: 'scale(0.95)' }}
         >
-          {location.pathname.includes('/clientes') ? 'Novo Cliente' : 'Novo orçamento'}
+          {location.pathname.includes('/clientes') ? 'Novo cliente' : 'Novo orçamento'}
         </Button>
       )}
     </Box>

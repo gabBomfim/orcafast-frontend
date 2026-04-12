@@ -64,20 +64,20 @@ const SidebarContent = ({ isCollapsed = false, onItemClick = () => { } }) => {
   const settingsSubItems = [
     {
       icon: FiUser,
-      label: 'Meu Perfil',
+      label: 'Meu perfil',
       path: '/dashboard/configuracoes/perfil',
       isLocked: !hasAccess || !canCustomizeBranding,
     },
     {
       icon: FiBriefcase,
-      label: 'Perfil da Empresa',
+      label: 'Perfil da empresa',
       path: '/dashboard/configuracoes/empresa',
       isLocked: !hasAccess || !canCustomizeBranding,
       isHidden: user?.role !== 3 && user?.role !== 1,
     },
     {
       icon: FiTarget,
-      label: 'Metas',
+      label: 'Metas financeiras',
       path: '/dashboard/configuracoes/metas',
       isLocked: !hasAccess || !canSetFinancialGoals,
       isHidden: user?.role !== 3 && user?.role !== 1,

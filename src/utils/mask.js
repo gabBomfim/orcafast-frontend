@@ -71,3 +71,32 @@ export const unmaskPhone = (value) => {
   if (!value) return ''
   return value.replace(/\D/g, '')
 }
+
+/**
+ * Máscara bancária de moeda BRL (constrói a partir dos centavos, estilo PIX).
+ * Entrada: qualquer string (pode já estar formatada ou ser só dígitos).
+ * Saída: string formatada pt-BR — ex: "154,50", "1.234,56".
+ */
+export const maskBRL = (input) => {
+  const digits = String(input || '').replace(/\D/g, '').slice(0, 9) // max R$9.999.999,99
+  if (!digits) return ''
+  const num = parseInt(digits, 10) || 0
+  return (num / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+}
+
+/**
+ * Converte string de display BRL ("1.234,56") para float (1234.56) para o backend.
+ */
+export const parseBRL = (value) => {
+  return parseFloat(String(value || '0').replace(/\./g, '').replace(',', '.')) || 0
+}
+
+/**
+ * Converte float vindo do backend (ex: 154.5) para o formato de display ("154,50").
+ */
+export const initBRL = (value) => {
+  if (!value) return ''
+  const cents = Math.round(parseFloat(value) * 100)
+  if (!cents) return ''
+  return maskBRL(String(cents))
+}

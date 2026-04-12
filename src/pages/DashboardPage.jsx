@@ -178,6 +178,7 @@ const DashboardPage = () => {
   const getMetaTitle = () => {
     if (isMember) return 'Seu Desempenho'
     if (isYearlyView) return `Seu objetivo para ${new Date().getFullYear()}`
+    if (selectedPeriod === 'custom') return 'Objetivo proporcional ao período'
     const m = new Date().toLocaleDateString('pt-BR', { month: 'long' })
     if (selectedPeriod === 'last-month') {
       const d = new Date()
@@ -323,7 +324,7 @@ const DashboardPage = () => {
 
                     <Box flex={1} w="full">
                       <Text fontSize="sm" fontWeight="medium" color="gray.600" mb={1}>
-                        Serviços fechados
+                        Orçamentos fechados
                       </Text>
                       {totalSent > 0 ? (
                         <>
@@ -519,9 +520,9 @@ const DashboardPage = () => {
                                 <Flex w={16} h={16} bg="emerald.50" rounded="2xl" align="center" justify="center" mx="auto" mb={4}>
                                   <Icon as={FiTarget} w={8} h={8} color="emerald.500" />
                                 </Flex>
-                                <Text fontSize="md" fontWeight="semibold" color="gray.900">Quanto você quer ganhar esse mês?</Text>
+                                <Text fontSize="md" fontWeight="semibold" color="gray.900">Quanto você quer ganhar este mês?</Text>
                                 <Text fontSize="sm" color="gray.500" mt={2} maxW="xs" mx="auto">
-                                  Coloque o seu objetivo de lucro para a gente te ajudar a acompanhar.
+                                  Coloque o seu objetivo de lucro pra gente te ajudar a acompanhar.
                                 </Text>
                                 <Button
                                   as={Link}
@@ -607,7 +608,7 @@ const DashboardPage = () => {
                   <Flex align="center" gap={2}>
                     <Icon as={FiTrendingUp} w={4} h={4} color="gray.500" />
                     <Text fontSize="sm" color="gray.600">
-                      <Text as="span" fontWeight="medium">Visão Anual:</Text>{' '}
+                      <Text as="span" fontWeight="medium">Visão anual:</Text>{' '}
                       Você já atingiu{' '}
                       <Text as="span" fontWeight="semibold" color="gray.900">
                         {annualProg}%

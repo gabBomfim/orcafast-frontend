@@ -104,7 +104,7 @@ const SettingsProfile = () => {
         <Container maxW="container.md">
             <Box mb={8}>
                 <Text fontSize="2xl" fontWeight="bold" color="gray.800">
-                    Meu Perfil
+                    Meu perfil
                 </Text>
             </Box>
 

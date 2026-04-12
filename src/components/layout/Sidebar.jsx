@@ -23,7 +23,7 @@ const Sidebar = () => {
       >
         <DrawerOverlay />
         <DrawerContent bg="white">
-          <SidebarContent isCollapsed={false} onLinkClick={closeSidebar} />
+          <SidebarContent isCollapsed={false} onItemClick={closeSidebar} />
         </DrawerContent>
       </Drawer>
 

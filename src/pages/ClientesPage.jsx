@@ -115,12 +115,22 @@ const ClientesPage = () => {
       }
 
       const { data } = await clientService.list(params)
-      const normalizedClients = data.data.map((client) => ({
-        ...client,
-        proposalsCount: client.proposals ? client.proposals.length : 0,
-        totalValue: client.totalValue ?? client.total_value ?? 0,
-        lastProposal: client.lastProposal ?? client.last_proposal ?? 'Sem registro',
-      }))
+      const normalizedClients = data.data.map((client) => {
+        const proposals = client.proposals || []
+        const totalValue = proposals.reduce((sum, p) => sum + parseFloat(p.total_value || 0), 0)
+        const lastDate = proposals.length > 0
+          ? proposals.reduce((latest, p) => p.created_at > latest ? p.created_at : latest, proposals[0].created_at)
+          : null
+        const lastProposal = lastDate
+          ? new Date(lastDate).toLocaleDateString('pt-BR')
+          : 'Sem registro'
+        return {
+          ...client,
+          proposalsCount: proposals.length,
+          totalValue,
+          lastProposal,
+        }
+      })
 
       setClients(normalizedClients)
       setPagination({
@@ -254,20 +264,20 @@ const ClientesPage = () => {
         {/* Stats */}
         <Grid
           templateColumns={{
-            base: '1fr',
-            md: 'repeat(4, 1fr)'
+              base: 'repeat(2, 1fr)',
+              md: 'repeat(5, 1fr)'
           }}
-          gap={6}
+          gap={4}
         >
           <StatsCard
-            title="Total de Clientes"
+            title="Total de clientes"
             value={totalClients}
             icon={FiUsers}
             colorScheme="primary"
           />
 
           <StatsCard
-            title="Orçamentos Enviados"
+            title="Orçamentos enviados"
             value={totalProposalsSent}
             icon={FiFileText}
             colorScheme="primary"
@@ -278,6 +288,7 @@ const ClientesPage = () => {
             value={`R$ ${totalProposalValue.toLocaleString('pt-BR')}`}
             icon={FiZap}
             colorScheme="primary"
+            valueFontSize={{ base: 'lg', md: '2xl' }}
           />
 
           <StatsCard
@@ -285,11 +296,12 @@ const ClientesPage = () => {
             value={`R$ ${averageTicket.toLocaleString('pt-BR')}`}
             icon={FiActivity}
             colorScheme="primary"
+            valueFontSize={{ base: 'lg', md: '2xl' }}
           />
         </Grid>
 
         {/* Filters */}
-        <DataCard title="Ache um cliente">
+        <DataCard title="Encontre um cliente">
           <Stack direction={{ base: 'column', lg: 'row' }} spacing={4} align={{ lg: 'flex-end' }}>
             <FormControl flex={2}>
               <FormLabel>Buscar</FormLabel>
@@ -393,7 +405,7 @@ const ClientesPage = () => {
 
         {/* Clients List */}
         <DataCard
-          title="Seus Clientes"
+          title="Seus clientes"
           subtitle={`${pagination.total} cliente${pagination.total !== 1 ? 's' : ''} encontrado${pagination.total !== 1 ? 's' : ''}`}
         >
           {isLoading ? (
@@ -501,12 +513,12 @@ const ClientesPage = () => {
                             as={Link}
                             to={`/dashboard/propostas/nova?client=${client.id}`}
                             variant="outline"
-                            size={{ base: 'md', md: 'sm' }}
+                            size="md"
+                            height="40px"
                             leftIcon={<Icon as={FiFileText} />}
                             w={{ base: 'full', md: 'auto' }}
-                            h={{ base: '44px', md: 'auto' }}
                           >
-                            Novo Orçamento
+                            Novo orçamento
                           </Button>
 
                           <Menu>

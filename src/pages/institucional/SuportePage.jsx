@@ -109,7 +109,7 @@ const SuportePage = () => {
                 <AccordionIcon color="gray.400" />
               </AccordionButton>
               <AccordionPanel pb={6} px={5} color="gray.600" lineHeight="tall">
-                O fluxo de aprovação é desobstruído e mágico! Após você enviar o "Link do Orçamento" (Copiar Link ou WhatsApp), o cliente final tem a visão do seu orçamento formatado com a sua logomarca. Contribui para a jornada dele ler com atenção as descrições em tela inteira (celular ou PC) e simplesmente clicar na call-to-action verde no fundo inferior “Aprovar”. O status cairá automaticamente no seu painel principal sem precisar nem de mensagem!
+                O fluxo de aprovação é desobstruído e mágico! Após você enviar o "Link do Orçamento" (Copiar Link ou WhatsApp), o cliente final tem a visão do seu orçamento formatado com seu logo. Contribui para a jornada dele ler com atenção as descrições em tela inteira (celular ou PC) e simplesmente clicar na call-to-action verde no fundo inferior “Aprovar”. O status cairá automaticamente no seu painel principal sem precisar nem de mensagem!
               </AccordionPanel>
             </AccordionItem>
 

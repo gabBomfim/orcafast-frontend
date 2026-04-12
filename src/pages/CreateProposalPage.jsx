@@ -35,7 +35,6 @@ import {
   FiUser,
   FiPhone,
   FiMail,
-  FiCalendar,
   FiBriefcase,
   FiGrid,
   FiCopy,
@@ -45,7 +44,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { proposalService, clientService, companyService } from '../services'
 import OrcafastLogo from '../components/ui/OrcafastLogo'
 import { storage } from '../utils/storage'
-import { maskPhone, unmaskPhone } from '../utils/mask'
+import { maskPhone, unmaskPhone, maskBRL, parseBRL, initBRL } from '../utils/mask'
 import { FieldError } from '../components/ui/FormFeedback'
 import { formMessages } from '../utils/formMessages'
 import { appSelectStyles } from '../theme/selectStyles'
@@ -106,7 +105,7 @@ const CreateProposalPage = () => {
             id: item.id || index + 1,
             desc: item.description || '',
             qtd: item.quantity || 1,
-            value: String(parseFloat(item.unit_price || item.unitPrice || 0) || ''),
+            value: initBRL(item.unit_price || item.unitPrice || 0),
           })))
         }
       } catch (error) {
@@ -151,20 +150,13 @@ const CreateProposalPage = () => {
 
   const handleItemChange = (id, field, rawValue) => {
     if (field === 'qtd' && rawValue.length > 6) return
-    if (field === 'value') {
-      const normalized = rawValue.replace(',', '.')
-      if (!/^\d*\.?\d{0,2}$/.test(normalized) && rawValue !== '') return
-      if (normalized.length > 10) return
-    }
     setItems(items.map((item) => item.id === id ? { ...item, [field]: rawValue } : item))
   }
 
   // ─── Cálculos ─────────────────────────────────────────────────────────────
 
   const subtotal = items.reduce((acc, item) => {
-    const value = parseFloat(String(item.value).replace(',', '.')) || 0
-    const qtd = parseFloat(item.qtd) || 0
-    return acc + value * qtd
+    return acc + parseBRL(item.value) * (parseFloat(item.qtd) || 0)
   }, 0)
 
   const discountPct = parseFloat(String(formData.discount).replace(',', '.')) || 0
@@ -220,7 +212,7 @@ const CreateProposalPage = () => {
     if (!formData.validUntil) next.validUntil = formMessages.required.validUntil
     const firstItem = items[0]
     if (!firstItem?.desc?.trim()) next.itemDesc = formMessages.required.generic
-    const itemVal = parseFloat(String(firstItem?.value || '').replace(',', '.')) || 0
+    const itemVal = parseBRL(firstItem?.value || '')
     if (itemVal <= 0) next.itemValue = formMessages.value.zero
     setErrors(next)
     return Object.keys(next).length === 0
@@ -290,7 +282,7 @@ const CreateProposalPage = () => {
         items: items.map(item => ({
           description: item.desc,
           quantity: parseInt(item.qtd, 10),
-          unit_price: parseFloat(String(item.value).replace(',', '.')) || 0,
+          unit_price: parseBRL(item.value),
         })),
       }
 
@@ -553,16 +545,15 @@ const CreateProposalPage = () => {
                                 </Text>
                                 <Input
                                   type="text"
-                                  inputMode="decimal"
+                                  inputMode="numeric"
                                   placeholder="0,00"
                                   value={item.value}
                                   h={10}
                                   px={3}
                                   borderRadius="lg"
                                   isInvalid={!!errors.itemValue && item.id === items[0]?.id}
-                                  onFocus={(e) => { if (e.target.value === '0') handleItemChange(item.id, 'value', '') }}
                                   onChange={(e) => {
-                                    handleItemChange(item.id, 'value', e.target.value)
+                                    handleItemChange(item.id, 'value', maskBRL(e.target.value))
                                     if (errors.itemValue && item.id === items[0]?.id) setErrors(prev => ({ ...prev, itemValue: '' }))
                                   }}
                                 />
@@ -599,7 +590,7 @@ const CreateProposalPage = () => {
                       variant="solid"
                       leftIcon={<Icon as={FiPlus} w={4} h={4} />}
                     >
-                      Incluir serviço ou peça
+                      Incluir itens
                     </Button>
                   </Box>
 
@@ -738,10 +729,12 @@ const CreateProposalPage = () => {
                         )}
                       </Box>
                       <Flex px={5} py={4} bg="gray.50" borderTop="1px" borderColor="gray.100" justify="space-between" align="center">
-                        <HStack spacing={1} color="gray.500">
-                          <Icon as={FiCalendar} boxSize={3} />
-                          <Text fontSize="xs">Criado em {new Date().toLocaleDateString('pt-BR')}</Text>
-                        </HStack>
+                        <Box>
+                          <Text fontSize="xs" color="gray.500">Criado em</Text>
+                          <Text fontSize="sm" fontWeight="semibold" color="gray.700">
+                            {new Date().toLocaleDateString('pt-BR')}
+                          </Text>
+                        </Box>
                         {formData.validUntil && (
                           <Box textAlign="right">
                             <Text fontSize="xs" color="gray.500">Válido até</Text>
@@ -796,7 +789,7 @@ const CreateProposalPage = () => {
                       </Box>
 
                       {items.filter(item => item.desc.trim()).map((item, idx, arr) => {
-                        const v = parseFloat(String(item.value).replace(',', '.')) || 0
+                        const v = parseBRL(item.value)
                         const q = parseInt(item.qtd || 1)
                         return (
                           <Flex

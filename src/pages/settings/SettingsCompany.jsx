@@ -216,7 +216,7 @@ const SettingsCompany = () => {
         <Container maxW="container.md">
             <Box mb={8}>
                 <Text fontSize="2xl" fontWeight="bold" color="gray.800">
-                    Dados da sua empresa
+                    Perfil da empresa
                 </Text>
             </Box>
 
@@ -262,7 +262,7 @@ const SettingsCompany = () => {
                 <Card bg="white" shadow="sm" rounded="2xl" border="1px" borderColor="gray.200">
                     <CardBody p={6}>
                         <VStack spacing={3} mb={8} alignItems="center" w="full">
-                            <Text fontSize="sm" fontWeight="medium" color="gray.800">Sua logo</Text>
+                            <Text fontSize="sm" fontWeight="medium" color="gray.800">Seu logo</Text>
                             <FormControl>
                                 <FormLabel
                                     htmlFor="logo-upload"

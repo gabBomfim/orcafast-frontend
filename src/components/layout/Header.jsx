@@ -188,7 +188,7 @@ const Header = ({ title, showBackButton = false, rightContent }) => {
                 to="/dashboard/configuracoes/perfil"
                 icon={<Icon as={FiUser} />}
               >
-                Meu Perfil
+                Meu perfil
               </MenuItem>
               {isAdmin && (
                 <MenuItem
@@ -196,7 +196,7 @@ const Header = ({ title, showBackButton = false, rightContent }) => {
                   to="/dashboard/configuracoes/empresa"
                   icon={<Icon as={FiBriefcase} />}
                 >
-                  Perfil da Empresa
+                  Perfil da empresa
                 </MenuItem>
               )}
               <MenuItem

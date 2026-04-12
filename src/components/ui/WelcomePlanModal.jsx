@@ -25,7 +25,7 @@ const PLAN_WELCOME = {
         title: 'Tudo pronto! O Plano Autônomo tá ativo.',
         subtitle: 'Agora você tem tudo o que precisa para profissionalizar seus orçamentos e ganhar tempo.',
         features: [
-            { icon: FiZap, text: 'Mande quantos orçamentos quiser, com a sua logo.' },
+            { icon: FiZap, text: 'Mande quantos orçamentos quiser com o seu logo.' },
             { icon: FiStar, text: 'Defina suas metas e acompanhe seu faturamento.' },
             { icon: FiLock, text: 'Veja o dinheiro entrando direto no seu painel.' },
             { icon: FiMessageCircle, text: 'Suporte prioritário por WhatsApp' },
@@ -37,7 +37,7 @@ const PLAN_WELCOME = {
         badge: 'EQUIPE',
         badgeColor: 'purple',
         title: 'Show de bola! O Plano Equipe tá liberado.',
-        subtitle: 'Agora seu time tem a ferramenta certa pra parar de bater cabeça e fechar mais negócios.',
+        subtitle: 'Agora seu time tem a ferramenta certa pra fechar mais negócios.',
         features: [
             { icon: FiTrendingUp, text: 'Traga sua equipe: todo mundo na mesma página.' },
             { icon: FiStar, text: 'Relatórios prontos: veja onde seu faturamento está de verdade.' },

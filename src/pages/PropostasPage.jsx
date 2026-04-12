@@ -48,6 +48,10 @@ import {
   FiExternalLink,
   FiCheck,
   FiChevronDown,
+  FiEye,
+  FiSend,
+  FiClock,
+  FiList,
 } from 'react-icons/fi'
 import { FaWhatsapp } from 'react-icons/fa'
 
@@ -544,7 +548,7 @@ Qualquer dúvida, estou à disposição!`
       case 'approve':
         return {
           title: 'Negócio fechado? 🎉',
-          body: `O cliente deu o OK? Marcar como fechado ajuda a gente a organizar suas metas e o seu lucro.`,
+          body: `O cliente deu o OK? Marcar como fechado ajuda a gente a organizar suas metas e o seu faturamento.`,
           confirmText: 'Sim, fechamos!',
           confirmColor: 'green'
         }
@@ -586,6 +590,7 @@ Qualquer dúvida, estou à disposição!`
             <StatsCard
               title="Todos"
               value={getStatusCount('all')}
+              icon={FiList}
               colorScheme="primary"
               isActive={statusFilter === 'all'}
               onClick={() => setStatusFilter('all')}
@@ -593,6 +598,7 @@ Qualquer dúvida, estou à disposição!`
             <StatsCard
               title="Fechados"
               value={getStatusCount('approved')}
+              icon={FiCheckCircle}
               colorScheme="green"
               isActive={statusFilter === 'approved'}
               onClick={() => setStatusFilter('approved')}
@@ -600,6 +606,7 @@ Qualquer dúvida, estou à disposição!`
             <StatsCard
               title="O cliente já viu"
               value={getStatusCount('viewed')}
+              icon={FiEye}
               colorScheme="blue"
               isActive={statusFilter === 'viewed'}
               onClick={() => setStatusFilter('viewed')}
@@ -607,6 +614,7 @@ Qualquer dúvida, estou à disposição!`
             <StatsCard
               title="Já mandou"
               value={getStatusCount('sent')}
+              icon={FiSend}
               colorScheme="yellow"
               isActive={statusFilter === 'sent'}
               onClick={() => setStatusFilter('sent')}
@@ -614,6 +622,7 @@ Qualquer dúvida, estou à disposição!`
             <StatsCard
               title="Pra mandar"
               value={getStatusCount('draft')}
+              icon={FiClock}
               colorScheme="gray"
               isActive={statusFilter === 'draft'}
               onClick={() => setStatusFilter('draft')}

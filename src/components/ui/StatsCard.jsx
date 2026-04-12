@@ -8,15 +8,16 @@ import {
   Flex,
 } from '@chakra-ui/react'
 
-const StatsCard = ({ 
-  title, 
-  value, 
-  helpText, 
-  icon, 
+const StatsCard = ({
+  title,
+  value,
+  helpText,
+  icon,
   colorScheme = 'primary',
   onClick,
   isActive = false,
-  ...props 
+  valueFontSize = '2xl',
+  ...props
 }) => {
   return (
     <Box
@@ -45,9 +46,9 @@ const StatsCard = ({
           <StatLabel fontSize="sm" fontWeight="600" color="gray.600">
             {title}
           </StatLabel>
-          <StatNumber 
-            fontSize="2xl" 
-            fontWeight="800" 
+          <StatNumber
+            fontSize={valueFontSize}
+            fontWeight="800"
             color="gray.900"
             letterSpacing="-0.5px"
           >
@@ -60,10 +61,10 @@ const StatsCard = ({
           )}
         </Stat>
         {icon && (
-          <Icon 
-            as={icon} 
-            boxSize={10} 
-            color={`${colorScheme}.500`} 
+          <Icon
+            as={icon}
+            boxSize={7}
+            color={`${colorScheme}.500`}
             strokeWidth={1.5}
           />
         )}

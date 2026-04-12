@@ -30,13 +30,13 @@ export const formMessages = {
 
   // Formato inválido
   invalid: {
-    email: 'Esse e-mail não tá certo. Confere aí.',
+    email: 'Esse e-mail não tá certo. Confira.',
     phone: 'Esse celular não tá no formato certo. Ex: (11) 99999-9999',
-    cpf: 'Esse CPF não tá batendo. Confere os números.',
-    cnpj: 'Esse CNPJ não tá batendo. Confere os números.',
-    cep: 'Esse CEP não existe. Confere aí.',
+    cpf: 'Esse CPF não tá batendo. Confira os números.',
+    cnpj: 'Esse CNPJ não tá batendo. Confira os números.',
+    cep: 'Esse CEP não existe. Confira.',
     date: 'Essa data não tá certa. Usa o formato dd/mm/aaaa.',
-    url: 'Esse link não tá funcionando. Confere o endereço.',
+    url: 'Esse link não tá funcionando. Confira o endereço.',
     number: 'Coloque só números aqui.',
     currency: 'Coloque um valor válido. Ex: 1.500,00',
   },
@@ -51,7 +51,7 @@ export const formMessages = {
 
   // Senhas
   password: {
-    mismatch: 'As senhas não batem. Confere aí.',
+    mismatch: 'As senhas não batem. Confira.',
     weak: 'Essa senha tá fraca. Mistura letras, números e símbolos.',
     same: 'Usa uma senha diferente da anterior.',
     current: 'A senha atual não tá certa.',
@@ -69,7 +69,7 @@ export const formMessages = {
   date: {
     past: 'Essa data já passou. Escolhe uma data futura.',
     future: 'Essa data ainda não chegou. Escolhe uma data passada.',
-    invalid: 'Essa data não existe. Confere aí.',
+    invalid: 'Essa data não existe. Confira.',
     expired: 'Essa data de validade já expirou.',
   },
 
@@ -93,7 +93,7 @@ export const formMessages = {
 
   // Rede / Sistema
   system: {
-    offline: 'Parece que você tá sem internet. Confere a conexão.',
+    offline: 'Parece que você tá sem internet. Confira a conexão.',
     timeout: 'Demorou demais. Tenta de novo.',
     serverError: 'Ih, algo deu errado aqui. A gente já sabe e tá resolvendo.',
     maintenance: 'A gente tá fazendo uma manutenção rápida. Volta em instantes.',
@@ -104,7 +104,7 @@ export const formMessages = {
   quote: {
     noItems: 'Adiciona pelo menos um item no orçamento.',
     duplicateItem: 'Esse item já tá na lista.',
-    invalidTotal: 'O valor total não tá batendo. Confere os itens.',
+    invalidTotal: 'O valor total não tá batendo. Confira os itens.',
     expiredValidity: 'A validade do orçamento já passou. Atualiza a data.',
     clientRequired: 'Seleciona um cliente pra esse orçamento.',
   },
@@ -112,7 +112,7 @@ export const formMessages = {
   // Clientes
   client: {
     duplicate: 'Já existe um cliente com esse celular.',
-    notFound: 'Não achei esse cliente. Confere o nome.',
+    notFound: 'Não achei esse cliente. Confira o nome.',
   },
 }
 
@@ -151,7 +151,7 @@ export const successMessages = {
     login: 'Bem-vinda de volta!',
     logout: 'Até mais! Volta logo.',
     register: 'Conta criada! Bora começar.',
-    passwordReset: 'E-mail enviado! Confere sua caixa de entrada.',
+    passwordReset: 'E-mail enviado! Confira sua caixa de entrada.',
     passwordChanged: 'Senha redefinida! Agora é só fazer login.',
   },
 }
@@ -166,7 +166,7 @@ export const warningMessages = {
   quote: {
     noSave: 'Seu orçamento ainda não foi salvo.',
     expiringSoon: 'Esse orçamento vence em breve.',
-    highDiscount: 'Desconto alto! Confere se tá certo.',
+    highDiscount: 'Desconto alto! Confira se tá certo.',
   },
 
   plan: {

@@ -160,7 +160,7 @@ const HomePage = () => {
                 <div className="stat-box">
                   <div className="stat-label">
                     <FiDollarSign style={{ width: '1rem', height: '1rem' }} />
-                    <span>Serviços fechados</span>
+                    <span>Orçamentos fechados</span>
                   </div>
                   <p className="stat-value">R$ 7.300</p>
                 </div>
@@ -306,7 +306,7 @@ const HomePage = () => {
               </div>
               <h3 className="step-title">Fechar</h3>
               <p className="step-description">
-                Acompanhe a resposta e marque o orçamento como aprovado com um clique.
+                Acompanhe a resposta e marque o orçamento como aprovado.
               </p>
             </CardContent>
           </Card>
@@ -382,7 +382,7 @@ const HomePage = () => {
               <ul className="pricing-features">
                 <li><FiCheck className="feature-check" /> Orçamentos ilimitados</li>
                 <li><FiCheck className="feature-check" /> Orçamento com a sua marca</li>
-                <li><FiCheck className="feature-check" /> Painel com seus números</li>
+                <li><FiCheck className="feature-check" /> Painel com seus indicadores</li>
                 <li><FiCheck className="feature-check" /> Metas financeiras</li>
                 <li><FiCheck className="feature-check" /> Suporte rápido</li>
               </ul>
@@ -408,10 +408,10 @@ const HomePage = () => {
               <ul className="pricing-features">
                 <li><FiCheck className="feature-check" /> Orçamentos ilimitados</li>
                 <li><FiCheck className="feature-check" /> Orçamento com a sua marca</li>
-                <li><FiCheck className="feature-check" /> Painel com seus números</li>
+                <li><FiCheck className="feature-check" /> Painel com seus indicadores</li>
                 <li><FiCheck className="feature-check" /> Metas financeiras</li>
                 <li><FiCheck className="feature-check" /> Suporte rápido</li>
-                <li><FiCheck className="feature-check" /> Toda a equipe na mesma conta</li>
+                <li><FiCheck className="feature-check" /> Toda a equipe na mesma assinatura</li>
                 <li><FiCheck className="feature-check" /> Veja o desempenho de cada um</li>
                 <li><FiCheck className="feature-check" /> Gerencie sua equipe</li>
                 <li><FiCheck className="feature-check" /> Metas financeiras para a equipe</li>
@@ -442,13 +442,13 @@ const HomePage = () => {
             className="cta-btn-final"
             style={{ textDecoration: 'none' }}
           >
-            Começar agora
+            Começar grátis
             <FiArrowRight />
           </Link>
           <div className="cta-trust flex flex-col">
             <div className="trust-item">
               <FiCheck className="trust-icon" />
-              <span>Comece grátis</span>
+              <span>Teste grátis por 7 dias</span>
             </div>
             <div className="trust-item">
               <FiCheck className="trust-icon" />

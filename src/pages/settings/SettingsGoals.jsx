@@ -23,6 +23,7 @@ import { FiTarget, FiCalendar, FiSave, FiInfo, FiLock } from 'react-icons/fi'
 import { useSubscription } from '../../hooks/useSubscription'
 import { useAuth } from '../../hooks/useAuth'
 import { goalsService } from '../../services'
+import { maskBRL, parseBRL, initBRL } from '../../utils/mask'
 
 const MONTHS = [
     'Janeiro', 'Fevereiro', 'Março', 'Abril',
@@ -32,17 +33,14 @@ const MONTHS = [
 
 const CURRENT_YEAR = new Date().getFullYear()
 // Allow selecting current year and the two surrounding years
-const YEAR_OPTIONS = [CURRENT_YEAR - 1, CURRENT_YEAR, CURRENT_YEAR + 1]
-
-/** Parse a server value (string|number|null) to a plain integer string for inputs */
-const toInputStr = (v) => (v != null ? String(Math.round(Number(v))) : '0')
+const YEAR_OPTIONS = [ CURRENT_YEAR, CURRENT_YEAR + 1]
 
 /** Build 12-element monthly array from the custom targets (array) or fill with a default */
-const buildMonthlyArray = (customArr, defaultVal = '0') => {
+const buildMonthlyArray = (customArr, defaultVal = '') => {
     if (Array.isArray(customArr) && customArr.length === 12) {
-        return customArr.map((v) => toInputStr(v))
+        return customArr.map((v) => initBRL(v))
     }
-    return MONTHS.map(() => String(defaultVal))
+    return MONTHS.map(() => defaultVal)
 }
 
 const formatCurrency = (value) => {
@@ -62,11 +60,11 @@ const SettingsGoals = () => {
     const [isLoadingData, setIsLoadingData] = useState(true)
     const [isSaving, setIsSaving] = useState(false)
 
-    const [metaAnual, setMetaAnual] = useState('0')
-    const [metaMensalPadrao, setMetaMensalPadrao] = useState('0')
+    const [metaAnual, setMetaAnual] = useState('')
+    const [metaMensalPadrao, setMetaMensalPadrao] = useState('')
     const [usarPadrao, setUsarPadrao] = useState(true)           // true = NOT custom
     const [metasMensais, setMetasMensais] = useState(
-        MONTHS.map(() => '0')                                    // indexed array
+        MONTHS.map(() => '')                                     // indexed array
     )
 
     // ─── Load goals whenever year changes ───────────────────────────────────────
@@ -78,8 +76,8 @@ const SettingsGoals = () => {
                 const { data } = await goalsService.get(year)
                 if (cancelled) return
 
-                const defaultVal = toInputStr(data.monthly_target_default)
-                setMetaAnual(toInputStr(data.annual_target))
+                const defaultVal = initBRL(data.monthly_target_default)
+                setMetaAnual(initBRL(data.annual_target))
                 setMetaMensalPadrao(defaultVal)
                 setUsarPadrao(!data.is_monthly_custom)
                 setMetasMensais(
@@ -106,10 +104,10 @@ const SettingsGoals = () => {
 
     // ─── Handlers ────────────────────────────────────────────────────────────────
     const handleMetaMensalPadraoChange = (value) => {
-        const clean = value.replace(/\D/g, '')
-        setMetaMensalPadrao(clean)
+        const masked = maskBRL(value)
+        setMetaMensalPadrao(masked)
         if (usarPadrao) {
-            setMetasMensais(MONTHS.map(() => clean))
+            setMetasMensais(MONTHS.map(() => masked))
         }
     }
 
@@ -122,10 +120,10 @@ const SettingsGoals = () => {
     }
 
     const handleMetaMensalChange = (idx, value) => {
-        const clean = value.replace(/\D/g, '')
+        const masked = maskBRL(value)
         setMetasMensais((prev) => {
             const next = [...prev]
-            next[idx] = clean
+            next[idx] = masked
             return next
         })
     }
@@ -135,11 +133,11 @@ const SettingsGoals = () => {
         try {
             const payload = {
                 year,
-                annual_target: Number(metaAnual) || 0,
-                monthly_target_default: Number(metaMensalPadrao) || 0,
+                annual_target: parseBRL(metaAnual),
+                monthly_target_default: parseBRL(metaMensalPadrao),
                 is_monthly_custom: !usarPadrao,
                 ...((!usarPadrao) && {
-                    monthly_targets_custom: metasMensais.map((v) => Number(v) || 0),
+                    monthly_targets_custom: metasMensais.map((v) => parseBRL(v)),
                 }),
             }
 
@@ -216,7 +214,7 @@ const SettingsGoals = () => {
             <HStack justify="space-between" align="flex-start" mb={8} wrap="wrap" gap={4}>
                 <Box>
                     <Text fontSize="2xl" fontWeight="bold" color="gray.800">
-                        Metas Financeiras
+                        Metas financeiras
                     </Text>
                 </Box>
 
@@ -309,8 +307,9 @@ const SettingsGoals = () => {
                                         </Flex>
                                         <Input
                                             value={metaAnual}
-                                            onChange={(e) => setMetaAnual(e.target.value.replace(/\D/g, ''))}
-                                            placeholder="0"
+                                            onChange={(e) => setMetaAnual(maskBRL(e.target.value))}
+                                            placeholder="120.000,00"
+                                            inputMode="numeric"
                                             bg="white"
                                             roundedRight="xl"
                                             roundedLeft="none"
@@ -323,7 +322,7 @@ const SettingsGoals = () => {
                                         />
                                     </HStack>
                                     <Text fontSize="xs" color="gray.600" mt={2}>
-                                        Equivale a R$ {formatCurrency((parseFloat(metaAnual) / 12).toString())} por mês em média
+                                        Equivale a R$ {formatCurrency(String(parseBRL(metaAnual) / 12))} por mês em média
                                     </Text>
                                 </FormControl>
                             </Box>
@@ -356,7 +355,8 @@ const SettingsGoals = () => {
                                         <Input
                                             value={metaMensalPadrao}
                                             onChange={(e) => handleMetaMensalPadraoChange(e.target.value)}
-                                            placeholder="0"
+                                            placeholder="10.000,00"
+                                            inputMode="numeric"
                                             bg="white"
                                             roundedRight="xl"
                                             roundedLeft="none"
@@ -392,7 +392,7 @@ const SettingsGoals = () => {
                                 <Text fontSize="sm" color="gray.800">
                                     Todos os meses de {year} terão a meta de{' '}
                                     <Text as="span" fontWeight="semibold" color="green.600">
-                                        R$ {formatCurrency(metaMensalPadrao)}
+                                        R$ {formatCurrency(String(parseBRL(metaMensalPadrao)))}
                                     </Text>
                                 </Text>
                             </Flex>
@@ -417,7 +417,8 @@ const SettingsGoals = () => {
                                                 <Input
                                                     value={metasMensais[idx]}
                                                     onChange={(e) => handleMetaMensalChange(idx, e.target.value)}
-                                                    placeholder="0"
+                                                    placeholder="5.000,00"
+                                                    inputMode="numeric"
                                                     bg="white"
                                                     roundedRight="lg"
                                                     roundedLeft="none"

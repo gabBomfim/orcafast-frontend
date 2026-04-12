@@ -32,7 +32,7 @@ import {
 import {
     FiAward, FiCheck, FiZap, FiStar, FiLock, FiMessageCircle,
     FiCreditCard, FiTrendingUp, FiExternalLink, FiAlertCircle,
-    FiRefreshCw, FiTarget, FiArrowRight,
+    FiRefreshCw, FiTarget, FiArrowRight, FiFilter,
 } from 'react-icons/fi'
 import { useSubscription } from '../../hooks/useSubscription'
 import { useAuth } from '../../hooks/useAuth'
@@ -46,10 +46,11 @@ const FREE_TO_PRO_BENEFITS = [
 ]
 
 const PRO_TO_BUSINESS_BENEFITS = [
-    { icon: FiTrendingUp, text: 'Múltiplos usuários na mesma conta' },
-    { icon: FiStar, text: 'Relatórios avançados e exportação' },
-    { icon: FiLock, text: 'SLA de suporte empresarial' },
-    { icon: FiMessageCircle, text: 'Onboarding dedicado' },
+    { icon: FiTrendingUp, text: 'Traga sua equipe: todo mundo na mesma página.' },
+    { icon: FiStar, text: 'Relatórios prontos: veja onde seu faturamento está de verdade.' },
+    { icon: FiLock, text: 'Painel completo: controle total do que entra e sai.' },
+    { icon: FiFilter, text: 'Busca rápida: ache qualquer orçamento num piscar de olhos.' },
+    { icon: FiMessageCircle, text: 'Suporte VIP por WhatsApp (fale direto com a gente).' },
 ]
 
 // ─── Plan display config ──────────────────────────────────────────────────────
@@ -138,7 +139,7 @@ const ActiveSubscriptionCard = ({ subscription, onPortal, onCancel, onResume, is
         <Card bg="white" shadow="sm" rounded="2xl" border="1px" borderColor="gray.200">
             <CardBody p={6}>
                 <Text fontSize="sm" fontWeight="semibold" color="gray.800" mb={4}>
-                    Informações de Cobrança
+                    Informações de cobrança
                 </Text>
 
                 <VStack spacing={4} align="stretch">
@@ -195,7 +196,7 @@ const ActiveSubscriptionCard = ({ subscription, onPortal, onCancel, onResume, is
                         isLoading={isLoading === 'portal'}
                         onClick={onPortal}
                     >
-                        Gerenciar Cobrança
+                        Gerenciar cobrança
                     </Button>
 
                     {!onGracePeriod && (
@@ -537,9 +538,9 @@ const SettingsSubscription = () => {
                     <UpgradeCTA
                         benefits={PRO_TO_BUSINESS_BENEFITS}
                         title="Leve sua equipe ao próximo nível"
-                        subtitle="Faça upgrade para o plano Equipe e escale sua operação com múltiplos usuários"
+                        subtitle="Agora seu time tem a ferramenta certa pra fechar mais negócios."
                         price="97,90"
-                        buttonLabel="Fazer Upgrade para Equipe"
+                        buttonLabel="Fazer upgrade para Equipe"
                         isLoading={actionLoading === 'checkout-business'}
                         onCheckout={() => confirmUpgrade('business')}
                     />
@@ -578,11 +579,11 @@ const SettingsSubscription = () => {
                             Após isso, sua conta voltará para o plano gratuito.
                         </AlertDialogBody>
                         <AlertDialogFooter gap={2}>
+                            <Button colorScheme="red" variant="ghost" onClick={handleCancel} borderRadius="xl">
+                                Sim, cancelar
+                            </Button>
                             <Button ref={cancelRef} onClick={onCancelClose} borderRadius="xl">
                                 Manter assinatura
-                            </Button>
-                            <Button colorScheme="red" onClick={handleCancel} borderRadius="xl">
-                                Sim, cancelar
                             </Button>
                         </AlertDialogFooter>
                     </AlertDialogContent>
@@ -594,32 +595,32 @@ const SettingsSubscription = () => {
             <Modal isOpen={isUpgradeOpen} onClose={onUpgradeClose} isCentered motionPreset="slideInBottom">
                 <ModalOverlay bg="blackAlpha.500" backdropFilter="blur(4px)" />
                 <ModalContent borderRadius="2xl" shadow="xl">
-                    <ModalHeader pb={0}>Confirmar Upgrade</ModalHeader>
+                    <ModalHeader pb={0}>Upgrade para o plano Equipe</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody pt={4}>
                         <VStack spacing={4} align="stretch" color="gray.600" fontSize="sm">
                             <Text>
-                                Você está prestes a fazer upgrade para o plano{' '}
+                                Boa! Você está subindo para o plano{' '}
                                 <Text as="strong" color="green.600">
                                     {pendingUpgradePlan === 'business' ? 'Equipe' : 'Autônomo'}
                                 </Text>.
                             </Text>
                             {isPaidPlan && (
                                 <Text>
-                                    Como você já possui um plano ativo, a <b>diferença será cobrada proporcionalmente </b>
-                                    no cartão cadastrado (prorated).
+                                    Como você já tem um plano ativo, a gente só vai cobrar a <b>diferença do valor </b>
+                                    no seu cartão. Tudo certo?
                                 </Text>
                             )}
                         </VStack>
                     </ModalBody>
                     <ModalFooter bg="gray.50" borderBottomRadius="2xl" mt={6}>
-                        <Button variant="ghost" onClick={onUpgradeClose} mr={3}>Cancelar</Button>
+                        <Button variant="ghost" onClick={onUpgradeClose} mr={3}>Agora não.</Button>
                         <Button
                             colorScheme="green"
                             onClick={() => handleCheckout()}
                             isLoading={actionLoading === `checkout-${pendingUpgradePlan}`}
                         >
-                            Confirmar Assinatura
+                            Sim, bora!
                         </Button>
                     </ModalFooter>
                 </ModalContent>
