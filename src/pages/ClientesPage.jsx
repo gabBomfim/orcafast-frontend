@@ -265,7 +265,7 @@ const ClientesPage = () => {
         <Grid
           templateColumns={{
               base: 'repeat(2, 1fr)',
-              md: 'repeat(5, 1fr)'
+              md: 'repeat(4, 1fr)'
           }}
           gap={4}
         >
@@ -285,7 +285,7 @@ const ClientesPage = () => {
 
           <StatsCard
             title="Total orçado"
-            value={`R$ ${totalProposalValue.toLocaleString('pt-BR')}`}
+            value={`R$ ${totalProposalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
             icon={FiZap}
             colorScheme="primary"
             valueFontSize={{ base: 'lg', md: '2xl' }}
@@ -293,7 +293,7 @@ const ClientesPage = () => {
 
           <StatsCard
             title="Média por serviço"
-            value={`R$ ${averageTicket.toLocaleString('pt-BR')}`}
+            value={`R$ ${averageTicket.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
             icon={FiActivity}
             colorScheme="primary"
             valueFontSize={{ base: 'lg', md: '2xl' }}

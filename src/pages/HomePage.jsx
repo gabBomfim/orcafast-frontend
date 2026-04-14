@@ -247,7 +247,7 @@ const HomePage = () => {
       <section id="como-funciona" className="how-section">
         <div className="section-header">
           <span className="section-category">Como funciona</span>
-          <h2 className="section-title">Processo simples em 3 etapas para fechar mais negócios.</h2>
+          <h2 className="section-title">Processo simples em poucas etapas para fechar mais negócios.</h2>
         </div>
 
         <div className="steps-container">
