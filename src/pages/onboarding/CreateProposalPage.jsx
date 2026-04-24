@@ -147,10 +147,10 @@ const CreateProposalPage = () => {
     const next = {}
     if (!title.trim()) next.title = formMessages.required.title
     if (!validUntil.trim()) next.validUntil = formMessages.required.validUntil
-    const firstItem = items[0]
-    if (!firstItem?.desc?.trim()) next.itemDesc = formMessages.required.generic
-    const itemVal = parseBRL(firstItem?.value || '')
-    if (itemVal <= 0) next.itemValue = formMessages.value.zero
+    items.forEach((item) => {
+      if (!item.desc.trim()) next[`itemDesc_${item.id}`] = formMessages.required.generic
+      if (parseBRL(item.value) <= 0) next[`itemValue_${item.id}`] = formMessages.value.zero
+    })
     setErrors(next)
     return Object.keys(next).length === 0
   }
@@ -297,21 +297,18 @@ const CreateProposalPage = () => {
                         value={item.desc}
                         onChange={(e) => {
                           handleItemChange(item.id, 'desc', e.target.value)
-                          if (errors.itemDesc) setErrors(prev => ({ ...prev, itemDesc: '' }))
+                          if (errors[`itemDesc_${item.id}`]) setErrors(prev => { const n = { ...prev }; delete n[`itemDesc_${item.id}`]; return n })
                         }}
                         placeholder="Ex: Mão de obra"
                         h={10}
                         px={3}
                         borderRadius="lg"
-                        isInvalid={!!errors.itemDesc && item.id === items[0]?.id}
+                        isInvalid={!!errors[`itemDesc_${item.id}`]}
                       />
-                      {errors.itemDesc && item.id === items[0]?.id && (
-                        <>
-                          <Box h={2} alignSelf="start" >
-                            <FieldError message={errors.itemDesc} />
-                          </Box>
-                        </>
-
+                      {errors[`itemDesc_${item.id}`] && (
+                        <Box alignSelf="start">
+                          <FieldError message={errors[`itemDesc_${item.id}`]} />
+                        </Box>
                       )}
                       <Flex align="center" gap={3} w="full">
                         <Box flex={1}>
@@ -337,17 +334,17 @@ const CreateProposalPage = () => {
                             inputMode="numeric"
                             placeholder="0,00"
                             value={item.value}
-                            onChange={(e) => {
-                              handleItemChange(item.id, 'value', maskBRL(e.target.value))
-                              if (errors.itemValue && item.id === items[0]?.id) setErrors(prev => ({ ...prev, itemValue: '' }))
-                            }}
                             h={10}
                             px={3}
                             borderRadius="lg"
-                            isInvalid={!!errors.itemValue && item.id === items[0]?.id}
+                            isInvalid={!!errors[`itemValue_${item.id}`]}
+                            onChange={(e) => {
+                              handleItemChange(item.id, 'value', maskBRL(e.target.value))
+                              if (errors[`itemValue_${item.id}`]) setErrors(prev => { const n = { ...prev }; delete n[`itemValue_${item.id}`]; return n })
+                            }}
                           />
-                          {errors.itemValue && item.id === items[0]?.id && (
-                            <FieldError message={errors.itemValue} />
+                          {errors[`itemValue_${item.id}`] && (
+                            <FieldError message={errors[`itemValue_${item.id}`]} />
                           )}
                         </Box>
                         <IconButton

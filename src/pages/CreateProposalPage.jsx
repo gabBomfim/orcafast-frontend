@@ -210,10 +210,10 @@ const CreateProposalPage = () => {
     if (!formData.clientId) next.clientId = formMessages.required.client
     if (!formData.title.trim()) next.title = formMessages.required.title
     if (!formData.validUntil) next.validUntil = formMessages.required.validUntil
-    const firstItem = items[0]
-    if (!firstItem?.desc?.trim()) next.itemDesc = formMessages.required.generic
-    const itemVal = parseBRL(firstItem?.value || '')
-    if (itemVal <= 0) next.itemValue = formMessages.value.zero
+    items.forEach((item) => {
+      if (!item.desc.trim()) next[`itemDesc_${item.id}`] = formMessages.required.generic
+      if (parseBRL(item.value) <= 0) next[`itemValue_${item.id}`] = formMessages.value.zero
+    })
     setErrors(next)
     return Object.keys(next).length === 0
   }
@@ -513,15 +513,15 @@ const CreateProposalPage = () => {
                               h={10}
                               px={3}
                               borderRadius="lg"
-                              isInvalid={!!errors.itemDesc && item.id === items[0]?.id}
+                              isInvalid={!!errors[`itemDesc_${item.id}`]}
                               onChange={(e) => {
                                 handleItemChange(item.id, 'desc', e.target.value)
-                                if (errors.itemDesc) setErrors(prev => ({ ...prev, itemDesc: '' }))
+                                if (errors[`itemDesc_${item.id}`]) setErrors(prev => { const n = { ...prev }; delete n[`itemDesc_${item.id}`]; return n })
                               }}
                             />
-                            {errors.itemDesc && item.id === items[0]?.id && (
+                            {errors[`itemDesc_${item.id}`] && (
                               <Box alignSelf="start">
-                                <FieldError message={errors.itemDesc} />
+                                <FieldError message={errors[`itemDesc_${item.id}`]} />
                               </Box>
                             )}
 
@@ -551,14 +551,14 @@ const CreateProposalPage = () => {
                                   h={10}
                                   px={3}
                                   borderRadius="lg"
-                                  isInvalid={!!errors.itemValue && item.id === items[0]?.id}
+                                  isInvalid={!!errors[`itemValue_${item.id}`]}
                                   onChange={(e) => {
                                     handleItemChange(item.id, 'value', maskBRL(e.target.value))
-                                    if (errors.itemValue && item.id === items[0]?.id) setErrors(prev => ({ ...prev, itemValue: '' }))
+                                    if (errors[`itemValue_${item.id}`]) setErrors(prev => { const n = { ...prev }; delete n[`itemValue_${item.id}`]; return n })
                                   }}
                                 />
-                                {errors.itemValue && item.id === items[0]?.id && (
-                                  <FieldError message={errors.itemValue} />
+                                {errors[`itemValue_${item.id}`] && (
+                                  <FieldError message={errors[`itemValue_${item.id}`]} />
                                 )}
                               </Box>
 
