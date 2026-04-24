@@ -37,4 +37,9 @@ export const subscriptionService = {
     portal() {
         return api.post('subscription/portal')
     },
+
+    /** GET /subscription/team-info — { team_member_count, members, suggested_plan } */
+    teamInfo() {
+        return api.get('subscription/team-info')
+    },
 }

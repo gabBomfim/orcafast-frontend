@@ -84,11 +84,17 @@ const InviteAcceptPage = () => {
     try {
       setIsSubmitting(true)
       const res = await invitationService.accept(token, formData)
-      
+
       // Automatic Login
       if (res.access_token) {
         storage.setToken(res.access_token)
-        storage.setUser(res.user)
+
+        // Email já foi validado ao aceitar o convite, então marca como verificado
+        const userData = res.user
+        if (!userData.email_verified_at) {
+          userData.email_verified_at = new Date().toISOString()
+        }
+        storage.setUser(userData)
       }
 
       toast({

@@ -32,7 +32,7 @@ import {
 import {
     FiAward, FiCheck, FiZap, FiStar, FiLock, FiMessageCircle,
     FiCreditCard, FiTrendingUp, FiExternalLink, FiAlertCircle,
-    FiRefreshCw, FiTarget, FiArrowRight, FiFilter,
+    FiRefreshCw, FiTarget, FiArrowRight, FiFilter, FiUsers,
 } from 'react-icons/fi'
 import { useSubscription } from '../../hooks/useSubscription'
 import { useAuth } from '../../hooks/useAuth'
@@ -51,6 +51,41 @@ const PRO_TO_BUSINESS_BENEFITS = [
     { icon: FiLock, text: 'Painel completo: controle total do que entra e sai.' },
     { icon: FiFilter, text: 'Busca rápida: ache qualquer orçamento num piscar de olhos.' },
     { icon: FiMessageCircle, text: 'Suporte VIP por WhatsApp (fale direto com a gente).' },
+]
+
+const PLANS = [
+    {
+        slug: 'pro',
+        badge: 'AUTÔNOMO',
+        price: 'R$ 49,90',
+        period: '/mês',
+        features: [
+            'Orçamentos ilimitados',
+            'Orçamento com a sua marca',
+            'Saiba quando o cliente abriu seu orçamento',
+            'Painel com seus indicadores',
+            'Metas financeiras',
+            'Suporte rápido',
+        ],
+    },
+    {
+        slug: 'business',
+        badge: 'EQUIPE',
+        price: 'R$ 97,90',
+        period: '/mês',
+        features: [
+            'Orçamentos ilimitados',
+            'Orçamento com a sua marca',
+            'Saiba quando o cliente abriu seu orçamento',
+            'Painel com seus indicadores',
+            'Metas financeiras',
+            'Suporte rápido',
+            'Toda a equipe na mesma assinatura',
+            'Veja o desempenho de cada um',
+            'Gerencie sua equipe',
+            'Metas financeiras para a equipe',
+        ],
+    },
 ]
 
 // ─── Plan display config ──────────────────────────────────────────────────────
@@ -236,6 +271,7 @@ const SettingsSubscription = () => {
     const [isLoadingStatus, setIsLoadingStatus] = useState(true)
     const [actionLoading, setActionLoading] = useState(null)
     const [searchParams, setSearchParams] = useSearchParams()
+    const [teamInfo, setTeamInfo] = useState(null)
 
     // Upgrade confirmation modal (for direct swaps)
     const { isOpen: isUpgradeOpen, onOpen: onUpgradeOpen, onClose: onUpgradeClose } = useDisclosure()
@@ -283,6 +319,20 @@ const SettingsSubscription = () => {
 
     useEffect(() => { loadStatus() }, [loadStatus])
 
+    // ── Reset loading state when restored from bfcache (browser back after Stripe redirect) ──
+    useEffect(() => {
+        const handlePageShow = (e) => { if (e.persisted) setActionLoading(null) }
+        window.addEventListener('pageshow', handlePageShow)
+        return () => window.removeEventListener('pageshow', handlePageShow)
+    }, [])
+
+    // ── Fetch team info for trial plan comparison ──────────────────────────────
+    useEffect(() => {
+        subscriptionService.teamInfo()
+            .then(({ data }) => setTeamInfo(data))
+            .catch(() => setTeamInfo({ team_member_count: 0, members: [], suggested_plan: 'pro' }))
+    }, [])
+
     // ── Handle Stripe Redirects ──────────────────────────────────────────────────
     useEffect(() => {
         const success = searchParams.get('success')
@@ -305,15 +355,8 @@ const SettingsSubscription = () => {
 
     // ── Checkout / Upgrade ───────────────────────────────────────────────────────
 
-    // 1. User clicks upgrade button -> open confirmation modal first
-    const confirmUpgrade = (plan) => {
-        setPendingUpgradePlan(plan)
-        onUpgradeOpen()
-    }
-
-    // 2. User confirms upgrade -> call API (or direct call for Free -> Paid)
-    const handleCheckout = async (directPlan = null) => {
-        const plan = directPlan || pendingUpgradePlan
+    // Direct checkout without validation (used after confirmation modal)
+    const doCheckout = async (plan) => {
         if (!plan) return
 
         setActionLoading(`checkout-${plan}`)
@@ -343,6 +386,26 @@ const SettingsSubscription = () => {
             })
             setActionLoading(null)
         }
+    }
+
+    // 1. User clicks checkout button -> open confirmation modal if needed (only if already paid)
+    const handleCheckout = async (plan) => {
+        if (!plan) return
+
+        // On trial: user has FULL access to all features, no restrictions. Direct checkout.
+        if (onTrial) {
+            await doCheckout(plan)
+            return
+        }
+
+        // Already subscribed/paid: warn about downgrade if selecting pro with team members
+        if (plan === 'pro' && (teamInfo?.team_member_count ?? 0) > 0) {
+            setPendingUpgradePlan(plan)
+            onUpgradeOpen()
+            return
+        }
+
+        await doCheckout(plan)
     }
 
     // ── Portal ───────────────────────────────────────────────────────────────────
@@ -471,51 +534,220 @@ const SettingsSubscription = () => {
                 </Box>
             )}
 
-            {/* Current Plan Card (showing even if unsubscribed since they technically have the plan mapped to them) */}
-            <Card bg="white" shadow="sm" rounded="2xl" border="1px" borderColor="gray.200" mb={4}>
-                <CardBody p={6}>
-                    <HStack spacing={4}>
-                        <Flex
-                            w="56px" h="56px" rounded="2xl"
-                            bg={display.iconBg}
-                            align="center" justify="center" flexShrink={0}
-                        >
-                            <Icon as={FiAward} boxSize={7} color={display.iconColor} />
-                        </Flex>
-                        <Box flex={1}>
-                            <HStack spacing={2} mb={1}>
-                                <Text fontSize="xs" fontWeight="semibold" color="gray.500" textTransform="uppercase" letterSpacing="wide">
-                                    Plano Atual
-                                </Text>
-                                <Badge
-                                    bg={display.badgeBg}
-                                    color={display.badgeColor}
-                                    px={2} py={0.5}
-                                    rounded="full"
-                                    fontSize="xs"
-                                    fontWeight="semibold"
-                                >
-                                    {display.label}
-                                </Badge>
-                                {!isActiveSubscription && (
-                                    <Badge colorScheme="red" variant="subtle" px={2} py={0.5} rounded="full" fontSize="xs">
-                                        Inativo
+            {/* Current Plan Card (hide when on trial, show plan comparison instead) */}
+            {!onTrial && (
+                <Card bg="white" shadow="sm" rounded="2xl" border="1px" borderColor="gray.200" mb={4}>
+                    <CardBody p={6}>
+                        <HStack spacing={4}>
+                            <Flex
+                                w="56px" h="56px" rounded="2xl"
+                                bg={display.iconBg}
+                                align="center" justify="center" flexShrink={0}
+                            >
+                                <Icon as={FiAward} boxSize={7} color={display.iconColor} />
+                            </Flex>
+                            <Box flex={1}>
+                                <HStack spacing={2} mb={1}>
+                                    <Text fontSize="xs" fontWeight="semibold" color="gray.500" textTransform="uppercase" letterSpacing="wide">
+                                        Plano Atual
+                                    </Text>
+                                    <Badge
+                                        bg={display.badgeBg}
+                                        color={display.badgeColor}
+                                        px={2} py={0.5}
+                                        rounded="full"
+                                        fontSize="xs"
+                                        fontWeight="semibold"
+                                    >
+                                        {display.label}
                                     </Badge>
-                                )}
-                            </HStack>
-                            <Text fontSize="lg" fontWeight="semibold" color="gray.800">
-                                Você está no plano {planName}
-                            </Text>
-                        </Box>
-                    </HStack>
-                </CardBody>
-            </Card>
+                                    {!isActiveSubscription && (
+                                        <Badge colorScheme="red" variant="subtle" px={2} py={0.5} rounded="full" fontSize="xs">
+                                            Inativo
+                                        </Badge>
+                                    )}
+                                </HStack>
+                                <Text fontSize="lg" fontWeight="semibold" color="gray.800">
+                                    Você está no plano {planName}
+                                </Text>
+                            </Box>
+                        </HStack>
+                    </CardBody>
+                </Card>
+            )}
 
             {/* Loading */}
             {isLoadingStatus && (
                 <Center py={8}>
                     <Spinner size="md" color="emerald.500" thickness="2px" />
                 </Center>
+            )}
+
+            {/* Trial: Show Plan Comparison */}
+            {!isLoadingStatus && onTrial && (
+                <Box mt={8}>
+                    <VStack spacing={6} align="stretch">
+                        {/* Header */}
+                        <Box>
+                            <Text fontSize="lg" fontWeight="semibold" color="gray.800" mb={2}>
+                                Escolha seu plano
+                            </Text>
+                            <Text fontSize="sm" color="gray.600">
+                                Seu teste gratuito termina em <strong>{new Date(trialEndsAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}</strong>. Escolha um plano para continuar com acesso completo.
+                            </Text>
+                        </Box>
+
+                        {/* Team nudge - if has members */}
+                        {(teamInfo?.team_member_count ?? 0) > 0 && (
+                            <Box
+                                bg="emerald.50"
+                                border="1px"
+                                borderColor="emerald.200"
+                                borderRadius="xl"
+                                p={4}
+                            >
+                                <Flex align="flex-start" gap={3}>
+                                    <Icon as={FiUsers} color="emerald.600" mt={0.5} flexShrink={0} />
+                                    <Box>
+                                        <Text fontSize="sm" fontWeight="semibold" color="emerald.800">
+                                            Vimos que você já tem equipe!
+                                        </Text>
+                                        <Text fontSize="sm" color="emerald.700" mt={0.5}>
+                                            O plano Equipe é o ideal para você não perder o ritmo.
+                                        </Text>
+                                    </Box>
+                                </Flex>
+                            </Box>
+                        )}
+
+                        {/* Plan comparison cards - following home.css pattern */}
+                        <Flex
+                            direction={{ base: 'column', md: 'row' }}
+                            gap={8}
+                            align="stretch"
+                            justify="center"
+                        >
+                            {PLANS.map((plan) => {
+                                const isSuggested = (teamInfo?.team_member_count ?? 0) > 0 && plan.slug === 'business'
+                                const isLoading = actionLoading === `checkout-${plan.slug}`
+                                const isPrimaryBtn = isSuggested
+
+                                return (
+                                    <Box
+                                        key={plan.slug}
+                                        flex={1}
+                                        maxW="400px"
+                                        bg="white"
+                                        border="1px solid"
+                                        borderColor={isSuggested ? 'emerald.500' : 'gray.200'}
+                                        borderRadius="1rem"
+                                        p={8}
+                                        position="relative"
+                                        transition="all 0.3s"
+                                        boxShadow={isSuggested ? '0 20px 25px -5px rgba(0, 0, 0, 0.1)' : '0 1px 3px rgba(0, 0, 0, 0.1)'}
+                                        transform={isSuggested ? 'scale(1.05)' : 'scale(1)'}
+                                        _hover={{
+                                            borderColor: isSuggested ? 'emerald.500' : 'rgba(0, 217, 126, 0.3)',
+                                        }}
+                                    >
+                                        {isSuggested && (
+                                            <Badge
+                                                position="absolute"
+                                                top="-12px"
+                                                left="50%"
+                                                transform="translateX(-50%)"
+                                                bg="emerald.500"
+                                                color="white"
+                                                fontSize="0.75rem"
+                                                px={3}
+                                                py={1}
+                                                borderRadius="full"
+                                                fontWeight="600"
+                                                letterSpacing="0.05em"
+                                            >
+                                                RECOMENDADO PRO SEU NEGÓCIO
+                                            </Badge>
+                                        )}
+
+                                        <VStack align="stretch" spacing={6} h="full">
+                                            {/* Plan name and price */}
+                                            <Box>
+                                                <Text fontSize="1.25rem" fontWeight="600" color="gray.900" mb={2}>
+                                                    {plan.badge}
+                                                </Text>
+                                                <Box mb={6}>
+                                                    <HStack align="baseline" spacing={1}>
+                                                        <Text fontSize="1.5rem" color="gray.900" fontWeight="700">
+                                                            R$
+                                                        </Text>
+                                                        <Text fontSize="2.5rem" color="gray.900" fontWeight="700">
+                                                            {plan.price.replace('R$ ', '').replace('/mês', '')}
+                                                        </Text>
+                                                    </HStack>
+                                                    <Text fontSize="1rem" color="gray.600">/mês</Text>
+                                                </Box>
+                                            </Box>
+
+                                            {/* Features */}
+                                            <Box flex={1}>
+                                                <Box as="ul" listStyleType="none" p={0} m={0} spacing={3}>
+                                                    {plan.features.map((feat) => (
+                                                        <Flex key={feat} align="flex-start" gap={3} mb={3}>
+                                                            <Flex
+                                                                w={5} h={5}
+                                                                minW={5}
+                                                                bg="rgba(0, 217, 126, 0.1)"
+                                                                borderRadius="9999px"
+                                                                align="center"
+                                                                justify="center"
+                                                                mt={0.5}
+                                                            >
+                                                                <Icon as={FiCheck} color="emerald.500" boxSize={3} />
+                                                            </Flex>
+                                                            <Text fontSize="0.875rem" color="gray.700">
+                                                                {feat}
+                                                            </Text>
+                                                        </Flex>
+                                                    ))}
+                                                </Box>
+                                            </Box>
+
+                                            {/* Button - following landing.css .pricing-btn and .pricing-btn-primary */}
+                                            <Button
+                                                w="full"
+                                                py={3}
+                                                px={6}
+                                                borderRadius="0.5rem"
+                                                fontWeight="600"
+                                                fontSize="0.875rem"
+                                                cursor="pointer"
+                                                transition="all 0.2s ease"
+                                                bg="emerald.500"
+                                                color="white"
+                                                border="none"
+                                                isLoading={isLoading}
+                                                loadingText="Redirecionando..."
+                                                isDisabled={actionLoading !== null && !isLoading}
+                                                onClick={() => handleCheckout(plan.slug)}
+                                                _hover={{
+                                                    bg: 'emerald.600',
+                                                    transform: 'translateY(-2px)',
+                                                    boxShadow: '0 4px 12px rgba(0, 217, 126, 0.3)',
+                                                }}
+                                            >
+                                                {plan.slug === 'pro' ? 'Assinar Autônomo' : 'Assinar plano Equipe'}
+                                            </Button>
+                                        </VStack>
+                                    </Box>
+                                )
+                            })}
+                        </Flex>
+
+                        <Text fontSize="xs" color="gray.500" textAlign="center">
+                            Pagamento seguro via Stripe • Cancele quando quiser
+                        </Text>
+                    </VStack>
+                </Box>
             )}
 
             {/* Unsubscribed user -> Needs to subscribe to PRO to start Trial */}
@@ -533,7 +765,7 @@ const SettingsSubscription = () => {
             )}
 
             {/* Pro IS Subscribed → Can upgrade to Business */}
-            {!isLoadingStatus && isPro && isActiveSubscription && (
+            {!isLoadingStatus && isPro && isActiveSubscription && !onTrial && (
                 <>
                     <UpgradeCTA
                         benefits={PRO_TO_BUSINESS_BENEFITS}
@@ -542,7 +774,7 @@ const SettingsSubscription = () => {
                         price="97,90"
                         buttonLabel="Fazer upgrade para Equipe"
                         isLoading={actionLoading === 'checkout-business'}
-                        onCheckout={() => confirmUpgrade('business')}
+                        onCheckout={() => handleCheckout('business')}
                     />
                     <Box mt={4}>
                         <ActiveSubscriptionCard
@@ -576,7 +808,7 @@ const SettingsSubscription = () => {
                         </AlertDialogHeader>
                         <AlertDialogBody>
                             Seu acesso a todos os recursos pagos continuará até o final do período já cobrado.
-                            Após isso, sua conta voltará para o plano gratuito.
+                            Após isso, você perderá o acesso.
                         </AlertDialogBody>
                         <AlertDialogFooter gap={2}>
                             <Button colorScheme="red" variant="ghost" onClick={handleCancel} borderRadius="xl">
@@ -591,37 +823,68 @@ const SettingsSubscription = () => {
             </AlertDialog>
 
 
-            {/* Upgrade confirmation modal */}
+            {/* Upgrade/Downgrade confirmation modal */}
             <Modal isOpen={isUpgradeOpen} onClose={onUpgradeClose} isCentered motionPreset="slideInBottom">
                 <ModalOverlay bg="blackAlpha.500" backdropFilter="blur(4px)" />
                 <ModalContent borderRadius="2xl" shadow="xl">
-                    <ModalHeader pb={0}>Upgrade para o plano Equipe</ModalHeader>
+                    <ModalHeader pb={0}>
+                        {pendingUpgradePlan === 'pro' && (teamInfo?.team_member_count ?? 0) > 0
+                            ? 'Atenção antes de continuar'
+                            : `Upgrade para o plano ${pendingUpgradePlan === 'business' ? 'Equipe' : 'Autônomo'}`}
+                    </ModalHeader>
                     <ModalCloseButton />
                     <ModalBody pt={4}>
                         <VStack spacing={4} align="stretch" color="gray.600" fontSize="sm">
-                            <Text>
-                                Boa! Você está subindo para o plano{' '}
-                                <Text as="strong" color="green.600">
-                                    {pendingUpgradePlan === 'business' ? 'Equipe' : 'Autônomo'}
-                                </Text>.
-                            </Text>
-                            {isPaidPlan && (
+                            {pendingUpgradePlan === 'pro' && (teamInfo?.team_member_count ?? 0) > 0 ? (
                                 <Text>
-                                    Como você já tem um plano ativo, a gente só vai cobrar a <b>diferença do valor </b>
-                                    no seu cartão. Tudo certo?
+                                    Ao escolher o plano Autônomo,{' '}
+                                    <Text as="span" fontWeight="semibold">
+                                        seus {teamInfo.team_member_count} membro{teamInfo.team_member_count > 1 ? 's' : ''} de equipe perderão o acesso imediatamente.
+                                    </Text>
+                                    {' '}Você voltará a gerenciar tudo sozinho. Tem certeza?
                                 </Text>
+                            ) : (
+                                <>
+                                    <Text>
+                                        Boa! Você está subindo para o plano{' '}
+                                        <Text as="strong" color="green.600">
+                                            {pendingUpgradePlan === 'business' ? 'Equipe' : 'Autônomo'}
+                                        </Text>.
+                                    </Text>
+                                    {isPaidPlan && (
+                                        <Text>
+                                            Como você já tem um plano ativo, a gente só vai cobrar a <b>diferença do valor </b>
+                                            no seu cartão. Tudo certo?
+                                        </Text>
+                                    )}
+                                </>
                             )}
                         </VStack>
                     </ModalBody>
                     <ModalFooter bg="gray.50" borderBottomRadius="2xl" mt={6}>
-                        <Button variant="ghost" onClick={onUpgradeClose} mr={3}>Agora não.</Button>
-                        <Button
-                            colorScheme="green"
-                            onClick={() => handleCheckout()}
-                            isLoading={actionLoading === `checkout-${pendingUpgradePlan}`}
-                        >
-                            Sim, bora!
-                        </Button>
+                        {pendingUpgradePlan === 'pro' && (teamInfo?.team_member_count ?? 0) > 0 ? (
+                            <>
+                                <Button variant="outline" onClick={onUpgradeClose} mr={3}>Manter Equipe</Button>
+                                <Button
+                                    colorScheme="orange"
+                                    onClick={() => { onUpgradeClose(); doCheckout(pendingUpgradePlan); }}
+                                    isLoading={actionLoading === `checkout-${pendingUpgradePlan}`}
+                                >
+                                    Confirmar Autônomo
+                                </Button>
+                            </>
+                        ) : (
+                            <>
+                                <Button variant="ghost" onClick={onUpgradeClose} mr={3}>Agora não.</Button>
+                                <Button
+                                    colorScheme="green"
+                                    onClick={() => doCheckout(pendingUpgradePlan)}
+                                    isLoading={actionLoading === `checkout-${pendingUpgradePlan}`}
+                                >
+                                    Sim, bora!
+                                </Button>
+                            </>
+                        )}
                     </ModalFooter>
                 </ModalContent>
             </Modal>

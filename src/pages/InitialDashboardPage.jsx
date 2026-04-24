@@ -26,13 +26,14 @@ import {
   FiArrowRight,
   FiZap,
 } from 'react-icons/fi'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import ActionCard from '../components/ui/ActionCard'
 import StatusBadge from '../components/ui/StatusBadge'
 import { storage } from '../utils/storage'
 
 const InitialDashboardPage = () => {
+  const navigate = useNavigate()
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
 
@@ -46,8 +47,15 @@ const InitialDashboardPage = () => {
   useEffect(() => {
     const userData = storage.getUser()
     setUser(userData)
+
+    // Se não tem dados de onboarding, redireciona para dashboard normal
+    if (!userData?.clients || userData.clients.length === 0) {
+      navigate('/dashboard', { replace: true })
+      return
+    }
+
     setLoading(false)
-  }, [])
+  }, [navigate])
 
   if (loading || !user) {
     return (

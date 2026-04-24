@@ -114,7 +114,7 @@ const PropostasPage = () => {
   const { getCurrentUser } = useAuth()
   const user = getCurrentUser()
   const isAdmin = user?.role === 3 || user?.role === 1
-  const { isBusiness } = useSubscription()
+  const { isBusiness, onTrial } = useSubscription()
   const [teamMembers, setTeamMembers] = useState([])
   const [selectedUserIds, setSelectedUserIds] = useState([])
 
@@ -240,7 +240,7 @@ const PropostasPage = () => {
   
   // Fetch team members if admin AND business
   useEffect(() => {
-    if (isAdmin && isBusiness) {
+    if (isAdmin && (isBusiness || onTrial)) {
       teamUserService.list().then(response => {
         const membersList = response.data || []
         setTeamMembers(membersList.map(m => ({

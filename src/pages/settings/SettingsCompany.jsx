@@ -135,8 +135,8 @@ const SettingsCompany = () => {
         if (docDigits && !validateDocument(formData.document)) {
             setDocumentError(
                 docDigits.length === 11
-                    ? 'Esse CPF não tá batendo. Confere os números.'
-                    : 'Esse CNPJ não tá batendo. Confere os números.'
+                    ? 'Esse CPF não tá batendo. Confira os números.'
+                    : 'Esse CNPJ não tá batendo. Confira os números.'
             )
             return
         }

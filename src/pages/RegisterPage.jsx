@@ -22,7 +22,7 @@ import OrcafastLogo from '../components/ui/OrcafastLogo'
 import { FaApple } from 'react-icons/fa'
 import { useState } from 'react'
 import { useLocation, Link as RouterLink, useNavigate } from 'react-router-dom'
-import { authService, subscriptionService, onboardingService } from '../services'
+import { authService, onboardingService } from '../services'
 import { storage } from '../utils/storage'
 import { maskDocument, validateDocument } from '../utils/mask'
 import { formMessages } from '../utils/formMessages'
@@ -129,31 +129,11 @@ const RegisterPage = () => {
         }
       }
 
-      try {
-        const successUrl = targetProposalId 
-          ? `${window.location.origin}/dashboard/orcamentos/${targetProposalId}/enviar`
-          : `${window.location.origin}/dashboard`
-        
-        sessionStorage.setItem('show_welcome', selectedPlan)
-
-        const { data: checkoutData } = await subscriptionService.checkout(selectedPlan, successUrl)
-
-        if (checkoutData?.checkout_url) {
-          window.location.href = checkoutData.checkout_url
-          return
-        }
-      } catch (err) {
-        console.error('Erro ao iniciar checkout:', err)
-        toast({
-          title: 'Aviso',
-          description: 'Não foi possível iniciar o teste grátis automaticamente. Você será redirecionado.',
-          status: 'warning',
-          duration: 4000,
-          isClosable: true,
-        })
+      if (targetProposalId) {
+        navigate(`/dashboard/orcamentos/${targetProposalId}/enviar`)
+      } else {
+        navigate('/initial-dashboard')
       }
-
-      navigate('/dashboard')
     } catch (error) {
       const message = error.response?.data?.message || 'Erro ao criar conta'
       toast({

@@ -1,6 +1,6 @@
 import { Navigate, Outlet, useLocation, useSearchParams } from 'react-router-dom'
 import { storage } from '../../utils/storage'
-import { Box, Button, Icon, Text } from '@chakra-ui/react'
+import { Box, Button, Icon } from '@chakra-ui/react'
 import { Link } from 'react-router-dom'
 import { useNavigate } from 'react-router-dom'
 import { FiPlus } from 'react-icons/fi'
@@ -12,13 +12,15 @@ import { useToast, Spinner, Center, useDisclosure } from '@chakra-ui/react'
 import { subscriptionService } from '../../services'
 import { useState, useEffect } from 'react'
 import WelcomePlanModal from '../ui/WelcomePlanModal'
+import PaywallModal from '../ui/PaywallModal'
+import EmailVerificationModal from '../ui/EmailVerificationModal'
 import { useIdleTimeout } from '../../hooks/useIdleTimeout'
 
 const ProtectedRoute = () => {
   const token = storage.getToken()
   const location = useLocation()
   const { isCollapsed } = useSidebar()
-  const { canCreateProposal, subscribed, onTrial } = useSubscription()
+  const { canCreateProposal, hasActiveAccess } = useSubscription()
   const navigate = useNavigate()
   const toast = useToast()
 
@@ -28,12 +30,17 @@ const ProtectedRoute = () => {
   const { isOpen: isWelcomeOpen, onOpen: onWelcomeOpen, onClose: onWelcomeClose } = useDisclosure()
   const [welcomePlanSlug, setWelcomePlanSlug] = useState('pro')
 
-  // Inicia o monitoramento de inatividade (Idle Timeout - 30 min)
+  const [emailVerified, setEmailVerified] = useState(() => {
+    const user = storage.getUser()
+    // Membros (role 4) chegam via convite — email já foi validado ao clicar no link
+    if (user?.role === 4) return true
+    return !!user?.email_verified_at
+  })
+
   useIdleTimeout()
 
   useEffect(() => {
     const checkSubscription = async () => {
-      // If we already have subscription data, don't block the render
       if (storage.getSubscription()) {
         setIsCheckingSub(false)
         return
@@ -42,7 +49,7 @@ const ProtectedRoute = () => {
       try {
         const { data } = await subscriptionService.getStatus()
         storage.setSubscription(data)
-        setSubDataRefreshed(prev => !prev) // trigger re-render so useSubscription pulls new data
+        setSubDataRefreshed(prev => !prev)
       } catch (e) {
         // failed to fetch, proceed with fallback
       } finally {
@@ -60,7 +67,23 @@ const ProtectedRoute = () => {
   useEffect(() => {
     const success = searchParams.get('success')
     const canceled = searchParams.get('canceled')
-    if (success === '1' || success === 'true') {
+    const emailVerifiedParam = searchParams.get('email_verified')
+
+    if (emailVerifiedParam === '1') {
+      const currentUser = storage.getUser()
+      if (currentUser) {
+        storage.setUser({ ...currentUser, email_verified_at: new Date().toISOString() })
+        setEmailVerified(true)
+      }
+      toast({
+        title: 'E-mail confirmado!',
+        description: 'Boa! Sua conta está completa e você tem acesso total.',
+        status: 'success',
+        duration: 6000,
+        isClosable: true,
+      })
+      setSearchParams({})
+    } else if (success === '1' || success === 'true') {
       setSearchParams({})
     } else if (canceled === '1' || canceled === 'true') {
       toast({
@@ -92,13 +115,22 @@ const ProtectedRoute = () => {
 
       if (pendingSlug) {
         sessionStorage.removeItem('show_welcome')
-        if (subscribed || onTrial) {
-          setWelcomePlanSlug(pendingSlug)
-          onWelcomeOpen()
-        }
+        setWelcomePlanSlug(pendingSlug)
+        onWelcomeOpen()
       }
     }
-  }, [isCheckingSub, subscribed, onTrial, onWelcomeOpen, toast])
+  }, [isCheckingSub, onWelcomeOpen, toast])
+
+  const handleEmailVerified = () => {
+    setEmailVerified(true)
+    toast({
+      title: 'E-mail confirmado!',
+      description: 'Boa! Agora é só usar a OrçaFast à vontade.',
+      status: 'success',
+      duration: 5000,
+      isClosable: true,
+    })
+  }
 
   const handleCreateProposal = (e) => {
     e.preventDefault()
@@ -107,7 +139,7 @@ const ProtectedRoute = () => {
     } else {
       toast({
         title: 'Limite atingido',
-        description: 'Você atingiu o limite de propostas do seu plano. Faça um upgrade para continuar.',
+        description: 'Você atingiu o limite de orçamentos do seu plano. Faça um upgrade para continuar.',
         status: 'warning',
         duration: 5000,
         isClosable: true,
@@ -127,36 +159,15 @@ const ProtectedRoute = () => {
     return <Navigate to="/login" replace />
   }
 
-  // Global guard: force unsubscribed AND not-on-trial users to subscription page
-  const hasAccess = subscribed || onTrial
-  if (!hasAccess) {
-    const allowedPaths = [
-      '/dashboard/configuracoes/assinatura'
-    ]
-    if (!allowedPaths.includes(location.pathname)) {
-      return <Navigate to="/dashboard/configuracoes/assinatura" replace />
-    }
-  }
-
-  // Determina o título e configurações baseado na rota
   const getHeaderConfig = () => {
     const path = location.pathname
 
-    // Rotas de cadastro/edição
     if (path === '/dashboard/clientes/novo') {
-      return {
-        title: 'Novo cliente',
-        showBackButton: true,
-      }
+      return { title: 'Novo cliente', showBackButton: true }
     }
     if (path === '/dashboard/propostas/nova') {
-      return {
-        title: 'Novo orçamento',
-        showBackButton: true,
-      }
+      return { title: 'Novo orçamento', showBackButton: true }
     }
-
-    // Rotas de listagem
     if (path.includes('/clientes')) {
       return {
         title: 'Clientes',
@@ -226,6 +237,7 @@ const ProtectedRoute = () => {
         w="100%"
       >
         <Outlet />
+
         <WelcomePlanModal
           isOpen={isWelcomeOpen}
           onClose={onWelcomeClose}
@@ -233,7 +245,10 @@ const ProtectedRoute = () => {
         />
       </Box>
 
-      {/* Mobile FAB - High affordance action button */}
+      <EmailVerificationModal isOpen={!emailVerified} onVerified={handleEmailVerified} />
+      <PaywallModal isOpen={emailVerified && !hasActiveAccess} />
+
+      {/* Mobile FAB */}
       {(location.pathname === '/dashboard/clientes' || location.pathname === '/dashboard/propostas') && (
         <Button
           position="fixed"
@@ -247,7 +262,7 @@ const ProtectedRoute = () => {
           boxShadow="0 12px 32px rgba(0, 217, 126, 0.4)"
           display={{ base: 'flex', md: 'none' }}
           leftIcon={<Icon as={FiPlus} boxSize={5} />}
-          onClick={location.pathname.includes('/clientes') 
+          onClick={location.pathname.includes('/clientes')
             ? () => navigate('/dashboard/clientes/novo')
             : handleCreateProposal
           }

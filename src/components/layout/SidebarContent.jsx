@@ -86,7 +86,7 @@ const SidebarContent = ({ isCollapsed = false, onItemClick = () => { } }) => {
       icon: FiUsers,
       label: 'Equipe',
       path: '/dashboard/usuarios',
-      isLocked: !subscribed || !isBusiness,
+      isLocked: !onTrial && (!subscribed || !isBusiness),
       isHidden: user?.role !== 3 && user?.role !== 1,
     },
     { 

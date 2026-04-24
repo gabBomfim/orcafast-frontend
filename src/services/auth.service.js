@@ -27,5 +27,17 @@ export const authService = {
   
   updateProfile(data) {
     return api.put('profile', data)
-  }
+  },
+
+  resendVerification() {
+    return api.post('email/verify/resend')
+  },
+
+  updateEmail(email) {
+    return api.put('email/verify/update', { email })
+  },
+
+  getProfile() {
+    return api.get('user')
+  },
 }

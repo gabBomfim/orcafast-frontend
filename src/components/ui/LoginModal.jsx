@@ -14,7 +14,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import LoginForm from '../auth/LoginForm'
 import RegisterForm from '../auth/RegisterForm'
-import { authService, subscriptionService } from '../../services'
+import { authService } from '../../services'
 import { useOnboarding } from '../../contexts/OnboardingContext'
 import { storage } from '../../utils/storage'
 
@@ -94,35 +94,11 @@ const LoginModal = ({ isOpen, onClose, onSuccess }) => {
       onClose()
       if (onSuccess) onSuccess()
 
-      // Redirect to Stripe if registering
-      if (!isLoginMode) {
-        try {
-          const successUrl = createdProposalId
-            ? `${window.location.origin}/dashboard/orcamentos/${createdProposalId}/enviar`
-            : `${window.location.origin}/dashboard/propostas/sucesso`
-
-          sessionStorage.setItem('show_welcome', 'pro')
-
-          const { data: checkoutData } = await subscriptionService.checkout('pro', successUrl)
-
-          if (checkoutData?.checkout_url) {
-            window.location.href = checkoutData.checkout_url
-            return
-          }
-        } catch (err) {
-          console.error('Erro ao iniciar checkout:', err)
-          toast({
-            title: 'Aviso',
-            description: 'Não foi possível iniciar o teste grátis automaticamente. Você será redirecionado.',
-            status: 'warning',
-            duration: 4000,
-            isClosable: true,
-          })
-        }
+      if (!isLoginMode && createdProposalId) {
+        navigate(`/dashboard/orcamentos/${createdProposalId}/enviar`)
+      } else {
+        navigate('/initial-dashboard')
       }
-
-      // Default redirect if it's just a login or Stripe failed
-      navigate('/initial-dashboard')
     } catch (error) {
       const message = error.response?.data?.message || 'Erro ao processar requisição'
       toast({
@@ -158,12 +134,12 @@ const LoginModal = ({ isOpen, onClose, onSuccess }) => {
         <ModalHeader textAlign="center" pt={8} pb={2}>
           <VStack spacing={1}>
             <Text fontSize="2xl" fontWeight="bold" color="gray.900">
-              {isLoginMode ? 'Entrar na sua conta' : 'Ative seu teste grátis'}
+              {isLoginMode ? 'Entrar na sua conta' : 'Teste grátis por 7 dias sem cartão'}
             </Text>
             <Text fontSize="sm" color="gray.600" fontWeight="normal">
               {isLoginMode
                 ? 'Digite seus dados para continuar.'
-                : 'Comece a usar a OrçaFast agora.'
+                : 'Sem cartão agora. Comece a usar a OrçaFast.'
               }
             </Text>
           </VStack>
@@ -205,7 +181,7 @@ const LoginModal = ({ isOpen, onClose, onSuccess }) => {
 
             {!isLoginMode && (
               <Text fontSize="xs" color="gray.500" textAlign="center" mt={2}>
-                7 dias por nossa conta • Você vai ativar o teste na Stripe. Não cobraremos nada hoje. 🚀
+                7 dias grátis • Sem cartão agora • Cancele quando quiser
               </Text>
             )}
           </VStack>

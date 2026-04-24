@@ -135,7 +135,7 @@ const HomePage = () => {
             <div className="hero-trust">
               <div className="trust-item">
                 <FiCheck className="trust-icon" />
-                <span>Teste grátis por 7 dias</span>
+                <span>Teste grátis por 7 dias sem cartão</span>
               </div>
               <div className="trust-item">
                 <FiCheck className="trust-icon" />
@@ -382,6 +382,7 @@ const HomePage = () => {
               <ul className="pricing-features">
                 <li><FiCheck className="feature-check" /> Orçamentos ilimitados</li>
                 <li><FiCheck className="feature-check" /> Orçamento com a sua marca</li>
+                <li><FiCheck className="feature-check" /> Saiba quando o cliente abriu seu orçamento</li>
                 <li><FiCheck className="feature-check" /> Painel com seus indicadores</li>
                 <li><FiCheck className="feature-check" /> Metas financeiras</li>
                 <li><FiCheck className="feature-check" /> Suporte rápido</li>
@@ -408,6 +409,7 @@ const HomePage = () => {
               <ul className="pricing-features">
                 <li><FiCheck className="feature-check" /> Orçamentos ilimitados</li>
                 <li><FiCheck className="feature-check" /> Orçamento com a sua marca</li>
+                <li><FiCheck className="feature-check" /> Saiba quando o cliente abriu seu orçamento</li>
                 <li><FiCheck className="feature-check" /> Painel com seus indicadores</li>
                 <li><FiCheck className="feature-check" /> Metas financeiras</li>
                 <li><FiCheck className="feature-check" /> Suporte rápido</li>
@@ -448,7 +450,7 @@ const HomePage = () => {
           <div className="cta-trust flex flex-col">
             <div className="trust-item">
               <FiCheck className="trust-icon" />
-              <span>Teste grátis por 7 dias</span>
+              <span>Teste grátis por 7 dias sem cartão</span>
             </div>
             <div className="trust-item">
               <FiCheck className="trust-icon" />

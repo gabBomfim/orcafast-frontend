@@ -147,7 +147,7 @@ const RestrictedOverlay = () => (
                     Acesso restrito
                 </Text>
                 <Text fontSize="sm" color="gray.600">
-                    Só os administradores da conta podem gerenciar a equipe. Fala com o admin da sua empresa.
+                    Só os administradores da conta podem gerenciar a equipe. Fale com o admin da sua empresa.
                 </Text>
             </Box>
             <Button
@@ -167,7 +167,7 @@ const RestrictedOverlay = () => (
 )
 
 // ─── Member Card (Mobile) ─────────────────────────────────────────────────────
-const MemberCard = ({ u, currentUserId, isBusiness, onEdit, onDelete }) => (
+const MemberCard = ({ u, currentUserId, hasAccess, onEdit, onDelete }) => (
     <Card bg="white" shadow="sm" rounded="2xl" border="1px" borderColor="gray.200">
         <CardBody p={4}>
             <Flex align="center" gap={3}>
@@ -188,7 +188,7 @@ const MemberCard = ({ u, currentUserId, isBusiness, onEdit, onDelete }) => (
                         height="40px"
                         variant="ghost"
                         colorScheme="gray"
-                        isDisabled={!isBusiness}
+                        isDisabled={!hasAccess}
                         flexShrink={0}
                     />
                     <MenuList shadow="xl" borderRadius="xl">
@@ -209,13 +209,14 @@ const MemberCard = ({ u, currentUserId, isBusiness, onEdit, onDelete }) => (
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 const UsersPage = () => {
-    const { isBusiness } = useSubscription()
+    const { isBusiness, onTrial } = useSubscription()
     const { getCurrentUser } = useAuth()
     const toast = useToast()
     const cancelRef = useRef()
     const user = getCurrentUser()
 
     const canManageTeam = user?.role === 3 || user?.role === 1
+    const hasAccess = isBusiness || onTrial
 
     const [users, setUsers] = useState([])
     const [loading, setLoading] = useState(true)
@@ -230,12 +231,12 @@ const UsersPage = () => {
     const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose } = useDisclosure()
 
     useEffect(() => {
-        if (isBusiness && canManageTeam) {
+        if (hasAccess && canManageTeam) {
             fetchUsers()
         } else {
             setLoading(false)
         }
-    }, [isBusiness, canManageTeam])
+    }, [hasAccess, canManageTeam])
 
     const fetchUsers = async () => {
         try {
@@ -259,7 +260,7 @@ const UsersPage = () => {
         const newErrors = {}
         if (!selectedUser && !formData.email) newErrors.email = 'Esqueceu o e-mail do membro.'
         if (selectedUser && !formData.name) newErrors.name = 'Esqueceu o nome do membro.'
-        if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Esse e-mail não tá certo. Confere aí.'
+        if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Esse e-mail não tá certo.'
         setErrors(newErrors)
         return Object.keys(newErrors).length === 0
     }
@@ -287,7 +288,7 @@ const UsersPage = () => {
         } catch (error) {
             toast({
                 title: 'Não consegui salvar.',
-                description: error.response?.data?.message || 'Confere os dados e tenta de novo.',
+                description: error.response?.data?.message || 'Confira os dados e tente novamente.',
                 status: 'error',
                 duration: 5000,
             })
@@ -345,7 +346,7 @@ const UsersPage = () => {
     return (
         <Container maxW="container.xl">
             <Box position="relative">
-                {!isBusiness && <UpgradeOverlay />}
+                {!hasAccess && <UpgradeOverlay />}
                 {!canManageTeam && <RestrictedOverlay />}
 
                 <VStack align="stretch" spacing={6}>
@@ -366,7 +367,7 @@ const UsersPage = () => {
                             minW="120px"
                             display={{ base: 'none', md: 'inline-flex' }}
                             onClick={openCreateModal}
-                            isDisabled={!isBusiness}
+                            isDisabled={!hasAccess}
                         >
                             Convidar membro
                         </Button>
@@ -392,7 +393,7 @@ const UsersPage = () => {
                                         minW="120px"
                                         mt={2}
                                         onClick={openCreateModal}
-                                        isDisabled={!isBusiness}
+                                        isDisabled={!hasAccess}
                                     >
                                         Convidar membro
                                     </Button>
@@ -409,7 +410,7 @@ const UsersPage = () => {
                                     key={u.id}
                                     u={u}
                                     currentUserId={user?.id}
-                                    isBusiness={isBusiness}
+                                    hasAccess={hasAccess}
                                     onEdit={openEditModal}
                                     onDelete={openDeleteDialog}
                                 />
@@ -420,7 +421,7 @@ const UsersPage = () => {
             </Box>
 
             {/* FAB Mobile */}
-            {isBusiness && (
+            {hasAccess && (
                 <Button
                     position="fixed"
                     bottom="24px"

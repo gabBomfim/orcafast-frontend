@@ -11,6 +11,7 @@ import RegisterPage from './pages/RegisterPage'
 import GoogleCallbackPage from './pages/auth/GoogleCallbackPage'
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
 import ResetPasswordPage from './pages/auth/ResetPasswordPage'
+import EmailVerificationPage from './pages/auth/EmailVerificationPage'
 import InitialDashboardPage from './pages/InitialDashboardPage'
 import CreateClientPage from './pages/CreateClientPage'
 import CreateProposalPage from './pages/CreateProposalPage'
@@ -54,6 +55,7 @@ function App() {
               <Route path="/redefinir-senha" element={<ResetPasswordPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/auth/callback" element={<GoogleCallbackPage />} />
+              <Route path="/verificar-email" element={<EmailVerificationPage />} />
               <Route path="/onboarding/create-client" element={<OnboardingCreateClientPage />} />
               <Route path="/onboarding/create-proposal" element={<OnboardingCreateProposalPage />} />
               <Route path="/onboarding/send-proposal" element={<SendProposalPage />} />

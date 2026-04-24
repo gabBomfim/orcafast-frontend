@@ -19,7 +19,7 @@
 ### Tom nas Mensagens (Emílio fala assim)
 | Errado | Certo |
 |--------|-------|
-| "E-mail inválido" | "Esse e-mail não tá certo. Confere aí." |
+| "E-mail inválido" | "Esse e-mail não tá certo." |
 | "Campo obrigatório" | "Esqueceu o nome do cliente." |
 | "Erro interno do servidor" | "Ih, algo deu errado aqui. A gente já sabe e tá resolvendo." |
 | "Orçamento aprovado com sucesso" | "Orçamento aprovado! Hora de colocar a mão na massa. Bora trabalhar!" |
@@ -187,8 +187,8 @@ Biblioteca centralizada com **todas** as mensagens. Tom: direto e encorajador (v
 import { formMessages, successMessages, warningMessages, infoMessages } from '../utils/formMessages'
 
 formMessages.required.name        // "Esqueceu o nome do cliente."
-formMessages.invalid.email        // "Esse e-mail não tá certo. Confere aí."
-formMessages.password.mismatch    // "As senhas não batem. Confere aí."
+formMessages.invalid.email        // "Esse e-mail não tá certo."
+formMessages.password.mismatch    // "As senhas não batem."
 formMessages.auth.emailInUse      // "Já tem uma conta com esse e-mail."
 formMessages.system.serverError   // "Ih, algo deu errado aqui. A gente já sabe e tá resolvendo."
 formMessages.quote.noItems        // "Coloca pelo menos um item no orçamento."
@@ -230,6 +230,8 @@ Tipos disponíveis: `error` · `success` · `warning` · `info`
 | `Pagination` | Paginação com truncamento inteligente (máx 5 páginas visíveis) |
 | `LoginModal` | Modal login/cadastro com toggle. Google OAuth + Stripe checkout |
 | `WelcomePlanModal` | Modal pós-assinatura com features do plano escolhido |
+| `EmailVerificationModal` | Modal não-closeable de verificação de e-mail com polling a cada 5s. Permite alterar e-mail dentro do modal |
+| `PaywallModal` | Modal não-closeable de bloqueio quando trial expira. Comparativo de 2 planos (Autônomo/Equipe) com upsell inteligente baseado em membros da equipe |
 | `OrcafastLogo` | Logo: `variant="full"` (40px) ou `variant="symbol"` (32px) |
 
 ### Layout (`src/components/layout/`)
@@ -258,11 +260,11 @@ Tipos disponíveis: `error` · `success` · `warning` · `info`
 
 | Service | Métodos |
 |---------|---------|
-| `authService` | `register`, `login`, `logout`, `getCurrentUser`, `forgotPassword`, `resetPassword`, `updateProfile` |
+| `authService` | `register`, `login`, `logout`, `getCurrentUser`, `getProfile`, `forgotPassword`, `resetPassword`, `updateProfile`, `resendVerification()`, `updateEmail(email)` |
 | `clientService` | `list(params)`, `get(id)`, `create`, `update`, `delete` — auto-injeta `company_id` |
 | `proposalService` | `list`, `get`, `create`, `update`, `delete`, `send`, `downloadPDF`, `updateStatus`, `getPublicProposal(token)` |
 | `companyService` | `get()`, `update(formData)` multipart, `deleteLogo()` |
-| `subscriptionService` | `getStatus()`, `checkout(planSlug, url)`, `cancel()`, `resume()`, `portal()` |
+| `subscriptionService` | `getStatus()`, `teamInfo()`, `checkout(planSlug, url)`, `cancel()`, `resume()`, `portal()` |
 | `goalsService` | `get(year)`, `save(payload)` |
 | `dashboardService` | `get(params)` — filtrável por período |
 | `teamUserService` | `list()`, `store(data)`, `show(id)`, `update(id, data)`, `destroy(id)` |
@@ -274,7 +276,7 @@ Tipos disponíveis: `error` · `success` · `warning` · `info`
 ## ⚠️ Rotas (`src/App.jsx`) — atualizar ao adicionar rota
 
 ### Públicas
-`/` · `/login` · `/register` · `/esqueci-senha` · `/redefinir-senha` · `/auth/callback` · `/share/proposta/:token` · `/convite/:token` · `/termos` · `/privacidade` · `/suporte`
+`/` · `/login` · `/register` · `/esqueci-senha` · `/redefinir-senha` · `/auth/callback` · `/verificar-email` · `/share/proposta/:token` · `/convite/:token` · `/termos` · `/privacidade` · `/suporte`
 
 ### Onboarding (guest)
 `/onboarding/create-client` · `/onboarding/create-proposal` · `/onboarding/send-proposal`
@@ -328,6 +330,23 @@ Tipos disponíveis: `error` · `success` · `warning` · `info`
 - Auto-logout por inatividade: 30 min (`useIdleTimeout`)
 - Google OAuth: redirect + `GoogleCallbackPage`
 - Convite de membro: link mágico com token → `InviteAcceptPage`
+
+### Trial-First + Email Verification
+- Novo usuário recebe **7 dias de trial** automático ao registrar (sem cartão de crédito)
+- Sistema bloqueia acesso até **email verificado** (via `EmailVerificationModal`)
+- Modal de verificação não pode ser fechado (closeOnOverlayClick/closeOnEsc = false)
+- Polling a cada 5s via `authService.getProfile()` para detectar verificação
+- Usuário pode alterar email dentro do modal e solicitar novo link de confirmação
+- Após email verificado: `PaywallModal` aparece quando trial expira
+- `PaywallModal` mostra comparativo de 2 planos com upsell inteligente (badge "RECOMENDADO" se `users_count > 1`)
+- Página de settings `/dashboard/configuracoes/assinatura` também mostra comparativo quando em trial
+- Downgrade de Equipe para Autônomo requer confirmação (alerta que membros perderão acesso)
+
+### Trial e Bloqueio de Acesso
+- `useSubscription()` retorna `hasActiveAccess` = true se subscrito OU em trial com dias restantes
+- `ProtectedRoute` bloqueia tudo exceto email verification até `emailVerified = true`
+- Após email verified: `PaywallModal` aparece se `!hasActiveAccess` (trial expirado)
+- Banner de countdown no painel: mostra dias restantes + muda cor se ≤ 2 dias
 
 ---
 

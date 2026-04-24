@@ -30,6 +30,8 @@ export const useSubscription = () => {
     const onTrial = savedSubscription?.on_trial ?? user?.on_trial ?? user?.company?.on_trial ?? false
     const trialEndsAt = savedSubscription?.trial_ends_at ?? user?.trial_ends_at ?? user?.company?.trial_ends_at ?? null
     const cancelled = savedSubscription?.cancelled ?? user?.cancelled ?? user?.company?.cancelled ?? false
+    const trialDaysRemaining = savedSubscription?.trial_days_remaining ?? null
+    const hasActiveAccess = savedSubscription?.has_active_access ?? (subscribed || onTrial)
 
     // When plan is null/undefined, treat as free (no active subscription)
     const isFree = !plan || plan?.slug === 'free'
@@ -54,6 +56,8 @@ export const useSubscription = () => {
         subscribed,
         onTrial,
         trialEndsAt,
+        trialDaysRemaining,
+        hasActiveAccess,
         cancelled,
 
         // Capacity flags (UI only — backend is the real enforcer)

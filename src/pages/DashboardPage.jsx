@@ -23,12 +23,12 @@ import {
   FiTrendingUp,
   FiTarget,
   FiBarChart,
-  FiPlus,
   FiStar,
   FiZap,
   FiLock,
   FiFileText,
   FiArrowRight,
+  FiClock,
 } from 'react-icons/fi'
 
 import Container from '../components/layout/Container'
@@ -63,18 +63,8 @@ const DashboardPage = () => {
   const user = getCurrentUser()
   const isAdmin = user?.role === 3 || user?.role === 1
   const isMember = user?.role === 4
-  const { isFree, onTrial, trialEndsAt, isBusiness } = useSubscription()
+  const { isFree, onTrial, trialDaysRemaining, isBusiness } = useSubscription()
   const toast = useToast()
-
-  const getDaysRemaining = (endDateStr) => {
-    if (!endDateStr) return 0
-    const end = new Date(endDateStr)
-    const now = new Date()
-    const diffTime = end - now
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    return diffDays > 0 ? diffDays : 0
-  }
-  const trialDaysLeft = getDaysRemaining(trialEndsAt)
 
   const [selectedPeriod, setSelectedPeriod] = useState('this-month')
   const [customDates, setCustomDates] = useState({ begin_date: '', end_date: '' })
@@ -110,13 +100,16 @@ const DashboardPage = () => {
         setPeriodLabel(`${from} – ${to}`)
       }
     } catch (err) {
-      toast({
-        title: 'Erro ao carregar dashboard',
-        description: err.response?.data?.message || 'Tente novamente',
-        status: 'error',
-        duration: 4000,
-        isClosable: true,
-      })
+      // 403 de email não verificado é tratado pelo EmailVerificationModal — não mostrar toast
+      if (err.response?.status !== 403) {
+        toast({
+          title: 'Erro ao carregar dashboard',
+          description: err.response?.data?.message || 'Tente novamente',
+          status: 'error',
+          duration: 4000,
+          isClosable: true,
+        })
+      }
     } finally {
       setIsLoading(false)
     }
@@ -145,7 +138,7 @@ const DashboardPage = () => {
 
   // Fetch team members if admin AND business
   useEffect(() => {
-    if (isAdmin && isBusiness) {
+    if (isAdmin && (isBusiness || onTrial)) {
       teamUserService.list().then(response => {
         const membersList = response.data || []
         setTeamMembers(membersList.map(m => ({
@@ -195,6 +188,53 @@ const DashboardPage = () => {
   return (
     <Container maxW="container.xl">
       <VStack align="stretch" spacing={6}>
+        {/* Trial countdown banner */}
+        {onTrial && trialDaysRemaining !== null && (
+          <Box
+            bg={trialDaysRemaining <= 2 ? 'orange.50' : 'emerald.50'}
+            border="1px"
+            borderColor={trialDaysRemaining <= 2 ? 'orange.200' : 'emerald.200'}
+            borderRadius="xl"
+            px={4}
+            py={3}
+          >
+            <Flex
+              align={{ base: 'flex-start', sm: 'center' }}
+              justify="space-between"
+              gap={3}
+              direction={{ base: 'column', sm: 'row' }}
+            >
+              <Flex align="center" gap={2}>
+                <Icon
+                  as={FiClock}
+                  color={trialDaysRemaining <= 2 ? 'orange.500' : 'emerald.600'}
+                  flexShrink={0}
+                />
+                <Text fontSize="sm" color={trialDaysRemaining <= 2 ? 'orange.800' : 'emerald.800'}>
+                  {trialDaysRemaining === 0
+                    ? 'Seu teste gratuito termina hoje!'
+                    : `Seu teste gratuito termina em ${trialDaysRemaining} dia${trialDaysRemaining > 1 ? 's' : ''}.`
+                  }{' '}
+                  Garanta seu acesso para continuar profissionalizando seu negócio e lucrar mais! 🚀
+                </Text>
+              </Flex>
+              <Button
+                as={Link}
+                to="/dashboard/configuracoes/assinatura"
+                size="sm"
+                bg={trialDaysRemaining <= 2 ? 'orange.500' : 'emerald.500'}
+                color="white"
+                _hover={{ bg: trialDaysRemaining <= 2 ? 'orange.600' : 'emerald.600' }}
+                borderRadius="lg"
+                fontWeight="semibold"
+                flexShrink={0}
+              >
+                Escolher plano
+              </Button>
+            </Flex>
+          </Box>
+        )}
+
         {/* Header */}
         <Flex
           direction={{ base: 'column', sm: 'row' }}
