@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Center, Spinner, Text, VStack, useToast } from '@chakra-ui/react'
 import { storage } from '../../utils/storage'
-import { onboardingService, subscriptionService } from '../../services'
+import { onboardingService } from '../../services'
 
 const GoogleCallbackPage = () => {
     const navigate = useNavigate()
@@ -45,29 +45,18 @@ const GoogleCallbackPage = () => {
                 if (pendingOnboarding) {
                     try {
                         const guestData = JSON.parse(pendingOnboarding)
-                        
-                        // Associa os dados à nova conta
+
                         const { data: associateData } = await onboardingService.associate({ guest_data: guestData })
                         const proposalId = associateData.proposal_id
 
-                        // Limpa o dado temporário
                         localStorage.removeItem('pending_onboarding')
 
-                        // Prepara o modal de boas-vindas para ser exibido após o checkout/redirecionamento
-                        sessionStorage.setItem('show_welcome', 'pro')
-
-                        // Inicia o checkout do Stripe com a success_url dinâmica
-                        // O plano padrão no onboarding é o 'pro'
-                        const successUrl = `${window.location.origin}/dashboard/orcamentos/${proposalId}/enviar`
-                        const { data: checkoutData } = await subscriptionService.checkout('pro', successUrl)
-                        
-                        if (checkoutData.checkout_url) {
-                            window.location.href = checkoutData.checkout_url
+                        if (proposalId) {
+                            navigate(`/dashboard/orcamentos/${proposalId}/enviar`)
                             return
                         }
                     } catch (assocError) {
-                        console.error('Erro na associação/checkout onboarding:', assocError)
-                        // Em caso de erro, segue para o dashboard normalmente para não travar o usuário
+                        // Em caso de erro, segue para o dashboard para não travar o usuário
                     }
                 }
 
