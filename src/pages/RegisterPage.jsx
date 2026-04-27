@@ -114,6 +114,11 @@ const RegisterPage = () => {
       storage.setToken(response.data.access_token)
       storage.setUser(response.data.user)
 
+      if (window.fbq) {
+        window.fbq('track', 'CompleteRegistration')
+        window.fbq('track', 'StartTrial')
+      }
+
       let targetProposalId = null
       
       // Verifica se há dados de onboarding pendentes

@@ -12,6 +12,7 @@ const GoogleCallbackPage = () => {
         const params = new URLSearchParams(window.location.search)
         const token = params.get('token')
         const error = params.get('error')
+        const isNewUser = params.get('is_new_user') === '1'
 
         if (error || !token) {
             toast({
@@ -27,6 +28,11 @@ const GoogleCallbackPage = () => {
 
         // Salva o token usando a mesma chave do login normal (auth_token via storage.setToken)
         storage.setToken(token)
+
+        if (isNewUser && window.fbq) {
+            window.fbq('track', 'CompleteRegistration')
+            window.fbq('track', 'StartTrial')
+        }
 
         // Busca os dados do usuário com o token recém-recebido
         fetch(`${import.meta.env.VITE_API_URL}/user`, {
