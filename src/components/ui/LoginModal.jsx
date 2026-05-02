@@ -17,6 +17,7 @@ import RegisterForm from '../auth/RegisterForm'
 import { authService } from '../../services'
 import { useOnboarding } from '../../contexts/OnboardingContext'
 import { storage } from '../../utils/storage'
+import { trackGAEvent, trackPixelEvent } from '../../utils/tracking'
 
 const LoginModal = ({ isOpen, onClose, onSuccess }) => {
   const [isLoading, setIsLoading] = useState(false)
@@ -65,6 +66,9 @@ const LoginModal = ({ isOpen, onClose, onSuccess }) => {
 
         storage.setToken(response.data.access_token)
         storage.setUser(response.data.user)
+
+        trackGAEvent('sign_up', { method: 'email' })
+        trackPixelEvent('CompleteRegistration')
 
         if (response.data.user?.clients?.length > 0) {
           const clients = response.data.user.clients

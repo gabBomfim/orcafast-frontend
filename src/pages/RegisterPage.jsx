@@ -28,6 +28,7 @@ import { storage } from '../utils/storage'
 // import { maskDocument, validateDocument } from '../utils/mask' // ONBOARDING FLOW DISABLED (document field removed)
 import { formMessages } from '../utils/formMessages'
 import { FieldError } from '../components/ui/FormFeedback'
+import { trackGAEvent } from '../utils/tracking'
 
 // Componente SVG do Google inline
 const GoogleIcon = () => (
@@ -110,6 +111,8 @@ const RegisterPage = () => {
 
       storage.setToken(response.data.access_token)
       storage.setUser(response.data.user)
+
+      trackGAEvent('sign_up', { method: 'email' })
 
       if (window.fbq) {
         window.fbq('track', 'CompleteRegistration')

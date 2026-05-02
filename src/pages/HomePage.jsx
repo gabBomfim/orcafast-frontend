@@ -18,7 +18,7 @@ import {
   FiFileText
 } from 'react-icons/fi';
 import logoFull from '../assets/logo/logo-full.svg';
-import { trackEvent } from '../utils/tracking';
+import { trackEvent, trackGAEvent } from '../utils/tracking';
 import '../styles/landing.css';
 
 // Componentes auxiliares
@@ -158,7 +158,10 @@ const HomePage = () => {
                 to="/register"
                 className="cta-primary"
                 style={{ textDecoration: 'none' }}
-                onClick={() => trackEvent('click_cta', { cta_location: 'hero', cta_label: 'Começar grátis' })}
+                onClick={() => {
+                  trackEvent('click_cta', { cta_location: 'hero', cta_label: 'Começar grátis' })
+                  trackGAEvent('clique_comecar_gratis', { event_category: 'Botão', event_label: 'Home - Começar Grátis' })
+                }}
               >
                 Começar grátis
                 <FiArrowRight />
@@ -436,7 +439,10 @@ const HomePage = () => {
                 to="/register"
                 className="pricing-btn-primary"
                 style={{ textDecoration: 'none' }}
-                onClick={() => trackEvent('click_cta', { cta_location: 'pricing_autonomo', cta_label: 'Começar grátis' })}
+                onClick={() => {
+                  trackEvent('click_cta', { cta_location: 'pricing_autonomo', cta_label: 'Começar grátis' })
+                  trackGAEvent('clique_comecar_gratis', { event_category: 'Botão', event_label: 'Home - Começar Grátis' })
+                }}
               >
                 Começar grátis
               </Link>
@@ -500,7 +506,10 @@ const HomePage = () => {
             to="/register"
             className="cta-btn-final"
             style={{ textDecoration: 'none' }}
-            onClick={() => trackEvent('click_cta', { cta_location: 'cta_final', cta_label: 'Começar grátis' })}
+            onClick={() => {
+              trackEvent('click_cta', { cta_location: 'cta_final', cta_label: 'Começar grátis' })
+              trackGAEvent('clique_comecar_gratis', { event_category: 'Botão', event_label: 'Home - Começar Grátis' })
+            }}
           >
             Começar grátis
             <FiArrowRight />
