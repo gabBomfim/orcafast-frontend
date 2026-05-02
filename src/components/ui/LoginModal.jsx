@@ -31,10 +31,11 @@ const LoginModal = ({ isOpen, onClose, onSuccess }) => {
     let createdProposalId = null
 
     const formData = new FormData(e.target)
+    const name = formData.get('name')
     const data = {
-      name: formData.get('name'),
-      company_name: formData.get('company_name'),
-      document: (formData.get('document') || '').replace(/\D/g, ''),
+      name,
+      company_name: `Empresa de ${name}`, // ONBOARDING FLOW DISABLED — auto-generated; user edits in Settings
+      // document: (formData.get('document') || '').replace(/\D/g, ''), // ONBOARDING FLOW DISABLED
       email: formData.get('email'),
       password: formData.get('password'),
       password_confirmation: formData.get('password_confirmation'),
@@ -50,13 +51,15 @@ const LoginModal = ({ isOpen, onClose, onSuccess }) => {
         storage.setToken(response.data.access_token)
         storage.setUser(response.data.user)
       } else {
-        const registerData = {
-          ...data,
-          guest_data: {
-            client: guestData.client,
-            proposal: guestData.proposal,
-          }
-        }
+        // ONBOARDING FLOW DISABLED — guest_data removed from register payload
+        // const registerData = {
+        //   ...data,
+        //   guest_data: {
+        //     client: guestData.client,
+        //     proposal: guestData.proposal,
+        //   }
+        // }
+        const registerData = { ...data }
 
         const response = await authService.register(registerData)
 

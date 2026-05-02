@@ -233,6 +233,7 @@ Tipos disponíveis: `error` · `success` · `warning` · `info`
 | `EmailVerificationModal` | Modal não-closeable de verificação de e-mail com polling a cada 5s. Permite alterar e-mail dentro do modal |
 | `PaywallModal` | Modal não-closeable de bloqueio quando trial expira. Comparativo de 2 planos (Autônomo/Equipe) com upsell inteligente baseado em membros da equipe |
 | `OrcafastLogo` | Logo: `variant="full"` (40px) ou `variant="symbol"` (32px) |
+| `TeamRankingCard` | Ranking de fechados por membro (admin com equipe). Top 5 + "Ver todo o ranking +N", toggle Quantidade/Valor, destaque "VOCÊ", barras hachuradas pra zerados. Cada linha → `/dashboard/propostas?status=approved&user_ids[]=<id>`. Mobile: reflow em 2 linhas com área de toque ampla |
 
 ### Layout (`src/components/layout/`)
 
@@ -262,7 +263,7 @@ Tipos disponíveis: `error` · `success` · `warning` · `info`
 |---------|---------|
 | `authService` | `register`, `login`, `logout`, `getCurrentUser`, `getProfile`, `forgotPassword`, `resetPassword`, `updateProfile`, `resendVerification()`, `updateEmail(email)` |
 | `clientService` | `list(params)`, `get(id)`, `create`, `update`, `delete` — auto-injeta `company_id` |
-| `proposalService` | `list`, `get`, `create`, `update`, `delete`, `send`, `downloadPDF`, `updateStatus`, `getPublicProposal(token)` |
+| `proposalService` | `list`, `get`, `create`, `update`, `delete`, `send`, `downloadPDF`, `updateStatus`, `getPublicProposal(token)`, `downloadPublicPDF(token)` |
 | `companyService` | `get()`, `update(formData)` multipart, `deleteLogo()` |
 | `subscriptionService` | `getStatus()`, `teamInfo()`, `checkout(planSlug, url)`, `cancel()`, `resume()`, `portal()` |
 | `goalsService` | `get(year)`, `save(payload)` |
@@ -310,11 +311,20 @@ Tipos disponíveis: `error` · `success` · `warning` · `info`
 - `clientService` auto-injeta `company_id` do localStorage
 - Metas financeiras: apenas Admin pode definir
 
+### Ranking do time (Painel)
+- Card `TeamRankingCard` aparece no painel **apenas para admins** (`role 1` / `role 3`) com plano Equipe ou em trial
+- Compara orçamentos fechados (status `4`) por membro — toggle Quantidade × Valor (R$)
+- Filtra pelo período selecionado no painel (`this-month` / `last-month` / `this-year` / `custom`)
+- Cada linha é um deep link para `/dashboard/propostas?status=approved&user_ids[]=<id>` — `PropostasPage` lê esses search params no mount e já abre filtrado por membro + status fechado
+- Membros zerados aparecem com barra hachurada na expansão "Ver todo o ranking"
+
 ### Fluxo de Envio
 - Link público via `sharing_token` → `/share/proposta/:token` (sem autenticação)
 - WhatsApp: `openWhatsApp()` detecta mobile (app) vs desktop (web)
 - Enviar/copiar → status `2 (Enviado)` automático
 - Acessar via link → status `3 (Visualizado)` se o acesso NÃO for do dono
+- Download em PDF na view pública via `proposalService.downloadPublicPDF(token)` → back-end `GET /proposta/{token}/pdf` (rota pública, valida sharing_token e expiração)
+- O PDF segue o mesmo design da view pública (cards, paleta emerald, layout mobile-first em A4) — blades em `resources/views/proposals/pdf-free.blade.php` e `pdf-premium.blade.php`
 
 ### Onboarding Gamificado (guest → usuário)
 1. Cadastro do cliente (Nome + Telefone obrigatórios; E-mail opcional)

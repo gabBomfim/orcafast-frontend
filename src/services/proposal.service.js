@@ -35,5 +35,9 @@ export const proposalService = {
   
   getPublicProposal(token) {
     return api.get(`proposta/${token}`)
+  },
+
+  downloadPublicPDF(token) {
+    return api.get(`proposta/${token}/pdf`, { responseType: 'blob' })
   }
 }

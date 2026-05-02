@@ -32,9 +32,11 @@ import {
 } from 'react-icons/fi'
 
 import Container from '../components/layout/Container'
+import TeamRankingCard from '../components/ui/TeamRankingCard'
 import { dashboardService, teamUserService, proposalService } from '../services'
 import { useAuth } from '../hooks/useAuth'
 import { useSubscription } from '../hooks/useSubscription'
+
 
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -77,6 +79,9 @@ const DashboardPage = () => {
   const [periodLabel, setPeriodLabel] = useState('')
   // Verifica se o usuário tem QUALQUER orçamento (incluindo rascunhos do onboarding)
   const [hasAnyProposal, setHasAnyProposal] = useState(null)
+
+  const [rankingMembers, setRankingMembers] = useState([])
+  const [rankingPeriodRange, setRankingPeriodRange] = useState('')
 
   // ─── Fetch ──────────────────────────────────────────────────────────────────
   const fetchDashboard = useCallback(async (period, dates = {}, userIds = []) => {
@@ -150,6 +155,31 @@ const DashboardPage = () => {
       })
     }
   }, [isAdmin, isBusiness])
+
+  // Fetch ranking — só para admins de plano Equipe (ou em trial)
+  useEffect(() => {
+    if (!isAdmin || (!isBusiness && !onTrial)) return
+    if (selectedPeriod === 'custom' && (!customDates.begin_date || !customDates.end_date)) return
+
+    const params = { period: selectedPeriod }
+    if (selectedPeriod === 'custom') {
+      params.begin_date = customDates.begin_date
+      params.end_date = customDates.end_date
+    }
+
+    dashboardService.getRanking(params)
+      .then(({ data }) => {
+        setRankingMembers(data.members ?? [])
+        if (data.period_from && data.period_to) {
+          const from = new Date(data.period_from + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
+          const to = new Date(data.period_to + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
+          setRankingPeriodRange(`${from} – ${to}`)
+        }
+      })
+      .catch(() => {
+        setRankingMembers([])
+      })
+  }, [isAdmin, isBusiness, onTrial, selectedPeriod, customDates.begin_date, customDates.end_date])
 
   // ─── Derived values ──────────────────────────────────────────────────────────
   const isYearlyView = selectedPeriod === 'this-year'
@@ -659,6 +689,24 @@ const DashboardPage = () => {
                 </Box>
               )}
             </Card>
+
+            {/* Ranking do time — somente para Admins de planos com equipe */}
+            {isAdmin && (isBusiness || onTrial) && rankingMembers.length > 0 && (
+              <TeamRankingCard
+                members={rankingMembers}
+                currentUserId={user?.id}
+                periodLabel={
+                  selectedPeriod === 'this-month'
+                    ? 'este mês'
+                    : selectedPeriod === 'last-month'
+                    ? 'no mês passado'
+                    : selectedPeriod === 'this-year'
+                    ? 'este ano'
+                    : 'no período'
+                }
+                periodRange={rankingPeriodRange}
+              />
+            )}
 
             {/* Card 3: Funil */}
             <Card borderRadius="2xl" boxShadow="sm" border="1px" borderColor="gray.200">

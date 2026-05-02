@@ -22,9 +22,10 @@ import OrcafastLogo from '../components/ui/OrcafastLogo'
 import { FaApple } from 'react-icons/fa'
 import { useState } from 'react'
 import { useLocation, Link as RouterLink, useNavigate } from 'react-router-dom'
-import { authService, onboardingService } from '../services'
+import { authService } from '../services'
+// import { onboardingService } from '../services' // ONBOARDING FLOW DISABLED
 import { storage } from '../utils/storage'
-import { maskDocument, validateDocument } from '../utils/mask'
+// import { maskDocument, validateDocument } from '../utils/mask' // ONBOARDING FLOW DISABLED (document field removed)
 import { formMessages } from '../utils/formMessages'
 import { FieldError } from '../components/ui/FormFeedback'
 
@@ -54,9 +55,9 @@ const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [showPasswordConfirmation, setShowPasswordConfirmation] = useState(false)
   const [name, setName] = useState('')
-  const [companyName, setCompanyName] = useState('')
-  const [document, setDocument] = useState('')
-  const [documentError, setDocumentError] = useState('')
+  // const [companyName, setCompanyName] = useState('') // ONBOARDING FLOW DISABLED (auto-generated from name)
+  // const [document, setDocument] = useState('') // ONBOARDING FLOW DISABLED
+  // const [documentError, setDocumentError] = useState('') // ONBOARDING FLOW DISABLED
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [passwordConfirmation, setPasswordConfirmation] = useState('')
@@ -83,26 +84,22 @@ const RegisterPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    const digits = document.replace(/\D/g, '')
-    if (!digits) {
-      setDocumentError(formMessages.required.generic)
-      return
-    }
-    if (digits.length !== 11 && digits.length !== 14) {
-      setDocumentError(digits.length < 11 ? formMessages.invalid.cpf : formMessages.invalid.cnpj)
-      return
-    }
-    if (!validateDocument(document)) {
-      setDocumentError(digits.length === 11 ? formMessages.invalid.cpf : formMessages.invalid.cnpj)
-      return
-    }
+    // ONBOARDING FLOW DISABLED — document validation removed
+    // const digits = document.replace(/\D/g, '')
+    // if (!digits) { setDocumentError(formMessages.required.generic); return }
+    // if (digits.length !== 11 && digits.length !== 14) {
+    //   setDocumentError(digits.length < 11 ? formMessages.invalid.cpf : formMessages.invalid.cnpj); return
+    // }
+    // if (!validateDocument(document)) {
+    //   setDocumentError(digits.length === 11 ? formMessages.invalid.cpf : formMessages.invalid.cnpj); return
+    // }
 
     setIsLoading(true)
 
     const data = {
       name,
-      company_name: companyName,
-      document,
+      company_name: `Empresa de ${name}`, // auto-generated; user edits later in Settings
+      // document, // ONBOARDING FLOW DISABLED
       email,
       password,
       password_confirmation: passwordConfirmation,
@@ -119,26 +116,26 @@ const RegisterPage = () => {
         window.fbq('track', 'StartTrial')
       }
 
-      let targetProposalId = null
-      
-      // Verifica se há dados de onboarding pendentes
-      const pendingOnboarding = localStorage.getItem('pending_onboarding')
-      if (pendingOnboarding) {
-        try {
-          const guestData = JSON.parse(pendingOnboarding)
-          const { data: associateData } = await onboardingService.associate({ guest_data: guestData })
-          targetProposalId = associateData.proposal_id
-          localStorage.removeItem('pending_onboarding')
-        } catch (assocError) {
-          console.error('Erro ao associar dados onboarding:', assocError)
-        }
-      }
+      // ONBOARDING FLOW DISABLED — pending_onboarding association removed
+      // let targetProposalId = null
+      // const pendingOnboarding = localStorage.getItem('pending_onboarding')
+      // if (pendingOnboarding) {
+      //   try {
+      //     const guestData = JSON.parse(pendingOnboarding)
+      //     const { data: associateData } = await onboardingService.associate({ guest_data: guestData })
+      //     targetProposalId = associateData.proposal_id
+      //     localStorage.removeItem('pending_onboarding')
+      //   } catch (assocError) {
+      //     console.error('Erro ao associar dados onboarding:', assocError)
+      //   }
+      // }
+      // if (targetProposalId) {
+      //   navigate(`/dashboard/orcamentos/${targetProposalId}/enviar`)
+      // } else {
+      //   navigate('/initial-dashboard')
+      // }
 
-      if (targetProposalId) {
-        navigate(`/dashboard/orcamentos/${targetProposalId}/enviar`)
-      } else {
-        navigate('/initial-dashboard')
-      }
+      navigate('/initial-dashboard')
     } catch (error) {
       const message = error.response?.data?.message || 'Erro ao criar conta'
       toast({
@@ -180,10 +177,10 @@ const RegisterPage = () => {
         {/* Header */}
         <VStack textAlign="center" mb={8} spacing={2}>
           <Heading as="h1" fontSize="2xl" fontWeight="bold" color="gray.900">
-            Criar sua conta
+            Crie sua conta e comece grátis
           </Heading>
           <Text color="gray.600" fontSize="sm">
-            Sem cartão de crédito, sem compromisso.
+            Sem cartão de crédito. Sem complicação. 
           </Text>
         </VStack>
 
@@ -239,17 +236,17 @@ const RegisterPage = () => {
             required
           />
 
-          {/* Company Name field */}
-          <Input
+          {/* ONBOARDING FLOW DISABLED — company_name auto-generated as "Empresa de {name}" */}
+          {/* <Input
             type="text"
             value={companyName}
             onChange={(e) => setCompanyName(e.target.value)}
             placeholder="Nome da empresa"
             required
-          />
+          /> */}
 
-          {/* Company CPF/CNPJ field */}
-          <Box w="full">
+          {/* ONBOARDING FLOW DISABLED — document (CPF/CNPJ) field removed */}
+          {/* <Box w="full">
             <Input
               type="text"
               value={document}
@@ -263,7 +260,7 @@ const RegisterPage = () => {
               required
             />
             <FieldError message={documentError} />
-          </Box>
+          </Box> */}
 
           {/* Email field */}
           <Input

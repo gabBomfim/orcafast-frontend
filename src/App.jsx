@@ -17,9 +17,9 @@ import CreateClientPage from './pages/CreateClientPage'
 import CreateProposalPage from './pages/CreateProposalPage'
 import ProposalSuccessPage from './pages/ProposalSuccessPage'
 
-// Onboarding pages
-import OnboardingCreateClientPage from './pages/onboarding/CreateClientPage'
-import OnboardingCreateProposalPage from './pages/onboarding/CreateProposalPage'
+// Onboarding pages — DISABLED (flow removed, kept for future reactivation)
+// import OnboardingCreateClientPage from './pages/onboarding/CreateClientPage'
+// import OnboardingCreateProposalPage from './pages/onboarding/CreateProposalPage'
 import SendProposalPage from './pages/onboarding/SendProposalPage'
 import InviteAcceptPage from './pages/InviteAcceptPage'
 import PublicProposalView from './pages/PublicProposalView'
@@ -56,9 +56,10 @@ function App() {
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/auth/callback" element={<GoogleCallbackPage />} />
               <Route path="/verificar-email" element={<EmailVerificationPage />} />
-              <Route path="/onboarding/create-client" element={<OnboardingCreateClientPage />} />
-              <Route path="/onboarding/create-proposal" element={<OnboardingCreateProposalPage />} />
-              <Route path="/onboarding/send-proposal" element={<SendProposalPage />} />
+              {/* ONBOARDING FLOW DISABLED — kept for future reactivation */}
+              {/* <Route path="/onboarding/create-client" element={<OnboardingCreateClientPage />} /> */}
+              {/* <Route path="/onboarding/create-proposal" element={<OnboardingCreateProposalPage />} /> */}
+              {/* <Route path="/onboarding/send-proposal" element={<SendProposalPage />} /> */}
               <Route path="/share/proposta/:token" element={<PublicProposalView />} />
               <Route path="/invite/:token" element={<InviteAcceptPage />} />
 

@@ -20,7 +20,7 @@ import { FaApple } from 'react-icons/fa'
 import { useState } from 'react'
 import { FieldError } from '../ui/FormFeedback'
 import { formMessages } from '../../utils/formMessages'
-import { maskDocument, validateDocument } from '../../utils/mask'
+// import { maskDocument, validateDocument } from '../../utils/mask' // ONBOARDING FLOW DISABLED
 
 // Componente SVG do Google inline
 const GoogleIcon = () => (
@@ -50,7 +50,7 @@ const RegisterForm = ({ onSubmit, onGoogleLogin, onFacebookLogin, isLoading }) =
   const [showPasswordConfirmation, setShowPasswordConfirmation] = useState(false)
   const [password, setPassword] = useState('')
   const [passwordConfirmation, setPasswordConfirmation] = useState('')
-  const [documentMasked, setDocumentMasked] = useState('')
+  // const [documentMasked, setDocumentMasked] = useState('') // ONBOARDING FLOW DISABLED
   const [errors, setErrors] = useState({})
 
   // Password strength indicator
@@ -72,21 +72,17 @@ const RegisterForm = ({ onSubmit, onGoogleLogin, onFacebookLogin, isLoading }) =
     if (!formData.get('name')?.trim())
       next.name = formMessages.required.name
 
-    if (!formData.get('company_name')?.trim())
-      next.company_name = formMessages.required.generic
-
-    const rawDoc = formData.get('document') || ''
-    const digits = rawDoc.replace(/\D/g, '')
-    if (!digits)
-      next.document = formMessages.required.generic
-    else if (digits.length !== 11 && digits.length !== 14)
-      next.document = digits.length < 11
-        ? formMessages.invalid.cpf
-        : formMessages.invalid.cnpj
-    else if (!validateDocument(rawDoc))
-      next.document = digits.length === 11
-        ? formMessages.invalid.cpf
-        : formMessages.invalid.cnpj
+    // ONBOARDING FLOW DISABLED — company_name auto-generated from name; document field removed
+    // if (!formData.get('company_name')?.trim())
+    //   next.company_name = formMessages.required.generic
+    // const rawDoc = formData.get('document') || ''
+    // const digits = rawDoc.replace(/\D/g, '')
+    // if (!digits)
+    //   next.document = formMessages.required.generic
+    // else if (digits.length !== 11 && digits.length !== 14)
+    //   next.document = digits.length < 11 ? formMessages.invalid.cpf : formMessages.invalid.cnpj
+    // else if (!validateDocument(rawDoc))
+    //   next.document = digits.length === 11 ? formMessages.invalid.cpf : formMessages.invalid.cnpj
 
     const email = formData.get('email')?.trim()
     if (!email)
@@ -164,8 +160,8 @@ const RegisterForm = ({ onSubmit, onGoogleLogin, onFacebookLogin, isLoading }) =
           <FieldError message={errors.name} />
         </Box>
 
-        {/* Company Name */}
-        <Box w="full">
+        {/* ONBOARDING FLOW DISABLED — company_name auto-generated as "Empresa de {name}" */}
+        {/* <Box w="full">
           <Input
             type="text"
             name="company_name"
@@ -174,10 +170,10 @@ const RegisterForm = ({ onSubmit, onGoogleLogin, onFacebookLogin, isLoading }) =
             onChange={() => clearError('company_name')}
           />
           <FieldError message={errors.company_name} />
-        </Box>
+        </Box> */}
 
-        {/* CPF / CNPJ */}
-        <Box w="full">
+        {/* ONBOARDING FLOW DISABLED — document (CPF/CNPJ) field removed */}
+        {/* <Box w="full">
           <Input
             type="text"
             name="document"
@@ -191,7 +187,7 @@ const RegisterForm = ({ onSubmit, onGoogleLogin, onFacebookLogin, isLoading }) =
             }}
           />
           <FieldError message={errors.document} />
-        </Box>
+        </Box> */}
 
         {/* Email */}
         <Box w="full">

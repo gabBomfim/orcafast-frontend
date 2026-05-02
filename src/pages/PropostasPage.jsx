@@ -34,7 +34,7 @@ import {
 } from '@chakra-ui/react'
 import ReactSelect from 'react-select'
 import { appSelectStyles } from '../theme/selectStyles'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import {
   FiFileText,
   FiEdit,
@@ -105,18 +105,30 @@ const formatDate = (dateString) => {
 }
 
 const PropostasPage = () => {
+  // Filtros iniciais lidos da URL (deep link do ranking do dashboard).
+  // Ex.: /dashboard/propostas?status=approved&user_ids[]=12
+  const [searchParams] = useSearchParams()
+  const initialStatus = (() => {
+    const s = searchParams.get('status')
+    return s && ['approved', 'viewed', 'sent', 'draft', 'rejected'].includes(s) ? s : 'all'
+  })()
+  const initialUserIds = searchParams
+    .getAll('user_ids[]')
+    .map((v) => Number(v))
+    .filter((v) => Number.isFinite(v) && v > 0)
+
   const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState('all')
+  const [statusFilter, setStatusFilter] = useState(initialStatus)
   const [proposals, setProposals] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
-  
+
   const { getCurrentUser } = useAuth()
   const user = getCurrentUser()
   const isAdmin = user?.role === 3 || user?.role === 1
   const { isBusiness, onTrial } = useSubscription()
   const [teamMembers, setTeamMembers] = useState([])
-  const [selectedUserIds, setSelectedUserIds] = useState([])
+  const [selectedUserIds, setSelectedUserIds] = useState(initialUserIds)
 
   // Date Filters
   const [datePreset, setDatePreset] = useState('all')

@@ -11,6 +11,7 @@ import {
   Image,
   Icon,
   Button,
+  useToast,
 } from '@chakra-ui/react'
 import {
   FiClock,
@@ -23,9 +24,11 @@ import {
   FiCheck,
   FiBriefcase,
   FiGrid,
+  FiDownload,
 } from 'react-icons/fi'
 import OrcafastLogo from '../components/ui/OrcafastLogo'
 import { proposalService } from '../services'
+import { formMessages, successMessages } from '../utils/formMessages'
 
 const PublicProposalView = () => {
   const { token } = useParams()
@@ -34,6 +37,8 @@ const PublicProposalView = () => {
   const [error, setError] = useState(null)
   const [isExpired, setIsExpired] = useState(false)
   const [copiedPix, setCopiedPix] = useState(false)
+  const [downloading, setDownloading] = useState(false)
+  const toast = useToast()
 
   useEffect(() => {
     const fetchProposal = async () => {
@@ -69,6 +74,39 @@ const PublicProposalView = () => {
       return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 6)}-${cleaned.slice(6)}`
     }
     return phone
+  }
+
+  const handleDownloadPDF = async () => {
+    if (downloading) return
+    setDownloading(true)
+    try {
+      const response = await proposalService.downloadPublicPDF(token)
+      const blob = new Blob([response.data], { type: 'application/pdf' })
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      const idStr = String(proposal?.id ?? '').padStart(4, '0')
+      link.download = `orcamento-${idStr}.pdf`
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.URL.revokeObjectURL(url)
+      toast({
+        title: successMessages.quote.downloaded,
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      })
+    } catch {
+      toast({
+        title: formMessages.system.serverError,
+        status: 'error',
+        duration: 4000,
+        isClosable: true,
+      })
+    } finally {
+      setDownloading(false)
+    }
   }
 
   const handleCopyPix = async (pixKey) => {
@@ -328,6 +366,27 @@ const PublicProposalView = () => {
               </Text>
             </Box>
           )}
+
+          
+          {/* Download PDF */}
+          <Button
+            onClick={handleDownloadPDF}
+            isLoading={downloading}
+            loadingText="Gerando PDF..."
+            variant="solid"
+            colorScheme="emerald"
+            size="lg"
+            height="56px"
+            borderRadius="2xl"
+            fontWeight="bold"
+            fontSize="md"
+            leftIcon={<Icon as={FiDownload} boxSize={5} />}
+            shadow="sm"
+            _hover={{ shadow: 'md', transform: 'translateY(-1px)' }}
+            transition="all 0.2s"
+          >
+            Baixar orçamento em PDF
+          </Button>
 
           {/* Footer */}
           <Box pt={4} textAlign="center">

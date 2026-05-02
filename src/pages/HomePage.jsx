@@ -18,6 +18,7 @@ import {
   FiFileText
 } from 'react-icons/fi';
 import logoFull from '../assets/logo/logo-full.svg';
+import { trackEvent } from '../utils/tracking';
 import '../styles/landing.css';
 
 // Componentes auxiliares
@@ -56,7 +57,21 @@ const HomePage = () => {
             <Link to="/login" className="nav-btn-secondary" style={{ textDecoration: 'none' }}>
               Entrar
             </Link>
-            <Link to="/onboarding/create-client" className="nav-btn-primary" style={{ textDecoration: 'none' }}>
+            {/* ONBOARDING FLOW DISABLED — redirecting to /register directly */}
+            {/* <Link
+              to="/onboarding/create-client"
+              className="nav-btn-primary"
+              style={{ textDecoration: 'none' }}
+              onClick={() => trackEvent('click_cta', { cta_location: 'nav_desktop', cta_label: 'Teste grátis' })}
+            >
+              Teste grátis
+            </Link> */}
+            <Link
+              to="/register"
+              className="nav-btn-primary"
+              style={{ textDecoration: 'none' }}
+              onClick={() => trackEvent('click_cta', { cta_location: 'nav_desktop', cta_label: 'Teste grátis' })}
+            >
               Teste grátis
             </Link>
           </div>
@@ -83,10 +98,20 @@ const HomePage = () => {
             >
               Entrar
             </Link>
-            <Link
+            {/* ONBOARDING FLOW DISABLED — redirecting to /register directly */}
+            {/* <Link
               to="/onboarding/create-client"
               className="nav-btn-primary"
               style={{ textDecoration: 'none', width: '100%', justifyContent: 'center', marginTop: '0.5rem' }}
+              onClick={() => trackEvent('click_cta', { cta_location: 'nav_mobile', cta_label: 'Teste grátis' })}
+            >
+              Teste grátis
+            </Link> */}
+            <Link
+              to="/register"
+              className="nav-btn-primary"
+              style={{ textDecoration: 'none', width: '100%', justifyContent: 'center', marginTop: '0.5rem' }}
+              onClick={() => trackEvent('click_cta', { cta_location: 'nav_mobile', cta_label: 'Teste grátis' })}
             >
               Teste grátis
             </Link>
@@ -119,10 +144,21 @@ const HomePage = () => {
             </div>
 
             <div className="hero-cta">
-              <Link
+              {/* ONBOARDING FLOW DISABLED — redirecting to /register directly */}
+              {/* <Link
                 to="/onboarding/create-client"
                 className="cta-primary"
                 style={{ textDecoration: 'none' }}
+                onClick={() => trackEvent('click_cta', { cta_location: 'hero', cta_label: 'Começar grátis' })}
+              >
+                Começar grátis
+                <FiArrowRight />
+              </Link> */}
+              <Link
+                to="/register"
+                className="cta-primary"
+                style={{ textDecoration: 'none' }}
+                onClick={() => trackEvent('click_cta', { cta_location: 'hero', cta_label: 'Começar grátis' })}
               >
                 Começar grátis
                 <FiArrowRight />
@@ -387,10 +423,20 @@ const HomePage = () => {
                 <li><FiCheck className="feature-check" /> Metas financeiras</li>
                 <li><FiCheck className="feature-check" /> Suporte rápido</li>
               </ul>
-              <Link
+              {/* ONBOARDING FLOW DISABLED — redirecting to /register directly */}
+              {/* <Link
                 to="/onboarding/create-client"
                 className="pricing-btn-primary"
                 style={{ textDecoration: 'none' }}
+                onClick={() => trackEvent('click_cta', { cta_location: 'pricing_autonomo', cta_label: 'Começar grátis' })}
+              >
+                Começar grátis
+              </Link> */}
+              <Link
+                to="/register"
+                className="pricing-btn-primary"
+                style={{ textDecoration: 'none' }}
+                onClick={() => trackEvent('click_cta', { cta_location: 'pricing_autonomo', cta_label: 'Começar grátis' })}
               >
                 Começar grátis
               </Link>
@@ -422,6 +468,7 @@ const HomePage = () => {
                 to="/register?plan=business"
                 className="pricing-btn-primary"
                 style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                onClick={() => trackEvent('click_cta', { cta_location: 'pricing_equipe', cta_label: 'Assinar plano Equipe' })}
               >
                 Assinar plano Equipe
               </Link>
@@ -439,10 +486,21 @@ const HomePage = () => {
           <p className="cta-subtitle">
             Cria sua conta agora. É rápido, é direto e você já sai com o primeiro orçamento pronto.
           </p>
-          <Link
+          {/* ONBOARDING FLOW DISABLED — redirecting to /register directly */}
+          {/* <Link
             to="/onboarding/create-client"
             className="cta-btn-final"
             style={{ textDecoration: 'none' }}
+            onClick={() => trackEvent('click_cta', { cta_location: 'cta_final', cta_label: 'Começar grátis' })}
+          >
+            Começar grátis
+            <FiArrowRight />
+          </Link> */}
+          <Link
+            to="/register"
+            className="cta-btn-final"
+            style={{ textDecoration: 'none' }}
+            onClick={() => trackEvent('click_cta', { cta_location: 'cta_final', cta_label: 'Começar grátis' })}
           >
             Começar grátis
             <FiArrowRight />
