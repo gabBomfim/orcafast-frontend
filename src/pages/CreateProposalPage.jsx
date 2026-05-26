@@ -576,7 +576,7 @@ const CreateProposalPage = () => {
                               />
                             </Flex>
 
-                            <Box w="full" alignSelf="start">
+                            {/* <Box w="full" alignSelf="start">
                               <AIPriceSuggestion
                                 description={item.desc}
                                 onApply={(price) => {
@@ -584,7 +584,7 @@ const CreateProposalPage = () => {
                                   if (errors[`itemValue_${item.id}`]) setErrors(prev => { const n = { ...prev }; delete n[`itemValue_${item.id}`]; return n })
                                 }}
                               />
-                            </Box>
+                            </Box> */}
                           </VStack>
                         </Box>
                       ))}
