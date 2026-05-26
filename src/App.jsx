@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import theme from './theme'
 
 import HomePage from './pages/HomePage'
+import LocacaoTendasPage from './pages/LocacaoTendasPage'
+import ModeloOrcamentoLocacaoTendasPage from './pages/ModeloOrcamentoLocacaoTendasPage'
 import DashboardPage from './pages/DashboardPage'
 import ClientesPage from './pages/ClientesPage'
 import PropostasPage from './pages/PropostasPage'
@@ -50,6 +52,8 @@ function App() {
             <Routes>
               {/* Public Routes */}
               <Route path="/" element={<HomePage />} />
+              <Route path="/locacao-tendas" element={<LocacaoTendasPage />} />
+              <Route path="/modelo-orcamento-locacao-tendas" element={<ModeloOrcamentoLocacaoTendasPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/esqueci-senha" element={<ForgotPasswordPage />} />
               <Route path="/redefinir-senha" element={<ResetPasswordPage />} />

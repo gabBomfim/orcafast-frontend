@@ -98,6 +98,15 @@ export const formMessages = {
     serverError: 'Ih, algo deu errado aqui. A gente já sabe e tá resolvendo.',
     maintenance: 'A gente tá fazendo uma manutenção rápida. Volta em instantes.',
     rateLimit: 'Calma aí! Muitas requisições. Espera um pouquinho.',
+    aiUnavailable: 'A sugestão de preço tá indisponível agora. Tenta de novo em uns segundos.',
+  },
+
+  // IA — sugestão de preço
+  ai: {
+    needDescription: 'Conta pra gente qual é o serviço — sem isso não dá pra sugerir preço.',
+    fromMarket: 'Sugestão baseada em média de mercado.',
+    basedOnHistory: (n) => `Baseado em ${n} ${n === 1 ? 'orçamento seu' : 'orçamentos seus'}.`,
+    rangeLabel: (min, max) => `Entre R$ ${Number(min).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} e R$ ${Number(max).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}.`,
   },
 
   // Orçamentos

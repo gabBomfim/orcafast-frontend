@@ -46,6 +46,7 @@ import OrcafastLogo from '../components/ui/OrcafastLogo'
 import { storage } from '../utils/storage'
 import { maskPhone, unmaskPhone, maskBRL, parseBRL, initBRL } from '../utils/mask'
 import { FieldError } from '../components/ui/FormFeedback'
+import AIPriceSuggestion from '../components/ui/AIPriceSuggestion'
 import { formMessages } from '../utils/formMessages'
 import { appSelectStyles } from '../theme/selectStyles'
 
@@ -574,6 +575,16 @@ const CreateProposalPage = () => {
                                 isDisabled={items.length === 1}
                               />
                             </Flex>
+
+                            <Box w="full" alignSelf="start">
+                              <AIPriceSuggestion
+                                description={item.desc}
+                                onApply={(price) => {
+                                  handleItemChange(item.id, 'value', initBRL(price))
+                                  if (errors[`itemValue_${item.id}`]) setErrors(prev => { const n = { ...prev }; delete n[`itemValue_${item.id}`]; return n })
+                                }}
+                              />
+                            </Box>
                           </VStack>
                         </Box>
                       ))}

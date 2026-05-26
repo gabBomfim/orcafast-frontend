@@ -39,5 +39,12 @@ export const proposalService = {
 
   downloadPublicPDF(token) {
     return api.get(`proposta/${token}/pdf`, { responseType: 'blob' })
-  }
+  },
+
+  pricingSuggestion({ description, location }) {
+    return api.post('proposals/pricing-suggestion', {
+      description,
+      ...(location ? { location } : {}),
+    })
+  },
 }

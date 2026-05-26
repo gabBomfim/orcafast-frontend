@@ -102,6 +102,7 @@ src/
 │   ├── formMessages.js     ← TODAS as mensagens de validação/feedback
 │   ├── storage.js          ← wrapper de localStorage (token, user, subscription)
 │   ├── mask.js             ← maskPhone(), unmaskPhone()
+│   ├── location.js         ← userLocation: geolocation + reverse-geocoding (BigDataCloud) cacheado em localStorage
 │   └── whatsapp.js         ← openWhatsApp() com detecção mobile/desktop
 │
 └── types/                  ← interfaces TypeScript (migração gradual)
@@ -234,6 +235,7 @@ Tipos disponíveis: `error` · `success` · `warning` · `info`
 | `PaywallModal` | Modal não-closeable de bloqueio quando trial expira. Comparativo de 2 planos (Autônomo/Equipe) com upsell inteligente baseado em membros da equipe |
 | `OrcafastLogo` | Logo: `variant="full"` (40px) ou `variant="symbol"` (32px) |
 | `TeamRankingCard` | Ranking de fechados por membro (admin com equipe). Top 5 + "Ver todo o ranking +N", toggle Quantidade/Valor, destaque "VOCÊ", barras hachuradas pra zerados. Cada linha → `/dashboard/propostas?status=approved&user_ids[]=<id>`. Mobile: reflow em 2 linhas com área de toque ampla |
+| `AIPriceSuggestion` | Botão + card de sugestão de preço com IA. Props: `description`, `onApply(price: number)`, `disabled`. Libera com 3+ chars na descrição. Aplica preço e mostra reasoning, faixa, factors, confiança e base (histórico próprio ou mercado). Usa `userLocation.ensure()` pra enviar cidade-UF |
 
 ### Layout (`src/components/layout/`)
 
@@ -263,7 +265,7 @@ Tipos disponíveis: `error` · `success` · `warning` · `info`
 |---------|---------|
 | `authService` | `register`, `login`, `logout`, `getCurrentUser`, `getProfile`, `forgotPassword`, `resetPassword`, `updateProfile`, `resendVerification()`, `updateEmail(email)` |
 | `clientService` | `list(params)`, `get(id)`, `create`, `update`, `delete` — auto-injeta `company_id` |
-| `proposalService` | `list`, `get`, `create`, `update`, `delete`, `send`, `downloadPDF`, `updateStatus`, `getPublicProposal(token)`, `downloadPublicPDF(token)` |
+| `proposalService` | `list`, `get`, `create`, `update`, `delete`, `send`, `downloadPDF`, `updateStatus`, `getPublicProposal(token)`, `downloadPublicPDF(token)`, `pricingSuggestion({ description, location })` |
 | `companyService` | `get()`, `update(formData)` multipart, `deleteLogo()` |
 | `subscriptionService` | `getStatus()`, `teamInfo()`, `checkout(planSlug, url)`, `cancel()`, `resume()`, `portal()` |
 | `goalsService` | `get(year)`, `save(payload)` |
@@ -277,7 +279,7 @@ Tipos disponíveis: `error` · `success` · `warning` · `info`
 ## ⚠️ Rotas (`src/App.jsx`) — atualizar ao adicionar rota
 
 ### Públicas
-`/` · `/login` · `/register` · `/esqueci-senha` · `/redefinir-senha` · `/auth/callback` · `/verificar-email` · `/share/proposta/:token` · `/convite/:token` · `/termos` · `/privacidade` · `/suporte`
+`/` · `/locacao-tendas` · `/modelo-orcamento-locacao-tendas` · `/login` · `/register` · `/esqueci-senha` · `/redefinir-senha` · `/auth/callback` · `/verificar-email` · `/share/proposta/:token` · `/convite/:token` · `/termos` · `/privacidade` · `/suporte`
 
 ### Onboarding (guest)
 `/onboarding/create-client` · `/onboarding/create-proposal` · `/onboarding/send-proposal`
@@ -318,6 +320,13 @@ Tipos disponíveis: `error` · `success` · `warning` · `info`
 - Cada linha é um deep link para `/dashboard/propostas?status=approved&user_ids[]=<id>` — `PropostasPage` lê esses search params no mount e já abre filtrado por membro + status fechado
 - Membros zerados aparecem com barra hachurada na expansão "Ver todo o ranking"
 
+### Sugestão de preço com IA
+- Endpoint: `POST /api/proposals/pricing-suggestion` (auth + assinatura/trial ativos) via `proposalService.pricingSuggestion({ description, location })`
+- Acionado pelo componente `AIPriceSuggestion` em cada item do orçamento (CreateProposalPage). Libera com 3+ chars na descrição do item
+- A localização vem do navegador (`navigator.geolocation`) + reverse-geocoding via BigDataCloud (free, sem key) e fica cacheada em `localStorage` (`user_location` no formato `Cidade-UF`) — primeira chamada pede permissão; depois lê do cache
+- Resposta traz `suggested_price` (aplicado direto no input), `range_min/max`, `reasoning`, `factors[]`, `confidence` (alta/media/baixa) e `based_on_history` (qtd de orçamentos do usuário usados) — `0` = sugestão de mercado puro
+- 503 (IA indisponível) → toast com `formMessages.system.aiUnavailable` e usuário segue digitando manualmente
+
 ### Fluxo de Envio
 - Link público via `sharing_token` → `/share/proposta/:token` (sem autenticação)
 - WhatsApp: `openWhatsApp()` detecta mobile (app) vs desktop (web)
@@ -357,6 +366,11 @@ Tipos disponíveis: `error` · `success` · `warning` · `info`
 - `ProtectedRoute` bloqueia tudo exceto email verification até `emailVerified = true`
 - Após email verified: `PaywallModal` aparece se `!hasActiveAccess` (trial expirado)
 - Banner de countdown no painel: mostra dias restantes + muda cor se ≤ 2 dias
+
+### Landings Verticais
+- `/locacao-tendas` valida o nicho de empresas de aluguel de tendas, coberturas e estruturas para eventos sem alterar a home principal.
+- `/modelo-orcamento-locacao-tendas` captura buscas de exemplo prático e leva o usuário para testar a OrçaFast.
+- Essas páginas usam meta tags, OpenGraph, canonical e FAQ schema via `src/utils/seo.js`; CTAs apontam para `/register`.
 
 ---
 
